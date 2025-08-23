@@ -1,0 +1,159 @@
+
+import React, { useState } from 'react';
+import TermsPopup from '../components/TermsPopup';
+import { bookPG } from '../api/pgBookingAPI';
+
+const PGBookingForm = ({ pg }) => {
+  const colors = { main: 'bg-blue-50', btn: 'bg-blue-600 hover:bg-blue-700', text: 'text-blue-700' };
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [aadhaarNumber, setAadhaarNumber] = useState('');
+  const [aadhaarFile, setAadhaarFile] = useState(null);
+  const [panNumber, setPanNumber] = useState('');
+  const [panFile, setPanFile] = useState(null);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [emergencyName, setEmergencyName] = useState('');
+  const [emergencyPhone, setEmergencyPhone] = useState('');
+  const [gender, setGender] = useState('');
+  const [occupation, setOccupation] = useState('');
+  const [age, setAge] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [message, setMessage] = useState('');
+
+  // Dummy OTP send
+  const sendOtp = () => {
+    setOtpSent(true);
+    setMessage('OTP sent to your mobile/email');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!acceptedTerms || !consent) {
+      setMessage('Please accept Terms & Conditions and Data Consent');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('pgId', pg._id);
+    formData.append('name', name);
+    formData.append('phone', phone);
+    formData.append('email', email);
+    formData.append('address', address);
+    formData.append('aadhaarNumber', aadhaarNumber);
+    if (aadhaarFile) formData.append('aadhaarFile', aadhaarFile);
+    formData.append('panNumber', panNumber);
+    if (panFile) formData.append('panFile', panFile);
+    if (profilePhoto) formData.append('profilePhoto', profilePhoto);
+    formData.append('emergencyName', emergencyName);
+    formData.append('emergencyPhone', emergencyPhone);
+    formData.append('gender', gender);
+    formData.append('occupation', occupation);
+    formData.append('age', age);
+    formData.append('otp', otp);
+    formData.append('consent', consent);
+    formData.append('acceptedTerms', acceptedTerms);
+    try {
+      // TODO: Replace with actual token from auth context/store
+      const token = localStorage.getItem('token');
+      const res = await bookPG(formData, token);
+      setMessage('PG booking submitted!');
+    } catch (err) {
+      setMessage(err.error || 'Booking failed');
+    }
+  };
+
+  return (
+    <div className={`min-h-screen flex flex-col items-center justify-center ${colors.main}`}>
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-8">
+        <h2 className={`text-3xl font-extrabold mb-6 text-center ${colors.text}`}>PG Booking</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block font-semibold mb-1">Full Name</label>
+          <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Phone</label>
+          <input type="text" value={phone} onChange={e => setPhone(e.target.value)} className="w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Email</label>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Address</label>
+          <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full border rounded px-3 py-2" required />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Profile Photo</label>
+          <input type="file" accept=".jpg,.jpeg,.png" onChange={e => setProfilePhoto(e.target.files[0])} />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Aadhaar Number</label>
+          <input type="text" value={aadhaarNumber} onChange={e => setAadhaarNumber(e.target.value)} className="w-full border rounded px-3 py-2" required />
+          <input type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={e => setAadhaarFile(e.target.files[0])} className="mt-2" required />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">PAN Number (optional)</label>
+          <input type="text" value={panNumber} onChange={e => setPanNumber(e.target.value)} className="w-full border rounded px-3 py-2" />
+          <input type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={e => setPanFile(e.target.files[0])} className="mt-2" />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Emergency Contact Name</label>
+          <input type="text" value={emergencyName} onChange={e => setEmergencyName(e.target.value)} className="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Emergency Contact Phone</label>
+          <input type="text" value={emergencyPhone} onChange={e => setEmergencyPhone(e.target.value)} className="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Gender</label>
+          <select value={gender} onChange={e => setGender(e.target.value)} className="w-full border rounded px-3 py-2">
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Occupation</label>
+          <input type="text" value={occupation} onChange={e => setOccupation(e.target.value)} className="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label className="block font-semibold mb-1">Age</label>
+          <input type="number" value={age} onChange={e => setAge(e.target.value)} className="w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+        <button type="button" onClick={sendOtp} className="bg-yellow-600 text-white px-4 py-2 rounded shadow hover:bg-yellow-700">Send OTP</button>
+        {otpSent && (
+          <input type="text" value={otp} onChange={e => setOtp(e.target.value)} placeholder="Enter OTP" className="w-full border rounded px-3 py-2 mt-2" />
+        )}
+        </div>
+        <div className="font-bold text-lg mt-4 text-blue-700">Security Charge: ₹{pg.securityCharge || 0} (Refundable)</div>
+        <div className="mt-2">
+          <label className="inline-flex items-center">
+            <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} />
+            <span className="ml-2">I consent to data privacy & GDPR</span>
+          </label>
+        </div>
+        <button type="button" onClick={() => setShowTerms(true)} className="bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700">View Terms & Conditions</button>
+        <button
+          type="submit"
+          className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow ml-4 ${(!acceptedTerms || !consent) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={!acceptedTerms || !consent}
+        >
+          Book Now
+        </button>
+        </form>
+        <TermsPopup isOpen={showTerms} type="pg_booking" onAccept={() => setAcceptedTerms(true)} onClose={() => setShowTerms(false)} />
+        {message && <div className="mt-4 text-green-600 font-semibold text-center">{message}</div>}
+      </div>
+    </div>
+  );
+};
+
+export default PGBookingForm;
