@@ -93,11 +93,7 @@ const About = () => {
   const Values = () => (
     <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
       <div className="container mx-auto px-4">
-<<<<<<< HEAD
-        <h2 className="text-3xl font-extrabold text-center mb-8 text-blue-900 tracking-tight drop-shadow">Our </h2>
-=======
         <h2 className="text-3xl font-extrabold text-center mb-8 text-blue-900 tracking-tight drop-shadow">Our Values</h2>
->>>>>>> 8d4e375961a21037cb63e8cedd5310aa60e2a5d6
         <div className="flex justify-center mb-8">
           <div className="flex flex-wrap gap-2 bg-gray-100 p-2 rounded-lg">
             {["all", "core", "service", "business", "social"].map((category) => (
