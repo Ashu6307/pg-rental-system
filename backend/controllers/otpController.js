@@ -1,0 +1,196 @@
+
+import Otp from '../models/Otp.js';
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { sendEmail } from '../utils/sendEmail.js';
+import OtpAudit from '../models/OtpAudit.js';
+import axios from 'axios';
+import Settings from '../models/Settings.js';
+
+// Helper: Audit log
+async function logOtpAction(email, action, status, message, req) {
+  await OtpAudit.create({
+    email,
+    action,
+    status,
+    message,
+    ip: req.ip || req.headers['x-forwarded-for'] || '',
+  });
+}
+
+// Helper: Rate limit (role-based limits per hour)
+async function isRateLimited(email, role = 'user') {
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const count = await OtpAudit.countDocuments({ email, action: 'send', createdAt: { $gte: oneHourAgo } });
+  
+  // Role-based rate limits
+  let maxLimit;
+  switch (role) {
+    case 'admin':
+      maxLimit = 10; // Admin: 10 OTP per hour
+      break;
+    case 'owner':
+      maxLimit = 5;  // Owner: 5 OTP per hour
+      break;
+    case 'user':
+    default:
+      maxLimit = 5;  // User: 5 OTP per hour
+      break;
+  }
+  
+  return count >= maxLimit;
+}
+
+// Helper: Get versioned settings (OTP length, expiry, retry)
+async function getOtpSettings() {
+  // Settings model se fetch karo, fallback default
+  const settings = await Settings.findOne({ key: 'otp' });
+  return {
+    length: settings?.length || 6,
+    expiry: settings?.expiry || 5 * 60, // seconds
+    retryLimit: settings?.retryLimit || 3,
+    webhookUrl: settings?.webhookUrl || '',
+  };
+}
+
+// Helper: GDPR/Data Consent log
+async function logConsent(email, consentType, details) {
+  // Consent model me save karo
+  // ...implementation...
+}
+
+// Helper: Multi-tenancy (tenantId support)
+function getTenantId(req) {
+  return req.headers['x-tenant-id'] || null;
+}
+
+// Helper: Analytics log
+async function logAnalytics(email, action, status) {
+  // Analytics model me save karo
+  // ...implementation...
+}
+
+// Update OTP generation to use versioned settings
+function generateOtp(length = 6) {
+  let otp = '';
+  for (let i = 0; i < length; i++) {
+    otp += Math.floor(Math.random() * 10);
+  }
+  return otp;
+}
+
+async function sendOtp(req, res) {
+  const { email, role } = req.body;
+  const userRole = role || 'user'; // Default to 'user' if role not provided
+  const tenantId = getTenantId(req);
+  const otpSettings = await getOtpSettings();
+  
+  if (!email) {
+    await logOtpAction(email, 'send', 'error', 'Email required', req);
+    return res.status(400).json({ success: false, message: 'Email required' });
+  }
+  
+  if (await isRateLimited(email, userRole)) {
+    const limits = { user: 5, owner: 5, admin: 10 };
+    const maxLimit = limits[userRole] || 5;
+    await logOtpAction(email, 'send', 'error', 'Rate limit exceeded', req);
+    return res.status(429).json({ 
+      success: false, 
+      message: `Too many OTP requests. Maximum ${maxLimit} OTPs per hour allowed for ${userRole}s.` 
+    });
+  }
+  
+  const otp = generateOtp(otpSettings.length);
+  const expiresAt = new Date(Date.now() + otpSettings.expiry * 1000);
+  await Otp.deleteMany({ email });
+  await Otp.create({ email, otp, expiresAt, tenantId, role: userRole });
+  
+  // Fix sendEmail call - use correct parameter format
+  await sendEmail({ 
+    to: email, 
+    subject: 'Your OTP Code', 
+    html: `<h2>Your OTP Code</h2><p>Your OTP is: <strong>${otp}</strong></p><p>This OTP will expire in 5 minutes.</p>` 
+  });
+  
+  await logOtpAction(email, 'send', 'success', 'OTP sent', req);
+  await logAnalytics(email, 'send', 'success');
+  res.json({ success: true, message: 'OTP sent' });
+};
+
+async function verifyOtp(req, res) {
+  const { email, otp } = req.body;
+  const tenantId = getTenantId(req);
+  const record = await Otp.findOne({ email, otp, tenantId });
+  if (!record) {
+    await logOtpAction(email, 'verify', 'error', 'Invalid OTP', req);
+    await logAnalytics(email, 'verify', 'error');
+    return res.status(400).json({ success: false, message: 'Invalid OTP' });
+  }
+  if (record.expiresAt < new Date()) {
+    await logOtpAction(email, 'verify', 'error', 'OTP expired', req);
+    await logAnalytics(email, 'verify', 'error');
+    return res.status(400).json({ success: false, message: 'OTP expired' });
+  }
+  record.verified = true;
+  // Don't mark as used here - will be marked when used for registration
+  await record.save();
+  await logOtpAction(email, 'verify', 'success', 'OTP verified', req);
+  await logAnalytics(email, 'verify', 'success');
+  // Webhook trigger
+  const otpSettings = await getOtpSettings();
+  if (otpSettings.webhookUrl) {
+    axios.post(otpSettings.webhookUrl, { email, tenantId, event: 'otp_verified', time: new Date() }).catch(() => {});
+  }
+  res.json({ success: true, message: 'OTP verified' });
+};
+
+async function resendOtp(req, res) {
+  const { email, role } = req.body;
+  const userRole = role || 'user'; // Default to 'user' if role not provided
+  const tenantId = getTenantId(req);
+  const otpSettings = await getOtpSettings();
+  
+  if (!email) {
+    await logOtpAction(email, 'resend', 'error', 'Email required', req);
+    return res.status(400).json({ success: false, message: 'Email required' });
+  }
+  
+  if (await isRateLimited(email, userRole)) {
+    const limits = { user: 5, owner: 5, admin: 10 };
+    const maxLimit = limits[userRole] || 5;
+    await logOtpAction(email, 'resend', 'error', 'Rate limit exceeded', req);
+    return res.status(429).json({ 
+      success: false, 
+      message: `Too many OTP requests. Maximum ${maxLimit} OTPs per hour allowed for ${userRole}s.` 
+    });
+  }
+  
+  const otp = generateOtp(otpSettings.length);
+  const expiresAt = new Date(Date.now() + otpSettings.expiry * 1000);
+  await Otp.deleteMany({ email });
+  await Otp.create({ email, otp, expiresAt, tenantId, role: userRole });
+  
+  // Fix sendEmail call - use correct parameter format
+  await sendEmail({ 
+    to: email, 
+    subject: 'Your OTP Code', 
+    html: `<h2>Your OTP Code</h2><p>Your OTP is: <strong>${otp}</strong></p><p>This OTP will expire in 5 minutes.</p>` 
+  });
+  
+  await logOtpAction(email, 'resend', 'success', 'OTP resent', req);
+  await logAnalytics(email, 'resend', 'success');
+  res.json({ success: true, message: 'OTP resent' });
+};
+
+// Cleanup expired OTPs (background job)
+async function cleanupExpiredOtps() {
+  await Otp.deleteMany({ expiresAt: { $lt: new Date() } });
+}
+
+export default {
+  sendOtp,
+  verifyOtp,
+  resendOtp,
+  cleanupExpiredOtps
+};
