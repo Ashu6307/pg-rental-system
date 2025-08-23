@@ -28,7 +28,7 @@ jobs:
     - name: Run Frontend Tests
       run: |
         cd frontend
-        npm test -- --watchAll=false --passWithNoTests --silent
+        npm test
       env:
         CI: true
         NODE_OPTIONS: "--max-old-space-size=2048"
