@@ -200,3 +200,10 @@
 [2025-08-24T11:30:38.308Z] INFO: POST /api/auth/login | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
 [2025-08-24T14:36:01.795Z] INFO: Server running on port 5000 | {"environment":"development","port":"5000","timestamp":"2025-08-24T14:36:01.794Z"}
 [2025-08-24T14:36:13.605Z] INFO: MongoDB connected successfully
+[2025-08-24T15:52:48.015Z] INFO: Server running on port 5000 | {"environment":"development","port":"5000","timestamp":"2025-08-24T15:52:48.014Z"}
+[2025-08-24T15:52:49.067Z] INFO: MongoDB connected successfully
+[2025-08-24T16:52:18.635Z] INFO: Server running on port 5000 | {"environment":"development","port":"5000","timestamp":"2025-08-24T16:52:18.635Z"}
+[2025-08-24T16:52:19.845Z] INFO: MongoDB connected successfully
+[2025-08-24T16:56:38.721Z] INFO: POST /api/pgs/public/6893a920d08082bfd8fd876b/inquiry | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-24T16:59:09.850Z] INFO: Server running on port 5000 | {"environment":"development","port":"5000","timestamp":"2025-08-24T16:59:09.849Z"}
+[2025-08-24T16:59:11.103Z] INFO: MongoDB connected successfully

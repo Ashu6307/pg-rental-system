@@ -469,3 +469,7 @@
 [2025-08-23T20:12:10.431Z] ERROR: POST /verify-otp - 400 | {"duration":"121ms","ip":"::1"}
 [2025-08-23T20:23:37.650Z] ERROR: GET /googleAuth/google - 404 | {"duration":"3ms","ip":"::1"}
 [2025-08-24T11:26:34.147Z] ERROR: POST /check-email - 409 | {"duration":"517ms","ip":"::1"}
+[2025-08-24T15:42:52.856Z] ERROR: GET /googleAuth/google - 404 | {"duration":"2ms","ip":"::1"}
+[2025-08-24T15:48:44.643Z] ERROR: GET /googleAuth/google - 404 | {"duration":"1ms","ip":"::1"}
+[2025-08-24T15:52:35.863Z] ERROR: GET /googleAuth/google - 404 | {"duration":"1ms","ip":"::1"}
+[2025-08-24T16:56:38.726Z] ERROR: POST /api/pgs/public/6893a920d08082bfd8fd876b/inquiry - 404 | {"duration":"5ms","ip":"::1"}
