@@ -99,16 +99,27 @@ const MainApp = () => {
     location.pathname === route || location.pathname.startsWith(route + '/')
   );
   
-  // Hide public Navbar/Footer for:
+  // Hide public Navbar for:
   // 1. All admin routes (including login, dashboard, etc.)
   // 2. All authenticated dashboard routes
-  const hidePublicNavFooter = 
+  const hidePublicNavbar = 
     location.pathname.startsWith('/admin') || 
+    (isAuthenticated && isDashboardRoute);
+  
+  // Hide public Footer for:
+  // 1. All admin routes (including login, dashboard, etc.)
+  // 2. All authenticated dashboard routes
+  // 3. All login and registration pages
+  const hidePublicFooter = 
+    location.pathname.startsWith('/admin') || 
+    location.pathname.includes('/login') ||
+    location.pathname.includes('/register') ||
+    location.pathname.includes('/forgot-password') ||
     (isAuthenticated && isDashboardRoute);
     
   return (
     <>
-      {!hidePublicNavFooter && <Navbar />}
+      {!hidePublicNavbar && <Navbar />}
       <Routes>
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
         <Route path="/owner" element={<ProtectedRoute allowedRoles={["owner"]}><OwnerDashboard /></ProtectedRoute>} />
@@ -188,7 +199,7 @@ const MainApp = () => {
           )
         } />
       </Routes>
-      {!hidePublicNavFooter && <Footer />}
+      {!hidePublicFooter && <Footer />}
     </>
   );
 };

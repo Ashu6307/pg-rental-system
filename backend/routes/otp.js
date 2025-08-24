@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/send-otp', otpController.sendOtp);
 router.post('/verify-otp', otpController.verifyOtp);
 router.post('/resend-otp', otpController.resendOtp);
+router.post('/check-email', otpController.checkEmailExists);
 
 // Get current OTP settings
 router.get('/settings', async (req, res) => {

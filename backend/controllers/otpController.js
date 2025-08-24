@@ -1,6 +1,7 @@
 
 import Otp from '../models/Otp.js';
 import User from '../models/User.js';
+import OwnerProfile from '../models/OwnerProfile.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail.js';
@@ -90,6 +91,9 @@ async function sendOtp(req, res) {
     await logOtpAction(email, 'send', 'error', 'Email required', req);
     return res.status(400).json({ success: false, message: 'Email required' });
   }
+
+  // Note: Email existence check is now done separately via /check-email endpoint
+  // This allows for better UX where users get immediate feedback before OTP is sent
   
   if (await isRateLimited(email, userRole)) {
     const limits = { user: 5, owner: 5, admin: 10 };
@@ -183,6 +187,53 @@ async function resendOtp(req, res) {
   res.json({ success: true, message: 'OTP resent' });
 };
 
+// Check if email already exists for registration
+async function checkEmailExists(req, res) {
+  const { email, role } = req.body;
+  const userRole = role || 'user';
+
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'Email required' });
+  }
+
+  try {
+    let existingUser = null;
+    
+    // Check based on role
+    if (userRole === 'owner') {
+      // For owners, check both User table (with role='owner') and OwnerProfile table
+      existingUser = await User.findOne({ email, role: 'owner' }) || 
+                     await OwnerProfile.findOne({ email });
+    } else {
+      // For users and admins, check User table
+      existingUser = await User.findOne({ email, role: userRole });
+    }
+    
+    if (existingUser) {
+      return res.status(409).json({ 
+        success: false, 
+        message: `This email is already registered as ${userRole}. Please try logging in instead.`,
+        alreadyRegistered: true,
+        exists: true
+      });
+    }
+
+    // Email is available for registration
+    return res.json({ 
+      success: true, 
+      message: 'Email is available for registration',
+      exists: false
+    });
+
+  } catch (error) {
+    console.log('Email check error:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Error checking email availability' 
+    });
+  }
+}
+
 // Cleanup expired OTPs (background job)
 async function cleanupExpiredOtps() {
   await Otp.deleteMany({ expiresAt: { $lt: new Date() } });
@@ -192,5 +243,6 @@ export default {
   sendOtp,
   verifyOtp,
   resendOtp,
+  checkEmailExists,
   cleanupExpiredOtps
 };

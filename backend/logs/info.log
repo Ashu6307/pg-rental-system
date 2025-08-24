@@ -160,3 +160,43 @@
 [2025-08-08T09:53:44.247Z] INFO: POST /api/auth/login | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
 [2025-08-23T15:25:37.520Z] INFO: Server running on port 5000 | {"environment":"development","port":"5000","timestamp":"2025-08-23T15:25:37.520Z"}
 [2025-08-23T15:25:38.217Z] INFO: MongoDB connected successfully
+[2025-08-23T18:57:41.665Z] INFO: POST /api/otp/send-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T18:58:14.451Z] INFO: POST /api/otp/verify-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:17:22.470Z] INFO: POST /api/auth/login | {"ip":"::1","userAgent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA"}
+[2025-08-23T19:17:48.131Z] INFO: POST /api/auth/login | {"ip":"::1","userAgent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA"}
+[2025-08-23T19:18:18.967Z] INFO: POST /api/auth/login | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:18:45.308Z] INFO: POST /api/auth/login | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:20:31.390Z] INFO: POST /api/otp/send-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:22:15.091Z] INFO: POST /api/otp/send-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:22:38.296Z] INFO: POST /api/otp/send-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:27:12.311Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:27:18.186Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:27:29.108Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:27:37.813Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:27:55.045Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA"}
+[2025-08-23T19:31:39.870Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA"}
+[2025-08-23T19:33:52.101Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) W"}
+[2025-08-23T19:34:29.769Z] INFO: Server running on port 5000 | {"environment":"development","port":"5000","timestamp":"2025-08-23T19:34:29.769Z"}
+[2025-08-23T19:34:30.502Z] INFO: MongoDB connected successfully
+[2025-08-23T19:34:58.576Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) W"}
+[2025-08-23T19:35:33.958Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA"}
+[2025-08-23T19:35:48.331Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:36:35.554Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:36:51.349Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:37:26.464Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:37:52.445Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA"}
+[2025-08-23T19:38:50.715Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:39:03.333Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:39:09.306Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:39:10.678Z] INFO: POST /api/otp/send-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:53:55.935Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T19:53:59.367Z] INFO: POST /api/otp/send-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T20:11:16.073Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T20:11:20.954Z] INFO: POST /api/otp/send-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T20:12:10.310Z] INFO: POST /api/otp/verify-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T20:12:40.272Z] INFO: POST /api/otp/verify-otp | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-23T20:13:16.271Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-24T11:26:33.630Z] INFO: POST /api/otp/check-email | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-24T11:30:38.308Z] INFO: POST /api/auth/login | {"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb"}
+[2025-08-24T14:36:01.795Z] INFO: Server running on port 5000 | {"environment":"development","port":"5000","timestamp":"2025-08-24T14:36:01.794Z"}
+[2025-08-24T14:36:13.605Z] INFO: MongoDB connected successfully
