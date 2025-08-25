@@ -47,13 +47,21 @@
 @keyframes rotateBorder {
   100% { transform: rotate(360deg); }
 }
-/* Hide scrollbar for carousels */
+/* Hide scrollbar for carousels - Cross-browser compatible */
 .hide-scrollbar {
-  scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  overflow: -moz-scrollbars-none; /* Firefox older versions */
 }
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+  width: 0; /* Additional fallback */
+  height: 0; /* Additional fallback */
+}
+/* Modern Firefox support with feature detection */
+@supports (scrollbar-width: none) {
+  .hide-scrollbar {
+    scrollbar-width: none; /* Firefox 64+ */
+  }
 }
 
 /* Infinite scroll carousel */
