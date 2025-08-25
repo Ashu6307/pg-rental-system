@@ -7,6 +7,7 @@ const BikeSchema = new mongoose.Schema({
   type: { type: String, enum: ['Standard', 'Sports', 'Scooter', 'Electric'], default: 'Standard' },
   year: { type: Number },
   color: { type: String },
+  cc: { type: Number }, // Engine capacity
   mileage: { type: Number },
   fuelType: { type: String, enum: ['Petrol', 'Diesel', 'Electric', 'Hybrid'], default: 'Petrol' },
   transmission: { type: String, enum: ['Manual', 'Automatic'], default: 'Manual' },
@@ -18,12 +19,29 @@ const BikeSchema = new mongoose.Schema({
     validTill: { type: Date }
   },
   price_per_day: { type: Number, required: true },
+  originalPrice: { type: Number }, // For discount calculation
   price_per_week: { type: Number },
   price_per_month: { type: Number },
   available: { type: Boolean, default: true },
   description: { type: String },
   images: [{ type: String }],
   features: [{ type: String }],
+  analytics: {
+    views: { type: Number, default: 0 },
+    bookings: { type: Number, default: 0 },
+    rating: { type: Number, default: 0 },
+    reviews: { type: Number, default: 0 }
+  },
+  location: {
+    city: { type: String },
+    state: { type: String },
+    area: { type: String },
+    address: { type: String }, // Full address field
+    coordinates: {
+      latitude: { type: Number },
+      longitude: { type: Number }
+    }
+  },
   status: { type: String, enum: ['pending', 'approved', 'rejected', 'deleted'], default: 'pending' },
   verificationStatus: { type: String, enum: ['pending', 'verified', 'rejected'], default: 'pending' },
   approvalLogs: [{

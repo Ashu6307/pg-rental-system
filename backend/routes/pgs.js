@@ -3,14 +3,68 @@ import PG from '../models/PG.js';
 
 const router = express.Router();
 
-// Public random PGs for homepage/listing
+// Public PGs with filtering and sorting
 router.get('/public', async (req, res) => {
   try {
-    // 8 random active PGs
-    const pgs = await PG.aggregate([
-      { $match: { status: 'active', softDelete: { $ne: true } } },
-      { $sample: { size: 8 } }
-    ]);
+    const { 
+      search, 
+      pgType, 
+      genderAllowed,
+      sort = 'price_low',
+      limit = 20
+    } = req.query;
+
+    // Build filter object
+    let filter = { 
+      status: 'active', 
+      softDelete: { $ne: true }
+    };
+
+    // Search functionality
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { city: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // PG Type filter
+    if (pgType) {
+      filter.pgType = pgType;
+    }
+
+    // Gender filter
+    if (genderAllowed) {
+      filter.$or = [
+        { genderAllowed: genderAllowed },
+        { genderAllowed: 'both' }
+      ];
+    }
+
+    // Sorting
+    let sortObj = {};
+    switch (sort) {
+      case 'price_low':
+        sortObj = { price: 1 };
+        break;
+      case 'price_high':
+        sortObj = { price: -1 };
+        break;
+      case 'rating':
+        sortObj = { 'rating.overall': -1 };
+        break;
+      case 'popular':
+        sortObj = { 'analytics.views': -1 };
+        break;
+      default:
+        sortObj = { price: 1 };
+    }
+
+    const pgs = await PG.find(filter)
+      .sort(sortObj)
+      .limit(parseInt(limit));
+
     res.json(pgs);
   } catch (err) {
     res.status(500).json({ error: err.message });

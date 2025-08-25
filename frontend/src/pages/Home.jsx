@@ -222,12 +222,23 @@ const Home = () => {
                   >
                     <div className="absolute inset-0 rounded-2xl card-gradient z-0"></div>
                     <div className="relative z-10 flex flex-col items-center">
-                      <div className="w-24 h-24 rounded-full bg-white shadow-lg flex items-center justify-center mb-3 border-4 border-blue-200 group-hover:border-blue-400 transition-all duration-300">
-                        {item.images && item.images[0] ? (
-                          <img src={item.images[0]} alt={item.name} className="w-20 h-20 object-cover rounded-full" />
-                        ) : (
-                          <FaBuilding size={40} className="text-blue-400" />
-                        )}
+                      <div className="w-24 h-24 rounded-full bg-white shadow-lg flex items-center justify-center mb-3 border-4 border-blue-200 group-hover:border-blue-400 transition-all duration-300 overflow-hidden">
+                        {item.images && item.images.length > 0 ? (
+                          <img 
+                            src={item.images[0]?.url || item.images[0]} 
+                            alt={item.name} 
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <FaBuilding 
+                          size={40} 
+                          className="text-blue-400" 
+                          style={{ display: item.images && item.images.length > 0 ? 'none' : 'block' }}
+                        />
                       </div>
                       <h3 className="text-xl font-bold text-blue-700 mb-1 truncate group-hover:text-purple-700 transition">{item.name}</h3>
                       <p className="text-gray-500 mb-1 text-sm">{item.city}, {item.state}</p>

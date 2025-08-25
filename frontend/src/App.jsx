@@ -16,7 +16,6 @@ import BikeManagement from './pages/owner/BikeManagement.jsx';
 import UserDashboard from './pages/user/UserDashboard.jsx';
 import UserDashboardHome from './pages/user/UserDashboardHome.jsx';
 import MyBookings from './pages/user/MyBookings.jsx';
-import BrowsePGs from './pages/user/BrowsePGs.jsx';
 import RentBikes from './pages/user/RentBikes.jsx';
 import UserHome from './pages/user/UserHome.jsx';
 import PolicyManagement from './pages/PolicyManagement';
@@ -133,7 +132,6 @@ const MainApp = () => {
         <Route path="/user/dashboard" element={<ProtectedRoute allowedRoles={["user"]}><UserDashboard /></ProtectedRoute>} />
         <Route path="/user/dashboard-home" element={<ProtectedRoute allowedRoles={["user"]}><UserDashboardHome /></ProtectedRoute>} />
         <Route path="/user/my-bookings" element={<ProtectedRoute allowedRoles={["user"]}><MyBookings /></ProtectedRoute>} />
-        <Route path="/user/browse-pgs" element={<ProtectedRoute allowedRoles={["user"]}><BrowsePGs /></ProtectedRoute>} />
         <Route path="/user/rent-bikes" element={<ProtectedRoute allowedRoles={["user"]}><RentBikes /></ProtectedRoute>} />
         <Route path="/user/my-profile" element={<ProtectedRoute allowedRoles={["user"]}><UserProfile /></ProtectedRoute>} />
         <Route path="/user/loyalty-rewards" element={<ProtectedRoute allowedRoles={["user"]}><LoyaltyPoints /></ProtectedRoute>} />

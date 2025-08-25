@@ -8,9 +8,11 @@ import {
   FaCar, 
   FaUtensils,
   FaSearch,
-  FaFilter,
   FaHeart,
-  FaEye
+  FaEye,
+  FaMale,
+  FaFemale,
+  FaUsers
 } from 'react-icons/fa';
 import apiService from '../services/api';
 import AutoImageCarousel from '../components/AutoImageCarousel';
@@ -21,78 +23,36 @@ const PG = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     search: '',
-    city: '',
-    priceMin: '',
-    priceMax: '',
     pgType: '',
     genderAllowed: '',
-    amenities: []
+    sort: 'price_low'
   });
-  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPGs = async () => {
-      try {
-        setLoading(true);
-        const response = await apiService.get('/api/pgs/public?limit=20');
-        const pgData = response.data || response;
-        setPgs(Array.isArray(pgData) ? pgData : []);
-        setFilteredPgs(Array.isArray(pgData) ? pgData : []);
-      } catch (error) {
-        console.error('PG API error:', error);
-        setPgs([]);
-        setFilteredPgs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPGs();
-  }, []);
+  }, [filters]);
 
-  // Filter function
-  useEffect(() => {
-    let filtered = [...pgs];
-
-    // Search filter
-    if (filters.search) {
-      filtered = filtered.filter(pg => 
-        pg.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        pg.city.toLowerCase().includes(filters.search.toLowerCase()) ||
-        pg.description?.toLowerCase().includes(filters.search.toLowerCase())
-      );
+  const fetchPGs = async () => {
+    try {
+      setLoading(true);
+      const queryParams = new URLSearchParams({
+        ...filters,
+        limit: 20
+      }).toString();
+      
+      const response = await apiService.get(`/api/pgs/public?${queryParams}`);
+      const pgData = response.data || response;
+      setPgs(Array.isArray(pgData) ? pgData : []);
+      setFilteredPgs(Array.isArray(pgData) ? pgData : []);
+    } catch (error) {
+      console.error('PG API error:', error);
+      setPgs([]);
+      setFilteredPgs([]);
+    } finally {
+      setLoading(false);
     }
-
-    // City filter
-    if (filters.city) {
-      filtered = filtered.filter(pg => 
-        pg.city.toLowerCase().includes(filters.city.toLowerCase())
-      );
-    }
-
-    // Price filter
-    if (filters.priceMin) {
-      filtered = filtered.filter(pg => pg.price >= parseInt(filters.priceMin));
-    }
-    if (filters.priceMax) {
-      filtered = filtered.filter(pg => pg.price <= parseInt(filters.priceMax));
-    }
-
-    // PG Type filter
-    if (filters.pgType) {
-      filtered = filtered.filter(pg => pg.pgType === filters.pgType);
-    }
-
-    // Gender filter
-    if (filters.genderAllowed) {
-      filtered = filtered.filter(pg => 
-        pg.genderAllowed === filters.genderAllowed || pg.genderAllowed === 'both'
-      );
-    }
-
-    setFilteredPgs(filtered);
-  }, [filters, pgs]);
+  };
 
   const handlePGClick = (pg) => {
     // Track view
@@ -123,10 +83,46 @@ const PG = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading PG listings...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-6xl mx-auto py-12">
+          {/* Skeleton Header */}
+          <div className="bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 rounded-2xl shadow-lg p-8 mb-8 animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="bg-white rounded-full p-3 w-16 h-16"></div>
+                <div>
+                  <div className="h-8 bg-white/20 rounded w-64 mb-2"></div>
+                  <div className="h-4 bg-white/20 rounded w-96"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Skeleton Filters */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-pulse">
+            <div className="flex gap-4">
+              <div className="flex-1 h-12 bg-gray-200 rounded-lg"></div>
+              <div className="w-32 h-12 bg-gray-200 rounded-lg"></div>
+              <div className="w-32 h-12 bg-gray-200 rounded-lg"></div>
+              <div className="w-32 h-12 bg-gray-200 rounded-lg"></div>
+              <div className="w-24 h-12 bg-gray-200 rounded-lg"></div>
+            </div>
+          </div>
+          
+          {/* Skeleton Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
+                <div className="h-48 bg-gray-200"></div>
+                <div className="p-4">
+                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-3 w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-3 w-1/2"></div>
+                  <div className="h-8 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -202,40 +198,17 @@ const PG = () => {
               <option value="both">Co-living</option>
             </select>
 
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+            <select 
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={filters.sort}
+              onChange={(e) => setFilters(prev => ({ ...prev, sort: e.target.value }))}
             >
-              <FaFilter /> Filters
-            </button>
+              <option value="price_low">Price: Low to High</option>
+              <option value="price_high">Price: High to Low</option>
+              <option value="rating">Highest Rated</option>
+              <option value="popular">Most Popular</option>
+            </select>
           </div>
-
-          {/* Expanded Filters */}
-          {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <input
-                type="text"
-                placeholder="City"
-                className="px-4 py-2 border border-gray-300 rounded-lg"
-                value={filters.city}
-                onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
-              />
-              <input
-                type="number"
-                placeholder="Min Price"
-                className="px-4 py-2 border border-gray-300 rounded-lg"
-                value={filters.priceMin}
-                onChange={(e) => setFilters(prev => ({ ...prev, priceMin: e.target.value }))}
-              />
-              <input
-                type="number"
-                placeholder="Max Price"
-                className="px-4 py-2 border border-gray-300 rounded-lg"
-                value={filters.priceMax}
-                onChange={(e) => setFilters(prev => ({ ...prev, priceMax: e.target.value }))}
-              />
-            </div>
-          )}
         </div>
 
         {/* PG Grid */}
@@ -255,6 +228,7 @@ const PG = () => {
                   autoSlideInterval={4000}
                   showControls={true}
                   showDots={true}
+                  type="pg"
                 />
                 
                 {getDiscountBadge(pg)}
@@ -298,12 +272,37 @@ const PG = () => {
                   </div>
                 )}
 
-                {/* Amenities */}
+                {/* Amenities and Gender */}
                 <div className="flex items-center gap-3 mb-3 text-sm text-gray-600">
                   {pg.wifiAvailable && <FaWifi className="text-blue-500" title="WiFi" />}
                   {pg.parkingAvailable && <FaCar className="text-green-500" title="Parking" />}
                   {pg.foodIncluded && <FaUtensils className="text-orange-500" title="Food Included" />}
                   <span className="bg-gray-100 px-2 py-1 rounded text-xs">{pg.pgType}</span>
+                </div>
+
+                {/* Gender Badge */}
+                <div className="flex items-center gap-2 mb-3">
+                  {pg.genderAllowed && (
+                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                      pg.genderAllowed === 'male' 
+                        ? 'bg-blue-100 text-blue-700' 
+                        : pg.genderAllowed === 'female' 
+                        ? 'bg-pink-100 text-pink-700' 
+                        : 'bg-purple-100 text-purple-700'
+                    }`}>
+                      {pg.genderAllowed === 'male' && <FaMale />}
+                      {pg.genderAllowed === 'female' && <FaFemale />}
+                      {(pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex') && <FaUsers />}
+                      <span className="capitalize">
+                        {pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex' 
+                          ? 'Boys & Girls' 
+                          : pg.genderAllowed === 'male' 
+                          ? 'Boys Only' 
+                          : 'Girls Only'
+                        }
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Price */}
