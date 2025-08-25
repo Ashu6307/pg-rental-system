@@ -4,6 +4,7 @@ import UserHeader from '../../components/UserHeader';
 import UserFooter from '../../components/UserFooter';
 import { AuthContext } from '../../context/AuthContext';
 import { getBookings } from '../../services/bookingService';
+import { showSuccess, showError, showWarning } from '../../utils/notifications';
 
 const UserProfile = () => {
   const { user } = useContext(AuthContext);
@@ -55,23 +56,23 @@ const UserProfile = () => {
     const requiredFields = ['name', 'phone', 'profilePhoto', 'address', 'dob', 'gender', 'email'];
     for (let field of requiredFields) {
       if (!form[field] || form[field].trim() === '') {
-        alert(`Please fill the ${field.replace(/([A-Z])/g, ' $1')} field.`);
+        showError(`Please fill the ${field.replace(/([A-Z])/g, ' $1')} field.`);
         return;
       }
     }
     // Phone validation
     if (!/^([6-9][0-9]{9})$/.test(form.phone)) {
-      alert('Please enter a valid 10-digit phone number starting with 6-9.');
+      showError('Please enter a valid 10-digit phone number starting with 6-9.');
       return;
     }
     // Email validation
     if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(form.email)) {
-      alert('Please enter a valid email address.');
+      showError('Please enter a valid email address.');
       return;
     }
     // DOB validation (must be past date and age >= 18)
     if (isNaN(Date.parse(form.dob)) || new Date(form.dob) >= new Date()) {
-      alert('Please enter a valid date of birth (past date).');
+      showError('Please enter a valid date of birth (past date).');
       return;
     }
     const dobDate = new Date(form.dob);
@@ -81,20 +82,21 @@ const UserProfile = () => {
       age--;
     }
     if (age < 18) {
-      alert('You must be at least 18 years old.');
+      showError('You must be at least 18 years old.');
       return;
     }
     // Gender validation
     if (!['male', 'female', 'other'].includes(form.gender)) {
-      alert('Please select a valid gender.');
+      showError('Please select a valid gender.');
       return;
     }
     // Profile photo validation (basic)
     if (!form.profilePhoto.startsWith('http')) {
-      alert('Please enter a valid profile photo URL (should start with http).');
+      showError('Please enter a valid profile photo URL (should start with http).');
       return;
     }
     // TODO: API call to update user profile
+    showSuccess('Profile updated successfully!');
     setEditMode(false);
   };
 

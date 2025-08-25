@@ -3,6 +3,7 @@ import TermsPopup from '../components/TermsPopup';
 import axios from 'axios';
 import { getPricing } from '../api/pricingAPI';
 import { getBikes } from '../api/bikeAPI';
+import { showSuccess, showError, showWarning } from '../utils/notifications';
 
 // durations will be fetched per bike
 
@@ -100,9 +101,9 @@ const BikeBookingForm = () => {
         termsAccepted: true
       };
       await axios.post('/api/booking', bookingPayload);
-      alert('Booking confirmed!');
+      showSuccess('Booking confirmed successfully!');
     } catch (err) {
-      alert('Booking failed!');
+      showError('Booking failed. Please try again.');
     }
   };
 

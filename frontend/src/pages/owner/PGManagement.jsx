@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { showSuccess, showError, showWarning } from '../../utils/notifications';
 import { 
   FaBuilding, 
   FaPlus, 
@@ -158,7 +159,7 @@ export default function PGManagement() {
       }
     } catch (err) {
       console.error('Error fetching PGs:', err);
-      alert('Error fetching PGs');
+      showError('Error fetching PGs. Please try again.');
     }
     setLoading(false);
   };
@@ -212,10 +213,10 @@ export default function PGManagement() {
 
       if (editId) {
         await axios.put(`/api/pgs/${editId}`, submitData);
-        alert('PG updated successfully!');
+        showSuccess('PG updated successfully!');
       } else {
         await axios.post('/api/pgs', submitData);
-        alert('PG created successfully!');
+        showSuccess('PG created successfully!');
       }
       
       fetchPGs();
@@ -224,7 +225,7 @@ export default function PGManagement() {
       setActiveTab('basic');
     } catch (err) {
       console.error('Error saving PG:', err);
-      alert('Error saving PG: ' + (err.response?.data?.error || err.message));
+      showError('Error saving PG: ' + (err.response?.data?.error || err.message));
     }
     setLoading(false);
   };
@@ -246,11 +247,11 @@ export default function PGManagement() {
     setLoading(true);
     try {
       await axios.delete(`/api/pgs/${id}`);
-      alert('PG deleted successfully!');
+      showSuccess('PG deleted successfully!');
       fetchPGs();
     } catch (err) {
       console.error('Error deleting PG:', err);
-      alert('Error deleting PG');
+      showError('Error deleting PG. Please try again.');
     }
     setLoading(false);
   };

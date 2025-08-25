@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import FileUpload from '../../components/FileUpload.jsx';
+import { showSuccess, showError } from '../../utils/notifications';
 
 const BIKE_TYPE_OPTIONS = ['Standard', 'Sports', 'Scooter', 'Electric'];
 const FUEL_TYPE_OPTIONS = ['Petrol', 'Diesel', 'Electric', 'Hybrid'];
@@ -48,7 +49,7 @@ export default function BikeManagement() {
       const res = await axios.get('/api/bikes');
       setBikeList(res.data);
     } catch (err) {
-      alert('Error fetching bikes');
+      showError('Error fetching bikes. Please try again.');
     }
     setLoading(false);
   };
@@ -77,14 +78,16 @@ export default function BikeManagement() {
     try {
       if (editId) {
         await axios.put(`/api/bikes/${editId}`, form);
+        showSuccess('Bike updated successfully!');
       } else {
         await axios.post('/api/bikes', form);
+        showSuccess('Bike added successfully!');
       }
       fetchBikes();
       setForm(initialForm);
       setEditId(null);
     } catch (err) {
-      alert('Error saving bike');
+      showError(err.response?.data?.message || 'Error saving bike. Please try again.');
     }
     setLoading(false);
   };
@@ -103,9 +106,10 @@ export default function BikeManagement() {
     setLoading(true);
     try {
       await axios.delete(`/api/bikes/${id}`);
+      showSuccess('Bike deleted successfully!');
       fetchBikes();
     } catch (err) {
-      alert('Error deleting bike');
+      showError(err.response?.data?.message || 'Error deleting bike. Please try again.');
     }
     setLoading(false);
   };
