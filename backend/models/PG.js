@@ -24,12 +24,50 @@ const pgSchema = new mongoose.Schema({
   rooms: { type: Number, required: true },
   availableRooms: { type: Number, default: 0 },
   
-  // Enhanced Pricing Structure
-  price: { type: Number, required: true },
+  // Enhanced Pricing Structure (Legacy support + New Room Types)
+  price: { type: Number, required: true }, // Legacy: main price for backward compatibility
   originalPrice: { type: Number },
   priceType: { type: String, enum: ['monthly', 'daily', 'weekly'], default: 'monthly' },
-  pgType: { type: String, enum: ['Single', 'Double', 'Triple', 'Four'], default: 'Single' },
+  pgType: { type: String, enum: ['Single', 'Double', 'Triple', 'Four'], default: 'Single' }, // Legacy
   deposit: { type: Number },
+  
+  // NEW: Multiple Room Types Support
+  roomTypes: [{
+    id: { type: String, required: true }, // e.g., 'single-ac', 'double-sharing'
+    type: { type: String, required: true }, // e.g., 'Single AC', 'Double Sharing'
+    price: { type: Number, required: true },
+    originalPrice: { type: Number },
+    deposit: { type: Number },
+    totalRooms: { type: Number, required: true },
+    availableRooms: { type: Number, default: 0 },
+    
+    // Room-specific details
+    amenities: [{ type: String }], // Room-specific amenities
+    features: [{ type: String }], // Room-specific features
+    images: [{ 
+      url: { type: String },
+      caption: { type: String }
+    }],
+    
+    // Room specifications
+    area: { type: Number }, // in sqft
+    furnished: { type: Boolean, default: false },
+    acAvailable: { type: Boolean, default: false },
+    attachedBathroom: { type: Boolean, default: false },
+    balcony: { type: Boolean, default: false },
+    
+    // Pricing variations
+    weeklyDiscount: { type: Number, default: 0 }, // percentage
+    monthlyDiscount: { type: Number, default: 0 }, // percentage
+    
+    isActive: { type: Boolean, default: true }
+  }],
+  
+  // Auto-calculated price range (for display)
+  priceRange: {
+    min: { type: Number },
+    max: { type: Number }
+  },
   
   // Status and Featured
   status: { type: String, enum: ['active', 'inactive', 'pending', 'rejected'], default: 'pending' },
@@ -215,5 +253,56 @@ const pgSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
+
+// Pre-save middleware to calculate price range and update legacy fields
+pgSchema.pre('save', function(next) {
+  // Update timestamp
+  this.updatedAt = Date.now();
+  
+  // Calculate price range from roomTypes if available
+  if (this.roomTypes && this.roomTypes.length > 0) {
+    const prices = this.roomTypes
+      .filter(room => room.isActive !== false)
+      .map(room => room.price);
+    
+    if (prices.length > 0) {
+      this.priceRange = {
+        min: Math.min(...prices),
+        max: Math.max(...prices)
+      };
+      
+      // Update legacy price field with minimum price for backward compatibility
+      this.price = this.priceRange.min;
+    }
+    
+    // Update total available rooms
+    this.availableRooms = this.roomTypes
+      .filter(room => room.isActive !== false)
+      .reduce((total, room) => total + (room.availableRooms || 0), 0);
+    
+    // Update total rooms
+    this.rooms = this.roomTypes
+      .filter(room => room.isActive !== false)
+      .reduce((total, room) => total + (room.totalRooms || 0), 0);
+  }
+  
+  next();
+});
+
+// Method to get room type by ID
+pgSchema.methods.getRoomType = function(roomTypeId) {
+  return this.roomTypes.find(room => room.id === roomTypeId);
+};
+
+// Method to check room availability
+pgSchema.methods.isRoomTypeAvailable = function(roomTypeId) {
+  const roomType = this.getRoomType(roomTypeId);
+  return roomType && roomType.availableRooms > 0 && roomType.isActive !== false;
+};
+
+// Method to get active room types
+pgSchema.methods.getActiveRoomTypes = function() {
+  return this.roomTypes.filter(room => room.isActive !== false);
+};
 
 export default mongoose.model('PG', pgSchema);

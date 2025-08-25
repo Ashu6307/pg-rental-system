@@ -270,7 +270,7 @@ const Bike = () => {
               {/* Content */}
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition line-clamp-1">
+                  <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition line-clamp-1" title={`${bike.brand} ${bike.model}${bike.year ? ` (${bike.year})` : ''}${bike.color ? ` - ${bike.color}` : ''}`}>
                     {bike.brand} {bike.model}
                   </h3>
                   <button className="text-gray-400 hover:text-red-500 transition" title="Add to Favorites">
@@ -281,13 +281,13 @@ const Bike = () => {
                 {/* Year and Color */}
                 <div className="flex items-center gap-3 text-sm text-gray-600 mb-2">
                   {bike.year && (
-                    <span className="font-medium">{bike.year}</span>
+                    <span className="font-medium" title={`Manufacturing year: ${bike.year}`}>{bike.year}</span>
                   )}
                   {bike.color && (
-                    <span>• {bike.color}</span>
+                    <span title={`Bike color: ${bike.color}`}>• {bike.color}</span>
                   )}
                   {bike.type && (
-                    <span>• {bike.type}</span>
+                    <span title={`Bike type: ${bike.type}`}>• {bike.type}</span>
                   )}
                 </div>
 
@@ -346,7 +346,7 @@ const Bike = () => {
                 {bike.location?.city && (
                   <div className="flex items-center text-gray-600 mb-3">
                     <FaMapMarkerAlt className="mr-1 text-red-500" title="Location" />
-                    <span className="text-sm">{bike.location.city}</span>
+                    <span className="text-sm" title={`Location: ${bike.location.address || `${bike.location.city}, ${bike.location.state || ''}`}`}>{bike.location.city}</span>
                   </div>
                 )}
 
@@ -354,16 +354,16 @@ const Bike = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-green-600">₹{bike.price_per_day?.toLocaleString()}</span>
+                      <span className="text-2xl font-bold text-green-600" title={`Daily rental: ₹${bike.price_per_day?.toLocaleString()}${bike.price_per_week ? ` | Weekly: ₹${bike.price_per_week}` : ''}`}>₹{bike.price_per_day?.toLocaleString()}</span>
                       {bike.originalPrice && bike.originalPrice > bike.price_per_day && (
-                        <span className="text-sm text-gray-500 line-through">₹{bike.originalPrice?.toLocaleString()}</span>
+                        <span className="text-sm text-gray-500 line-through" title={`Original price: ₹${bike.originalPrice?.toLocaleString()}/day`}>₹{bike.originalPrice?.toLocaleString()}</span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-500">per day</span>
+                    <span className="text-xs text-gray-500" title="Daily rental rate">per day</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-semibold text-blue-600">{bike.available ? 'Available' : 'Booked'}</div>
-                    <span className="text-xs text-gray-500">Book Now</span>
+                    <div className="text-sm font-semibold text-blue-600" title={`Current status: ${bike.available ? 'Available for booking' : 'Currently booked'}`}>{bike.available ? 'Available' : 'Booked'}</div>
+                    <span className="text-xs text-gray-500" title="Click to start booking process">Book Now</span>
                   </div>
                 </div>
 
@@ -373,12 +373,12 @@ const Bike = () => {
                     <h4 className="text-xs font-semibold text-gray-600 mb-2">Key Features:</h4>
                     <div className="flex flex-wrap gap-1">
                       {bike.features.slice(0, 3).map((feature, index) => (
-                        <span key={index} className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full border border-blue-200">
+                        <span key={index} className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full border border-blue-200" title={`Key feature: ${feature}`}>
                           {feature}
                         </span>
                       ))}
                       {bike.features.length > 3 && (
-                        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full" title={`Additional features: ${bike.features.slice(3).join(', ')}`}>
                           +{bike.features.length - 3} more
                         </span>
                       )}
