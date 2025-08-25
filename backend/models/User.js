@@ -3,7 +3,13 @@ import mongoose from 'mongoose';
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password_hash: { type: String, required: true },
+  password_hash: { 
+    type: String, 
+    required: function() {
+      // Password is not required for Google OAuth users
+      return !this.isGoogleAuth;
+    }
+  },
   phone: { type: String },
   role: { type: String, enum: ['user', 'owner', 'admin', 'sub_admin'], default: 'user' },
   created_at: { type: Date, default: Date.now },

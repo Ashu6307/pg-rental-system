@@ -620,11 +620,25 @@ const AuthForm = ({
   // Google Auth handler
   const handleGoogleAuth = async () => {
     try {
-      // Use Google Identity Services (GIS) or window.open for OAuth popup
-      // For demo, redirect to backend endpoint
-      window.location.href = `/api/googleAuth/google?role=${role}`;
+      setLoading(true);
+      
+      // For development, check if Google credentials are configured
+      if (process.env.NODE_ENV === 'development') {
+        const response = await fetch('/api/googleAuth/check-config');
+        if (!response.ok) {
+          toast.error('Google OAuth is not properly configured. Please contact administrator.');
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // Redirect to backend Google OAuth endpoint with role parameter
+      const redirectUrl = `/api/googleAuth/google?role=${role}&mode=${isLogin ? 'login' : 'register'}`;
+      window.location.href = redirectUrl;
     } catch (err) {
-      toast.error('Google authentication failed.');
+      console.error('Google authentication error:', err);
+      toast.error('Google authentication failed. Please try again.');
+      setLoading(false);
     }
   };
 
@@ -840,13 +854,34 @@ const AuthForm = ({
               {!(role === 'admin' && isLogin) && (
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center gap-2 py-2 px-4 mb-4 rounded bg-white text-gray-900 font-semibold shadow border border-gray-300 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 mb-4 rounded-lg bg-white text-gray-900 font-semibold shadow-md border border-gray-300 hover:bg-gray-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleGoogleAuth}
+                  disabled={loading}
                 >
-                  <span className="text-xl"><FcGoogle /></span>
-                  {isLogin ? 'Login with Google' : 'Sign up with Google'}
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                  ) : (
+                    <span className="text-xl"><FcGoogle /></span>
+                  )}
+                  {loading 
+                    ? 'Connecting...' 
+                    : (isLogin ? 'Login with Google' : 'Sign up with Google')
+                  }
                 </button>
               )}
+              
+              {/* Divider */}
+              {!(role === 'admin' && isLogin) && (
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+                  </div>
+                </div>
+              )}
+              
               {/* Registration fields for user/owner/admin */}
               {!isLogin && (
                 <>

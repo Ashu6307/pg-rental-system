@@ -19,13 +19,16 @@ const GoogleCallback = () => {
         let errorMessage = 'Google authentication failed';
         switch (error) {
           case 'google_email_not_found':
-            errorMessage = 'Google email not found. Please try again.';
+            errorMessage = 'Google email not found. Please make sure your Google account has a verified email address.';
             break;
           case 'google_auth_failed':
             errorMessage = 'Google authentication failed. Please try again.';
             break;
+          case 'google_not_configured':
+            errorMessage = 'Google OAuth is not properly configured. Please contact the administrator.';
+            break;
           default:
-            errorMessage = 'Authentication error occurred.';
+            errorMessage = 'Authentication error occurred. Please try again.';
         }
         toast.error(errorMessage);
         navigate('/user/login');
@@ -44,7 +47,9 @@ const GoogleCallback = () => {
           login(user, token);
           
           // Success message
-          toast.success(`Welcome ${user.name}! You've been logged in successfully.`);
+          const isNewUser = urlParams.get('new') === 'true';
+          const actionText = isNewUser ? 'registered and logged in' : 'logged in';
+          toast.success(`Welcome ${user.name}! You've been ${actionText} successfully.`);
           
           // Redirect based on user role
           if (user.role === 'owner') {
