@@ -13,6 +13,7 @@ import {
   FaEye
 } from 'react-icons/fa';
 import apiService from '../services/api';
+import AutoImageCarousel from '../components/AutoImageCarousel';
 
 const PG = () => {
   const [pgs, setPgs] = useState([]);
@@ -245,29 +246,26 @@ const PG = () => {
               className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
               onClick={() => handlePGClick(pg)}
             >
-              {/* Image Container */}
-              <div className="relative h-48 overflow-hidden">
-                {pg.images && pg.images.length > 0 ? (
-                  <img 
-                    src={pg.images[0].url || pg.images[0]} 
-                    alt={pg.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                    <FaBuilding size={48} className="text-blue-400" />
-                  </div>
-                )}
+              {/* Image Container with Auto Carousel */}
+              <div className="relative">
+                <AutoImageCarousel
+                  images={pg.images || []}
+                  alt={pg.name}
+                  className="h-48"
+                  autoSlideInterval={4000}
+                  showControls={true}
+                  showDots={true}
+                />
                 
                 {getDiscountBadge(pg)}
                 
                 {pg.featured && (
-                  <div className="absolute top-3 right-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                  <div className="absolute top-3 right-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold z-20">
                     FEATURED
                   </div>
                 )}
                 
-                <div className="absolute bottom-3 right-3 bg-black/50 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                <div className="absolute bottom-3 right-3 bg-black/50 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1 z-20">
                   <FaEye /> {pg.analytics?.views || 0}
                 </div>
               </div>

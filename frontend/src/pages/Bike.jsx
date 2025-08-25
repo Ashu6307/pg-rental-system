@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaMotorcycle } from 'react-icons/fa';
 import apiService from '../services/api';
+import AutoImageCarousel from '../components/AutoImageCarousel';
 
 const Bike = () => {
   const [bikes, setBikes] = useState([]);
