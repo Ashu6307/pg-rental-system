@@ -43,9 +43,11 @@ const Home = () => {
       try {
         const data = await apiService.get('/api/home');
         setHomeData(data);
-        console.log('Home API data:', data);
       } catch (err) {
-        console.error('Home API error:', err);
+        // Only show errors in development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Home API error:', err);
+        }
       }
     };
 

@@ -12,9 +12,10 @@ const Bike = () => {
       try {
         const data = await apiService.get('/api/bikes/public');
         setBikes(Array.isArray(data) ? data : (data.bikes || []));
-        console.log('Bike API response:', data);
       } catch (error) {
-        console.error('Bike API error:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Bike API error:', error);
+        }
       }
     };
 

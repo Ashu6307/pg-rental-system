@@ -321,7 +321,9 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       } else {
         // No token found - user is not logged in
-        console.log('AuthContext: No token found - user not logged in');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('AuthContext: No token found - user not logged in');
+        }
         setIsAuthenticated(false);
         setUser(null);
         setRole('');

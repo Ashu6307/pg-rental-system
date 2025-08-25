@@ -23,9 +23,6 @@ class ApiService {
     const token = sessionStorage.getItem('token') || localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('ApiService: Adding auth header with token:', token.substring(0, 50) + '...');
-    } else {
-      console.log('ApiService: No token found for request to', endpoint);
     }
 
     try {
@@ -37,7 +34,10 @@ class ApiService {
       
       return await response.json();
     } catch (error) {
-      console.error(`API Error for ${endpoint}:`, error);
+      // Only show API errors in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`API Error for ${endpoint}:`, error);
+      }
       throw error;
     }
   }

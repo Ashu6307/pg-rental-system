@@ -104,9 +104,11 @@ const AuthForm = ({
     }
   };
 
-  // Debug useEffect to track showOtpModal state changes
+  // Debug useEffect to track showOtpModal state changes (development only)
   useEffect(() => {
-    console.log('State Update - emailVerified:', emailVerified, 'verifiedOtp:', verifiedOtp);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('State Update - emailVerified:', emailVerified, 'verifiedOtp:', verifiedOtp);
+    }
   }, [showOtpModal, emailVerified, verifiedOtp]);
 
   // Password strength checker

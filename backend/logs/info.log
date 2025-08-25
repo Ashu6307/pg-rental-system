@@ -1,0 +1,2 @@
+[2025-08-25T05:00:33.117Z] INFO: Server running on port 5000 | {"environment":"development","port":"5000","timestamp":"2025-08-25T05:00:33.117Z"}
+[2025-08-25T05:00:33.923Z] INFO: MongoDB connected successfully
