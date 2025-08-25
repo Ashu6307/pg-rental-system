@@ -60,9 +60,8 @@ export const getAllPGs = async (req, res) => {
 
     // Build filter object
     const filter = { 
-      status: 'active', 
-      softDelete: false,
-      verificationStatus: 'verified'
+      status: 'active',
+      softDelete: { $ne: true }
     };
 
     if (city) filter.city = new RegExp(city, 'i');
@@ -86,8 +85,7 @@ export const getAllPGs = async (req, res) => {
     const pgs = await PG.find(filter)
       .sort(sortOptions)
       .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .populate('owner', 'name email contactNumber');
+      .skip((page - 1) * limit);
 
     const total = await PG.countDocuments(filter);
 
@@ -102,9 +100,10 @@ export const getAllPGs = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('Error in getAllPGs:', err);
     res.status(500).json({ 
       success: false,
-      error: err.message 
+      error: err.message
     });
   }
 };
