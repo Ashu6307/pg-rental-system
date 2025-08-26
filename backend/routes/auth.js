@@ -34,8 +34,14 @@ router.post('/register', async (req, res) => {
     otp // Add OTP field for verification
   } = req.body;
   try {
+    // Debug logging
+    console.log('Registration request body:', req.body);
+    console.log('OTP received:', otp);
+    console.log('Email received:', email);
+    
     // Check if OTP is provided and valid
     if (!otp) {
+      console.log('No OTP provided in request');
       return res.status(400).json({ error: 'Email verification OTP is required.' });
     }
 
@@ -112,22 +118,20 @@ router.post('/register', async (req, res) => {
     // Clean up all OTPs for this email
     await otpRecord.deleteMany({ email });
 
-    // Send welcome email with professional template
+    // Send welcome email
     try {
-      const welcomeContent = emailTemplates.userWelcome({
-        name: user.name,
-        role: user.role,
-        email: user.email
-      });
-      
       await sendEmail({
-        to: user.email,
-        subject: '🎉 Welcome to BikeRental Pro - Registration Complete!',
-        html: welcomeContent
+        to: email,
+        subject: '🎉 Welcome to PG & Bike Rental Platform!',
+        html: emailTemplates.userWelcome({
+          name: user.name,
+          role: user.role,
+          email: email
+        })
       });
     } catch (emailError) {
-      console.error('Welcome email failed:', emailError);
-      // Don't fail registration if email fails
+      console.error('Failed to send welcome email:', emailError);
+      // Don't fail registration if welcome email fails
     }
 
     res.status(201).json({ 

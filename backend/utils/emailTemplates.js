@@ -257,6 +257,455 @@ const emailTemplates = {
     </div>
   `, '#3b82f6'),
 
+  // Booking Completion Template
+  bookingCompleted: ({ name, itemType, itemName, bookingId, completionDate }) => createEmailTemplate(`
+    <div class="title">🎉 Booking Completed Successfully!</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Thank you for using our platform! Your ${itemType.toLowerCase()} booking has been marked as <span class="success">completed</span>.
+    </div>
+    
+    <div class="info-box">
+        <strong>📋 Completion Details:</strong><br>
+        Booking ID: <span class="highlight">#${bookingId}</span><br>
+        ${itemType}: <span class="highlight">${itemName}</span><br>
+        Completion Date: <span class="highlight">${completionDate}</span><br>
+        Status: <span class="success">✅ Completed</span>
+    </div>
+    
+    <div class="text">
+        🌟 <strong>Share Your Experience:</strong><br>
+        • Rate your ${itemType.toLowerCase()} experience<br>
+        • Write a review to help others<br>
+        • Upload photos of your stay/ride
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="http://localhost:3000/user/my-bookings" class="button" style="flex: 1; text-align: center;">
+            📊 View Booking
+        </a>
+        <a href="http://localhost:3000/user/write-review?booking=${bookingId}" class="button" style="flex: 1; text-align: center; background: #059669;">
+            ⭐ Write Review
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        Thank you for choosing us! We hope you had a great experience. Book again anytime!
+    </div>
+  `, '#059669'),
+
+  // Initial Booking Request Template (when user creates booking - pending approval)
+  bookingRequested: ({ name, itemType, itemName, bookingId, itemAddress, startDate, endDate }) => createEmailTemplate(`
+    <div class="title">📝 Booking Request Submitted!</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Thank you for your booking request! We've received your ${itemType.toLowerCase()} booking and it's currently under review.
+    </div>
+    
+    <div class="info-box">
+        <strong>📋 Request Details:</strong><br>
+        Booking ID: <span class="highlight">#${bookingId}</span><br>
+        ${itemType}: <span class="highlight">${itemName}</span><br>
+        ${itemType === 'PG' ? `Address: ${itemAddress}<br>` : ''}
+        ${startDate && endDate ? `Duration: <span class="highlight">${startDate} to ${endDate}</span><br>` : ''}
+        Status: <span class="warning">⏳ Pending Approval</span>
+    </div>
+    
+    <div class="text">
+        ⏰ <strong>What Happens Next:</strong><br>
+        • Owner will review your request<br>
+        • You'll get an email notification with the decision<br>
+        • Check your dashboard for real-time updates
+    </div>
+    
+    <a href="http://localhost:3000/user/my-bookings" class="button">
+        📊 Track Your Booking
+    </a>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        We'll notify you as soon as the owner responds to your request. Usually takes 2-24 hours.
+    </div>
+  `, '#f59e0b'),
+
+  // Payment Receipt Templates
+  paymentReceipt: ({ name, email, paymentId, amount, gst, totalAmount, itemType, itemName, bookingId, paymentDate, paymentMethod, transactionId }) => createEmailTemplate(`
+    <div class="title">💳 Payment Receipt</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Thank you! Your payment has been <span class="success">successfully processed</span>.
+    </div>
+    
+    <div class="info-box">
+        <strong>💰 Payment Details:</strong><br>
+        Receipt No: <span class="highlight">#${paymentId}</span><br>
+        Transaction ID: <span class="highlight">${transactionId || 'N/A'}</span><br>
+        Payment Date: <span class="highlight">${paymentDate}</span><br>
+        Payment Method: <span class="highlight">${paymentMethod}</span><br>
+        Status: <span class="success">✅ Paid</span>
+    </div>
+
+    <div class="info-box">
+        <strong>📋 Booking Details:</strong><br>
+        Booking ID: <span class="highlight">#${bookingId}</span><br>
+        Service: <span class="highlight">${itemType} - ${itemName}</span><br>
+        Customer: <span class="highlight">${email}</span>
+    </div>
+
+    <div class="info-box">
+        <strong>💵 Amount Breakdown:</strong><br>
+        Base Amount: <span class="highlight">₹${amount}</span><br>
+        GST (18%): <span class="highlight">₹${gst}</span><br>
+        <div style="border-top: 1px solid #e5e7eb; margin: 8px 0; padding-top: 8px;">
+        <strong>Total Paid: <span class="highlight" style="font-size: 18px;">₹${totalAmount}</span></strong>
+        </div>
+    </div>
+    
+    <div class="text">
+        📧 <strong>Important Notes:</strong><br>
+        • Keep this receipt for your records<br>
+        • Refunds will be processed to the same payment method<br>
+        • Contact support for any payment queries
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="http://localhost:3000/user/my-bookings" class="button" style="flex: 1; text-align: center;">
+            📊 View Booking
+        </a>
+        <a href="http://localhost:3000/user/payments" class="button" style="flex: 1; text-align: center; background: #059669;">
+            💳 Payment History
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        This is an auto-generated receipt. For support, contact us at support@pgbikerental.com
+    </div>
+  `, '#3b82f6'),
+
+  // Payment Failed Template
+  paymentFailed: ({ name, paymentId, amount, itemType, itemName, bookingId, failureReason, retryUrl }) => createEmailTemplate(`
+    <div class="title">❌ Payment Failed</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Unfortunately, your payment could not be processed at this time.
+    </div>
+    
+    <div class="info-box">
+        <strong>❌ Failed Payment Details:</strong><br>
+        Payment ID: <span class="highlight">#${paymentId}</span><br>
+        Amount: <span class="highlight">₹${amount}</span><br>
+        Service: <span class="highlight">${itemType} - ${itemName}</span><br>
+        Booking ID: <span class="highlight">#${bookingId}</span><br>
+        Reason: <span class="danger">${failureReason || 'Payment gateway error'}</span><br>
+        Status: <span class="danger">❌ Failed</span>
+    </div>
+    
+    <div class="text">
+        🔄 <strong>What You Can Do:</strong><br>
+        • Try a different payment method<br>
+        • Check your card/bank balance<br>
+        • Contact your bank if needed<br>
+        • Retry the payment
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="${retryUrl || 'http://localhost:3000/user/my-bookings'}" class="button" style="flex: 1; text-align: center;">
+            🔄 Retry Payment
+        </a>
+        <a href="http://localhost:3000/contact" class="button" style="flex: 1; text-align: center; background: #dc2626;">
+            🆘 Get Help
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        Your booking is still active. Please complete the payment to confirm your reservation.
+    </div>
+  `, '#dc2626'),
+
+  // Refund Confirmation Template
+  refundConfirmation: ({ name, refundId, originalPaymentId, refundAmount, itemType, itemName, bookingId, refundDate, refundReason, processingDays }) => createEmailTemplate(`
+    <div class="title">💰 Refund Initiated</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Your refund request has been <span class="success">approved and initiated</span>.
+    </div>
+    
+    <div class="info-box">
+        <strong>💰 Refund Details:</strong><br>
+        Refund ID: <span class="highlight">#${refundId}</span><br>
+        Original Payment: <span class="highlight">#${originalPaymentId}</span><br>
+        Refund Amount: <span class="highlight">₹${refundAmount}</span><br>
+        Refund Date: <span class="highlight">${refundDate}</span><br>
+        Reason: <span class="highlight">${refundReason}</span><br>
+        Status: <span class="success">✅ Processing</span>
+    </div>
+
+    <div class="info-box">
+        <strong>📋 Booking Details:</strong><br>
+        Booking ID: <span class="highlight">#${bookingId}</span><br>
+        Service: <span class="highlight">${itemType} - ${itemName}</span>
+    </div>
+    
+    <div class="text">
+        ⏰ <strong>Refund Processing:</strong><br>
+        • Refund will be credited to your original payment method<br>
+        • Processing time: <span class="highlight">${processingDays || '5-7'} business days</span><br>
+        • You'll receive a confirmation once credited<br>
+        • Track status in your payment history
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="http://localhost:3000/user/payments" class="button" style="flex: 1; text-align: center;">
+            💳 Track Refund
+        </a>
+        <a href="http://localhost:3000/contact" class="button" style="flex: 1; text-align: center; background: #059669;">
+            📞 Contact Support
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        Thank you for your patience. We appreciate your business and hope to serve you again.
+    </div>
+  `, '#059669'),
+
+  // Marketing & Promotional Email Templates
+  
+  // Newsletter Template
+  newsletter: ({ name, month, year, featuredPGs, featuredBikes, specialOffers, blogPosts, customerStories }) => createEmailTemplate(`
+    <div class="title">📰 Monthly Newsletter - ${month} ${year}</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Welcome to our monthly newsletter! Here's what's new and exciting this month.
+    </div>
+    
+    ${featuredPGs && featuredPGs.length > 0 ? `
+    <div class="info-box">
+        <strong>🏠 Featured PGs This Month:</strong><br>
+        ${featuredPGs.map(pg => `
+          • <span class="highlight">${pg.name}</span> - ${pg.location}<br>
+          &nbsp;&nbsp;Starting from ₹${pg.price}/month<br>
+        `).join('')}
+    </div>
+    ` : ''}
+    
+    ${featuredBikes && featuredBikes.length > 0 ? `
+    <div class="info-box">
+        <strong>🏍️ Popular Bikes:</strong><br>
+        ${featuredBikes.map(bike => `
+          • <span class="highlight">${bike.company} ${bike.model}</span><br>
+          &nbsp;&nbsp;₹${bike.price}/day - ${bike.location}<br>
+        `).join('')}
+    </div>
+    ` : ''}
+    
+    ${specialOffers && specialOffers.length > 0 ? `
+    <div class="text">
+        🎉 <strong>Special Offers:</strong>
+        ${specialOffers.map(offer => `
+          <br>• ${offer.title} - <span class="success">${offer.discount}</span>
+        `).join('')}
+    </div>
+    ` : ''}
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="http://localhost:3000/pg-listings" class="button" style="flex: 1; text-align: center;">
+            🏠 Browse PGs
+        </a>
+        <a href="http://localhost:3000/bike-listings" class="button" style="flex: 1; text-align: center; background: #059669;">
+            🏍️ Rent Bikes
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        Don't want to receive newsletters? <a href="http://localhost:3000/unsubscribe?type=newsletter&email=${name}" style="color: #3b82f6;">Unsubscribe here</a>
+    </div>
+  `, '#3b82f6'),
+
+  // Promotional Offer Template
+  promotionalOffer: ({ name, offerTitle, discount, description, validTill, offerCode, terms, serviceType, originalPrice, discountedPrice, offerImage }) => createEmailTemplate(`
+    <div class="title">🎉 Special Offer: ${offerTitle}</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Great news! We have an exclusive offer just for you!
+    </div>
+    
+    <div style="background: linear-gradient(135deg, #059669, #047857); color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">
+            ${discount} OFF
+        </div>
+        <div style="font-size: 18px; margin-bottom: 10px;">
+            ${offerTitle}
+        </div>
+        <div style="font-size: 14px; opacity: 0.9;">
+            Valid till ${validTill}
+        </div>
+    </div>
+    
+    <div class="info-box">
+        <strong>🎯 Offer Details:</strong><br>
+        Service: <span class="highlight">${serviceType || 'PG & Bike Rental'}</span><br>
+        Discount: <span class="success">${discount}</span><br>
+        ${originalPrice && discountedPrice ? `
+          Original Price: <span style="text-decoration: line-through;">₹${originalPrice}</span><br>
+          Your Price: <span class="highlight">₹${discountedPrice}</span><br>
+        ` : ''}
+        Valid Till: <span class="highlight">${validTill}</span><br>
+        ${offerCode ? `Promo Code: <span class="highlight">${offerCode}</span><br>` : ''}
+    </div>
+    
+    <div class="text">
+        📝 <strong>How to Use:</strong><br>
+        ${description || '• Book any service on our platform<br>• Apply the promo code at checkout<br>• Enjoy your discount!'}
+    </div>
+    
+    ${terms ? `
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        <strong>Terms & Conditions:</strong><br>
+        ${terms}
+    </div>
+    ` : ''}
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="http://localhost:3000/offers" class="button" style="flex: 1; text-align: center;">
+            🎉 Claim Offer
+        </a>
+        <a href="http://localhost:3000/pg-listings" class="button" style="flex: 1; text-align: center; background: #059669;">
+            🏠 Book Now
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        Hurry! This offer expires on ${validTill}. <a href="http://localhost:3000/unsubscribe?type=promotional&email=${name}" style="color: #3b82f6;">Unsubscribe from promotional emails</a>
+    </div>
+  `, '#059669'),
+
+  // Seasonal Campaign Template
+  seasonalCampaign: ({ name, season, campaignTitle, mainOffer, subOffers, bgColor, seasonIcon, campaignEndDate }) => createEmailTemplate(`
+    <div class="title">${seasonIcon} ${campaignTitle}</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        ${season} is here! Time to make the most of this beautiful season with our special offers.
+    </div>
+    
+    <div style="background: ${bgColor || 'linear-gradient(135deg, #f59e0b, #d97706)'}; color: white; padding: 25px; border-radius: 15px; text-align: center; margin: 25px 0;">
+        <div style="font-size: 28px; margin-bottom: 15px;">
+            ${seasonIcon}
+        </div>
+        <div style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">
+            ${mainOffer.title}
+        </div>
+        <div style="font-size: 18px; margin-bottom: 10px;">
+            ${mainOffer.discount}
+        </div>
+        <div style="font-size: 14px; opacity: 0.9;">
+            ${mainOffer.description}
+        </div>
+    </div>
+    
+    ${subOffers && subOffers.length > 0 ? `
+    <div class="text">
+        🎁 <strong>More ${season} Deals:</strong>
+    </div>
+    <div class="info-box">
+        ${subOffers.map(offer => `
+          <strong>${offer.service}:</strong> <span class="success">${offer.discount}</span><br>
+          ${offer.description}<br><br>
+        `).join('')}
+    </div>
+    ` : ''}
+    
+    <div class="text">
+        ⏰ <strong>Limited Time Offer:</strong><br>
+        • Valid for ${season} season only<br>
+        • Book before ${campaignEndDate}<br>
+        • Combine multiple offers for maximum savings<br>
+        • Perfect weather for outdoor adventures!
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="http://localhost:3000/seasonal-offers" class="button" style="flex: 1; text-align: center;">
+            ${seasonIcon} Explore Offers
+        </a>
+        <a href="http://localhost:3000/book-now" class="button" style="flex: 1; text-align: center; background: #dc2626;">
+            🚀 Book Now
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        Make this ${season} memorable with us! Offer valid till ${campaignEndDate}.
+    </div>
+  `, bgColor || '#f59e0b'),
+
+  // Customer Retention Email
+  customerRetention: ({ name, lastBookingDate, loyaltyPoints, personalizedOffers, missedYouDiscount, favoriteServices }) => createEmailTemplate(`
+    <div class="title">😊 We Miss You!</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        We noticed it's been a while since your last booking (${lastBookingDate}). We miss having you as our valued customer!
+    </div>
+    
+    <div class="info-box">
+        <strong>🏆 Your Account Summary:</strong><br>
+        Loyalty Points: <span class="highlight">${loyaltyPoints || 0} points</span><br>
+        Last Booking: <span class="highlight">${lastBookingDate}</span><br>
+        Favorite Services: <span class="highlight">${favoriteServices || 'PG & Bike Rental'}</span><br>
+        Status: <span class="success">Valued Customer</span>
+    </div>
+    
+    <div style="background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">
+            🎁 Welcome Back Offer
+        </div>
+        <div style="font-size: 18px; margin-bottom: 10px;">
+            ${missedYouDiscount || '25% OFF'} on your next booking
+        </div>
+        <div style="font-size: 14px; opacity: 0.9;">
+            Just for you - Limited time only!
+        </div>
+    </div>
+    
+    ${personalizedOffers && personalizedOffers.length > 0 ? `
+    <div class="text">
+        🎯 <strong>Personalized Offers Just for You:</strong>
+    </div>
+    <div class="info-box">
+        ${personalizedOffers.map(offer => `
+          • <span class="highlight">${offer.title}</span> - ${offer.discount}<br>
+          &nbsp;&nbsp;${offer.description}<br><br>
+        `).join('')}
+    </div>
+    ` : ''}
+    
+    <div class="text">
+        🌟 <strong>What's New Since You Left:</strong><br>
+        • New PG properties in prime locations<br>
+        • Latest bike models available<br>
+        • Improved booking experience<br>
+        • 24/7 customer support
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="http://localhost:3000/welcome-back" class="button" style="flex: 1; text-align: center;">
+            🎁 Claim Offer
+        </a>
+        <a href="http://localhost:3000/whats-new" class="button" style="flex: 1; text-align: center; background: #059669;">
+            ✨ See What's New
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        We value your relationship with us. If you prefer not to receive these emails, <a href="http://localhost:3000/unsubscribe?type=retention&email=${name}" style="color: #3b82f6;">click here</a>.
+    </div>
+  `, '#dc2626'),
+
   // Owner Notifications
   ownerApproval: ({ name, pgName, approvalDate }) => createEmailTemplate(`
     <div class="title">🎉 Owner Account Approved!</div>
@@ -309,6 +758,58 @@ const emailTemplates = {
     </a>
   `, '#dc2626'),
 
+  // Enhanced Password Reset Confirmation Template
+  passwordResetConfirmation: ({ name, email, role, resetTime, ipAddress, userAgent }) => createEmailTemplate(`
+    <div class="title">🔐 Password Reset Successful</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Your password has been successfully reset using the forgot password feature.
+    </div>
+    
+    <div class="info-box">
+        <strong>🛡️ Reset Details:</strong><br>
+        Account: <span class="highlight">${email}</span><br>
+        Role: <span class="highlight">${role.charAt(0).toUpperCase() + role.slice(1)}</span><br>
+        Reset Time: <span class="highlight">${resetTime}</span><br>
+        IP Address: <span class="warning">${ipAddress || 'Unknown'}</span><br>
+        Device: <span class="info">${userAgent ? userAgent.substring(0, 50) + '...' : 'Unknown'}</span><br>
+        Status: <span class="success">✅ Password Updated</span>
+    </div>
+    
+    <div class="text">
+        <strong>🔒 Security Recommendations:</strong>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>Use a strong, unique password</li>
+            <li>Enable two-factor authentication if available</li>
+            <li>Don't share your password with others</li>
+            <li>Log out from shared devices</li>
+        </ul>
+    </div>
+    
+    <div class="text">
+        <strong>⚠️ Security Alert:</strong> If you didn't reset your password, please contact our support team immediately and secure your account.
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="${role === 'admin' ? 'http://localhost:3000/admin/login' : role === 'owner' ? 'http://localhost:3000/owner/login' : 'http://localhost:3000/user/login'}" class="button" style="flex: 1; text-align: center;">
+            🔑 Login Now
+        </a>
+        <a href="http://localhost:3000/contact" class="button" style="flex: 1; text-align: center; background: #dc2626;">
+            🆘 Report Issue
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        <strong>Next Steps:</strong><br>
+        1. Login with your new password<br>
+        2. Update your security settings<br>
+        3. Review your account activity<br>
+        4. Consider enabling additional security features
+    </div>
+  `, '#059669'),
+
   // Generic Notification Template
   notification: ({ name, title, message, actionText, actionUrl, type = 'info' }) => {
     const colors = {
@@ -329,7 +830,52 @@ const emailTemplates = {
         </a>
       ` : ''}
     `, colors[type]);
-  }
+  },
+
+  // Profile Update Confirmation Template
+  profileUpdateConfirmation: ({ name, email, role, updatedFields, updateTime, ipAddress, userAgent }) => createEmailTemplate(`
+    <div class="title">✅ Profile Updated Successfully</div>
+    <div class="text">Dear <span class="highlight">${name}</span>,</div>
+    <div class="text">
+        Your profile has been successfully updated. Here are the details of the changes:
+    </div>
+    
+    <div class="info-box">
+        <strong>📝 Update Details:</strong><br>
+        Account: <span class="highlight">${email}</span><br>
+        Role: <span class="highlight">${role.charAt(0).toUpperCase() + role.slice(1)}</span><br>
+        Updated Fields: <span class="highlight">${updatedFields.join(', ')}</span><br>
+        Update Time: <span class="highlight">${updateTime}</span><br>
+        IP Address: <span class="warning">${ipAddress || 'Unknown'}</span><br>
+        Device: <span class="info">${userAgent ? userAgent.substring(0, 50) + '...' : 'Unknown'}</span><br>
+        Status: <span class="success">✅ Profile Updated</span>
+    </div>
+    
+    <div class="text">
+        <strong>🔒 Security Information:</strong>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>All profile changes are logged for security</li>
+            <li>If you didn't make these changes, please contact support immediately</li>
+            <li>Review your account settings regularly</li>
+            <li>Keep your login credentials secure</li>
+        </ul>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <a href="${role === 'admin' ? 'http://localhost:3000/admin/profile' : role === 'owner' ? 'http://localhost:3000/owner/profile' : 'http://localhost:3000/user/profile'}" class="button" style="flex: 1; text-align: center;">
+            👤 View Profile
+        </a>
+        <a href="http://localhost:3000/contact" class="button" style="flex: 1; text-align: center; background: #dc2626;">
+            🆘 Report Issue
+        </a>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="text" style="font-size: 14px; color: #6b7280;">
+        <strong>⚠️ Security Alert:</strong> If you didn't make these changes, please secure your account immediately and contact our support team.
+    </div>
+  `, '#3b82f6')
 };
 
 export default emailTemplates;

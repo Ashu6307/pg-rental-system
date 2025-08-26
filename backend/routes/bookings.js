@@ -52,27 +52,20 @@ router.post('/', authenticateJWT, async (req, res) => {
     // Generate PDF and send email with professional template
     const pdfBuffer = await generateInvoicePDFBuffer({ ...invoice.toObject(), user });
     
-    // Use appropriate template based on booking type
-    const emailTemplate = booking.item_type === 'PG' ? 
-      emailTemplates.bookingApproved({
-        name: user.name,
-        pgName: booking.item_name,
-        bookingId: booking.bookingId,
-        pgAddress: booking.address || 'Address not provided',
-        bookingDate: new Date(booking.createdAt).toLocaleDateString()
-      }) :
-      emailTemplates.bikeBookingConfirmed({
-        name: user.name,
-        bikeCompany: booking.item_name.split(' ')[0] || 'Bike',
-        bikeModel: booking.item_name,
-        bookingId: booking.bookingId,
-        startDate: new Date(booking.startDate).toLocaleDateString(),
-        endDate: new Date(booking.endDate).toLocaleDateString()
-      });
+    // Send booking request confirmation email (pending approval)
+    const emailTemplate = emailTemplates.bookingRequested({
+      name: user.name,
+      itemType: booking.item_type,
+      itemName: booking.item_name,
+      bookingId: booking.bookingId || booking._id.toString(),
+      itemAddress: booking.item_address || 'Address not provided',
+      startDate: booking.start_date ? new Date(booking.start_date).toLocaleDateString() : null,
+      endDate: booking.end_date ? new Date(booking.end_date).toLocaleDateString() : null
+    });
     
     await sendEmail({ 
       to: user.email, 
-      subject: `✅ ${booking.item_type} Booking Confirmed - PG & Bike Rental`, 
+      subject: `📝 ${booking.item_type} Booking Request Submitted - PG & Bike Rental`, 
       html: emailTemplate,
       attachmentBuffer: pdfBuffer 
     });
