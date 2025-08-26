@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { ReduxProvider } from './context/ReduxStore';
+import ScrollToTop from './components/ScrollToTop';
 import './config/console'; // Import console configuration to disable logs in production
 import AdminRoute from './routes/AdminRoute';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -121,6 +122,7 @@ const MainApp = () => {
   return (
     <>
       {!hidePublicNavbar && <Navbar />}
+      <ScrollToTop />
       <Routes>
         <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
         <Route path="/owner" element={<ProtectedRoute allowedRoles={["owner"]}><OwnerDashboard /></ProtectedRoute>} />

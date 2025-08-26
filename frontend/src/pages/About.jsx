@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchContent } from "../redux/contentSlice";
 import { FaBuilding, FaStar, FaHeart, FaMapMarkerAlt, FaPhone } from "react-icons/fa";
 import apiService from '../services/api';
+import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
 
 const About = () => {
   const dispatch = useDispatch();
@@ -12,6 +13,9 @@ const About = () => {
   const values = aboutContent?.values && Array.isArray(aboutContent.values) && aboutContent.values.length > 0
     ? aboutContent.values
     : [];
+
+  // Use ScrollToTop hook
+  const scrollToTop = useScrollToTop({ behavior: 'smooth', enableMultiTiming: true });
 
   useEffect(() => {
     dispatch(fetchContent("about"));
@@ -99,7 +103,7 @@ const About = () => {
             {["all", "core", "service", "business", "social"].map((category) => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => { scrollToTop(); setSelectedCategory(category); }}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${
                   selectedCategory === category
                     ? "bg-blue-600 text-white"
@@ -204,13 +208,25 @@ const About = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {Hero()}
-      {StoryWhy()}
-      {MissionVision()}
-      {Values()}
-      {Team()}
-    </div>
+    <>
+      {/* ScrollToTop handles both auto-scroll and floating button */}
+      <ScrollToTop 
+        scrollOnMount={true} 
+        behavior="smooth" 
+        enableMultiTiming={true}
+        showButton={true}
+        theme="purple"
+        buttonPosition="bottom-right"
+      />
+      
+      <div className="min-h-screen bg-gray-50">
+        {Hero()}
+        {StoryWhy()}
+        {MissionVision()}
+        {Values()}
+        {Team()}
+      </div>
+    </>
   );
 };
 

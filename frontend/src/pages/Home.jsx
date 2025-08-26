@@ -14,6 +14,7 @@ import React, { useState, useEffect } from 'react';
 import { FaBuilding, FaMotorcycle, FaHome, FaBicycle, FaCreditCard, FaStar, FaLock, FaMobileAlt, FaMapMarkerAlt, FaHeadset, FaUsers, FaShieldAlt } from 'react-icons/fa';
 import { HomePageLoader } from '../components/loaders/LoaderExamples';
 import apiService from '../services/api';
+import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
 
 
 
@@ -21,6 +22,9 @@ const Home = () => {
   const [homeData, setHomeData] = React.useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Use ScrollToTop hook instead of custom scroll function
+  const scrollToTop = useScrollToTop({ behavior: 'smooth', enableMultiTiming: true });
 
   // Auto-change images every 4 seconds
   useEffect(() => {
@@ -65,7 +69,18 @@ const Home = () => {
   const currentImage = heroImages[currentImageIndex];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      {/* ScrollToTop handles both auto-scroll and floating button */}
+      <ScrollToTop 
+        scrollOnMount={true} 
+        behavior="smooth" 
+        enableMultiTiming={true}
+        showButton={true}
+        theme="purple"
+        buttonPosition="bottom-right"
+      />
+      
+      <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
         <div className="container mx-auto px-4 text-center">
@@ -218,7 +233,10 @@ const Home = () => {
                   <div
                     key={`${item._id || idx}-${idx}`}
                     className="carousel-item min-w-[280px] relative rounded-2xl p-4 cursor-pointer transition-all duration-300 group card-attractive"
-                    onClick={() => setShowLoginModal(true)}
+                    onClick={() => {
+                      scrollToTop();
+                      setShowLoginModal(true);
+                    }}
                   >
                     <div className="absolute inset-0 rounded-2xl card-gradient z-0"></div>
                     <div className="relative z-10 flex flex-col items-center">
@@ -272,7 +290,10 @@ const Home = () => {
                   <div
                     key={`${item._id || idx}-${idx}`}
                     className="carousel-item min-w-[280px] relative rounded-2xl p-4 cursor-pointer transition-all duration-300 group card-attractive"
-                    onClick={() => setShowLoginModal(true)}
+                    onClick={() => {
+                      scrollToTop();
+                      setShowLoginModal(true);
+                    }}
                   >
                     <div className="absolute inset-0 rounded-2xl card-gradient z-0"></div>
                     <div className="relative z-10 flex flex-col items-center">
@@ -571,7 +592,7 @@ const Home = () => {
             <p className="mb-6 text-gray-600">Please login to view details and book your PG or Bike.</p>
             <button
               className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
-              onClick={() => window.location.href = '/login'}
+              onClick={() => { scrollToTop(); window.location.href = '/login'; }}
             >Login</button>
             <button
               className="ml-4 px-6 py-2 rounded-lg font-semibold border border-gray-300 hover:bg-gray-100 transition"
@@ -580,7 +601,8 @@ const Home = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -480,10 +480,13 @@ const AuthForm = ({
               localStorage.setItem('user', JSON.stringify(data.user));
             }
             if (role === 'owner') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
               window.location.href = '/owner';
             } else if (role === 'admin') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
               window.location.href = '/admin';
             } else {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
               window.location.href = '/user/home';
             }
           }
@@ -1029,6 +1032,7 @@ const AuthForm = ({
                                 duration: 2000
                               });
                               setTimeout(() => {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
                                 window.location.href = loginPath;
                               }, 1500);
                             }, 3000);
@@ -1533,6 +1537,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
       if (data.success) {
         toast.success(data.message);
         setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           window.location.href = '/login'; // Redirect to login after success
         }, 2000);
       } else {

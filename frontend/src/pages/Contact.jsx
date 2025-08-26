@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaWhatsapp, FaBuilding } from 'react-icons/fa';
 import apiService from '../services/api';
+import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,9 @@ const Contact = () => {
   const [content, setContent] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Use the new ScrollManager hook
+  const scrollToTop = useScrollToTop({ behavior: 'smooth', enableMultiTiming: true });
 
   useEffect(() => {
     const fetchContactContent = async () => {
@@ -67,6 +71,7 @@ const Contact = () => {
           name: '', email: '', phone: '', subject: '', message: '',
           inquiryType: 'general', priority: 'medium', attachments: []
         });
+        scrollToTop(); // Scroll to top after successful submission
       } else {
         setSubmitMessage('error: Something went wrong.');
       }
@@ -95,16 +100,27 @@ const Contact = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center text-red-600">
           <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Retry</button>
+          <button onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); window.location.reload(); }} className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Retry</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      {/* ScrollToTop handles both auto-scroll and floating button */}
+      <ScrollToTop 
+        scrollOnMount={true} 
+        behavior="smooth" 
+        enableMultiTiming={true}
+        showButton={true}
+        theme="blue"
+        buttonPosition="bottom-right"
+      />
+      
+      <div className="min-h-screen bg-gray-50" style={{ paddingTop: 0, marginTop: 0 }}>
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16" style={{ marginTop: 0 }}>
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4">{content?.hero?.title || 'Contact Us'}</h1>
           <p className="text-xl max-w-2xl mx-auto">{content?.hero?.description?.[0] || ''}</p>
@@ -333,7 +349,8 @@ const Contact = () => {
           </div>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 };
 

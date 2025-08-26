@@ -24,6 +24,7 @@ const PolicyManagement = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(true);
     setError('');
     setSuccess('');
@@ -41,6 +42,7 @@ const PolicyManagement = () => {
   };
 
   const handleUpdate = async (id, updatedPolicy) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setLoading(true);
     setError('');
     setSuccess('');

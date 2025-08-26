@@ -25,6 +25,7 @@ import {
 } from 'react-icons/fa';
 import apiService from '../services/api';
 import AutoImageCarousel from '../components/AutoImageCarousel';
+import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
 
 const PG = () => {
   const [pgs, setPgs] = useState([]);
@@ -37,6 +38,9 @@ const PG = () => {
     sort: 'price_low'
   });
   const navigate = useNavigate();
+
+  // Use ScrollToTop hook
+  const scrollToTop = useScrollToTop({ behavior: 'smooth', enableMultiTiming: true });
 
   // Initial data fetch - only once
   useEffect(() => {
@@ -120,6 +124,7 @@ const PG = () => {
   const handlePGClick = (pg) => {
     // Track view
     apiService.post(`/api/pgs/public/${pg._id}/inquiry`).catch(console.error);
+    scrollToTop();
     navigate('/user/login', { state: { redirectTo: `/pg/${pg._id}` } });
   };
 
@@ -212,7 +217,18 @@ const PG = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      {/* ScrollToTop handles both auto-scroll and floating button */}
+      <ScrollToTop 
+        scrollOnMount={true} 
+        behavior="smooth" 
+        enableMultiTiming={true}
+        showButton={true}
+        theme="blue"
+        buttonPosition="bottom-right"
+      />
+      
+      <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-8 px-4">
         {/* Enhanced Header */}
         <div className="relative mb-8">
@@ -548,14 +564,15 @@ const PG = () => {
           <div className="flex justify-center mt-12">
             <button
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:from-blue-700 hover:to-purple-700 transition-all text-lg tracking-wide"
-              onClick={() => navigate('/user/login')}
+              onClick={() => { scrollToTop(); navigate('/user/login'); }}
             >
               View All Properties & Book Now →
             </button>
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

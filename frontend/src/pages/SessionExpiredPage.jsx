@@ -29,10 +29,12 @@ const SessionExpiredPage = () => {
   }, [navigate]);
 
   const handleGoHome = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate('/');
   };
 
   const handleGoLogin = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     // Smart redirect based on expired user's role
     if (userRole === 'owner') {
       navigate('/owner/login');
