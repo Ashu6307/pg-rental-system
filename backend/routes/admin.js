@@ -7,6 +7,7 @@ import Admin from '../models/Admin.js';
 import Otp from '../models/Otp.js';
 import { authenticateJWT } from '../middleware/auth.js';
 import { sendEmail } from '../utils/sendEmail.js';
+import emailTemplates from '../utils/emailTemplates.js';
 import { sendNotification } from '../utils/notificationService.js';
 import { logAction } from '../utils/auditLogService.js';
 import { Parser } from 'json2csv';
@@ -54,16 +55,12 @@ router.post('/send-otp', async (req, res) => {
       role: 'admin'
     });
 
-    // Send OTP via email
+    // Send OTP via email with professional template
+    const emailContent = emailTemplates.otpVerification(otp, 'Admin Login');
     await sendEmail({
       to: email,
-      subject: 'Admin Login OTP',
-      html: `
-        <h2>Admin Login Verification</h2>
-        <p>Your OTP for admin login is: <strong>${otp}</strong></p>
-        <p>This OTP will expire in 5 minutes.</p>
-        <p>Do not share this OTP with anyone.</p>
-      `
+      subject: '🔐 Admin Access OTP - BikeRental Pro',
+      html: emailContent
     });
 
     res.json({ success: true, message: 'OTP sent to your email' });

@@ -2,7 +2,8 @@
 // Industry-level notification controller for Admin Dashboard
 const Notification = require('../models/Notification');
 const User = require('../models/User');
-const sendEmail = require('../utils/sendEmail');
+const { sendEmail } = require('../utils/sendEmail');
+const emailTemplates = require('../utils/emailTemplates');
 const notificationService = require('../utils/notificationService');
 
 // List notifications (with filters)
@@ -36,7 +37,13 @@ exports.sendNotification = async (req, res) => {
       if (!user) continue;
       let result = {};
       if (channel === 'email') {
-        result = await sendEmail(user.email, title, message, templateId);
+        // Use professional email template for admin notifications
+        const emailContent = emailTemplates.notification(title, message, user.name || user.username || 'User');
+        result = await sendEmail({
+          to: user.email,
+          subject: `📢 ${title} - BikeRental Pro`,
+          html: emailContent
+        });
       } else {
         result = await notificationService.send(user, title, message, channel, templateId);
       }
@@ -79,7 +86,13 @@ exports.testNotification = async (req, res) => {
     if (!testUser) return res.status(404).json({ error: 'No test user found' });
     let result = {};
     if (channel === 'email') {
-      result = await sendEmail(testUser.email, 'Test Notification', 'This is a test notification.', templateId);
+      // Use professional template for test notifications
+      const emailContent = emailTemplates.notification('Test Notification', 'This is a test notification from the admin panel. If you receive this, the email system is working correctly!', testUser.name || testUser.username || 'Admin');
+      result = await sendEmail({
+        to: testUser.email,
+        subject: '🧪 Test Notification - BikeRental Pro',
+        html: emailContent
+      });
     } else {
       result = await notificationService.send(testUser, 'Test Notification', 'This is a test notification.', channel, templateId);
     }

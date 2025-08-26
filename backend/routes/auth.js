@@ -5,6 +5,8 @@ import { hashPassword, comparePassword, authenticateJWT } from '../middleware/au
 import uploadKYC from '../middleware/uploadKYC.js';
 import OwnerProfile from '../models/OwnerProfile.js';
 import { blacklistToken, logSuspiciousActivity } from '../middleware/security.js';
+import { sendEmail } from '../utils/sendEmail.js';
+import emailTemplates from '../utils/emailTemplates.js';
 
 const router = express.Router();
 
@@ -115,6 +117,24 @@ router.post('/register', async (req, res) => {
     
     // Clean up all OTPs for this email
     await otpRecord.deleteMany({ email });
+
+    // Send welcome email with professional template
+    try {
+      const welcomeContent = emailTemplates.userWelcome({
+        name: user.name,
+        role: user.role,
+        email: user.email
+      });
+      
+      await sendEmail({
+        to: user.email,
+        subject: '🎉 Welcome to BikeRental Pro - Registration Complete!',
+        html: welcomeContent
+      });
+    } catch (emailError) {
+      console.error('Welcome email failed:', emailError);
+      // Don't fail registration if email fails
+    }
 
     res.status(201).json({ 
       success: true,

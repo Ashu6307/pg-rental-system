@@ -2,6 +2,7 @@ import express from 'express';
 import Invoice from '../models/Invoice.js';
 import User from '../models/User.js';
 import { sendEmail } from '../utils/sendEmail.js';
+import emailTemplates from '../utils/emailTemplates.js';
 import { generateInvoicePDFBuffer } from '../utils/invoicePDF.js';
 import { authenticateJWT } from '../middleware/auth.js';
 const router = express.Router();
@@ -48,9 +49,33 @@ router.post('/', authenticateJWT, async (req, res) => {
       footer: ''
     });
     await invoice.save();
-    // Generate PDF and send email
+    // Generate PDF and send email with professional template
     const pdfBuffer = await generateInvoicePDFBuffer({ ...invoice.toObject(), user });
-    await sendEmail({ to: user.email, subject: 'Booking Confirmation & Invoice', html: '<p>Your booking is confirmed. Invoice attached.</p>', attachmentBuffer: pdfBuffer });
+    
+    // Use appropriate template based on booking type
+    const emailTemplate = booking.item_type === 'PG' ? 
+      emailTemplates.bookingApproved({
+        name: user.name,
+        pgName: booking.item_name,
+        bookingId: booking.bookingId,
+        pgAddress: booking.address || 'Address not provided',
+        bookingDate: new Date(booking.createdAt).toLocaleDateString()
+      }) :
+      emailTemplates.bikeBookingConfirmed({
+        name: user.name,
+        bikeCompany: booking.item_name.split(' ')[0] || 'Bike',
+        bikeModel: booking.item_name,
+        bookingId: booking.bookingId,
+        startDate: new Date(booking.startDate).toLocaleDateString(),
+        endDate: new Date(booking.endDate).toLocaleDateString()
+      });
+    
+    await sendEmail({ 
+      to: user.email, 
+      subject: `✅ ${booking.item_type} Booking Confirmed - PG & Bike Rental`, 
+      html: emailTemplate,
+      attachmentBuffer: pdfBuffer 
+    });
     // Notification
     await sendNotification({
       userId: req.user.id,
@@ -105,7 +130,20 @@ router.put('/:id', authenticateJWT, async (req, res) => {
         await invoice.save();
         const user = await User.findById(booking.user_id);
         const pdfBuffer = await generateInvoicePDFBuffer({ ...invoice.toObject(), user });
-        await sendEmail({ to: user.email, subject: 'Booking Cancelled & Cancelled Invoice', html: '<p>Your booking has been cancelled. Cancelled invoice attached.</p>', attachmentBuffer: pdfBuffer });
+        
+        // Use professional template for cancellation email
+        const emailContent = emailTemplates.notification(
+          'Booking Cancelled',
+          `Your booking has been cancelled successfully. We've attached your cancellation invoice for your records. If you have any questions, please don't hesitate to contact our support team.`,
+          user.name || user.username || 'Customer'
+        );
+        
+        await sendEmail({ 
+          to: user.email, 
+          subject: '❌ Booking Cancelled - Invoice Attached - BikeRental Pro', 
+          html: emailContent, 
+          attachmentBuffer: pdfBuffer 
+        });
       }
     }
     res.json(booking);

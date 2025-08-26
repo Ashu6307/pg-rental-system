@@ -5,6 +5,7 @@ import OwnerProfile from '../models/OwnerProfile.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { sendEmail } from '../utils/sendEmail.js';
+import emailTemplates from '../utils/emailTemplates.js';
 import OtpAudit from '../models/OtpAudit.js';
 import axios from 'axios';
 import Settings from '../models/Settings.js';
@@ -110,11 +111,17 @@ async function sendOtp(req, res) {
   await Otp.deleteMany({ email });
   await Otp.create({ email, otp, expiresAt, tenantId, role: userRole });
   
-  // Try to send email with error handling
+  // Try to send email with professional template
   const emailResult = await sendEmail({ 
     to: email, 
-    subject: 'Your OTP Code', 
-    html: `<h2>Your OTP Code</h2><p>Your OTP is: <strong>${otp}</strong></p><p>This OTP will expire in 5 minutes.</p>` 
+    subject: '🔐 Email Verification - PG & Bike Rental', 
+    html: emailTemplates.otpVerification({
+      name: 'User',
+      email: email,
+      role: userRole,
+      otp: otp,
+      purpose: 'email verification'
+    })
   });
   
   if (emailResult.success) {

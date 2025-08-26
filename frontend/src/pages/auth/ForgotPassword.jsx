@@ -1,5 +1,5 @@
 import React from 'react';
-import AuthForm from './AuthForm.jsx';
+import { ForgotPasswordForm } from './AuthForm.jsx';
 
 const ForgotPassword = ({ role = 'user' }) => {
   // For admin, render only the form (no Navbar/Footer)

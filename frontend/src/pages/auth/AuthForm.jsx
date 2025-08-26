@@ -1490,7 +1490,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     if (!email) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/forgot-password`, {
+      const res = await fetch(`http://localhost:5000/api/forgot-password/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, role })
@@ -1513,7 +1513,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     if (!otp) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/verify-otp`, {
+      const res = await fetch(`http://localhost:5000/api/otp/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, role })
@@ -1536,7 +1536,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     if (!newPassword) return;
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/reset-password`, {
+      const res = await fetch(`http://localhost:5000/api/forgot-password/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp, newPassword, role })
@@ -1616,6 +1616,19 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
               )}
               {otpSent && !otpVerified && (
                 <>
+                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center">
+                      <FaCheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                      <div>
+                        <p className="text-sm font-medium text-green-800">
+                          OTP sent successfully!
+                        </p>
+                        <p className="text-sm text-green-600">
+                          Please check your email <strong>{email}</strong> for the OTP code.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                   <label className="block text-sm font-medium text-gray-700">Enter OTP</label>
                   <div className="mt-1 relative">
                     <input
@@ -1623,7 +1636,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                       value={otp}
                       onChange={e => setOtp(e.target.value)}
                       className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter OTP"
+                      placeholder="Enter 6-digit OTP"
+                      maxLength="6"
                       required
                     />
                   </div>
@@ -1635,6 +1649,19 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                   >
                     {loading ? 'Verifying...' : 'Verify OTP'}
                   </button>
+                  <div className="text-center mt-4">
+                    <p className="text-sm text-gray-500">
+                      Didn't receive the OTP? 
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        className="ml-1 text-blue-600 hover:text-blue-500 font-medium"
+                        disabled={loading}
+                      >
+                        Resend OTP
+                      </button>
+                    </p>
+                  </div>
                 </>
               )}
               {otpVerified && (
