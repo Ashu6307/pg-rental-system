@@ -20,7 +20,6 @@ import pgRoutes from './routes/pg.js';
 import bikeRoutes from './routes/bikes.js';
 import authRoutes from './routes/auth.js';
 import homeRoutes from './routes/home.js';
-import googleAuthRoutes from './routes/googleAuth.js';
 import otpRoutes from './routes/otp.js';
 import forgotPasswordRoutes from './routes/forgotPassword.js';
 import { checkJwtExpiry } from './middleware/security.js';
@@ -78,7 +77,6 @@ app.use('/api/bikes', bikeRoutes); // Public bike listings
 app.use('/api/offers', offersRoutes); // Public offers
 app.use('/api/auth', authRoutes); // Authentication
 app.use('/api/auth', authMeRouter); // Auth/me endpoint for user profile
-app.use('/api/googleAuth', googleAuthRoutes); // Google OAuth authentication
 app.use('/api/admin', adminRoutes); // Admin authentication and management
 app.use('/api/otp', otpRoutes); // OTP verification
 app.use('/api/forgot-password', forgotPasswordRoutes); // Password reset

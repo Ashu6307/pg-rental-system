@@ -5,10 +5,7 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password_hash: { 
     type: String, 
-    required: function() {
-      // Password is not required for Google OAuth users
-      return !this.isGoogleAuth;
-    }
+    required: true
   },
   phone: { type: String },
   role: { type: String, enum: ['user', 'owner', 'admin', 'sub_admin'], default: 'user' },
@@ -27,15 +24,6 @@ const UserSchema = new mongoose.Schema({
   },
   lastLogin: {
     type: Date,
-  },
-  googleId: {
-    type: String,
-    unique: true,
-    sparse: true
-  },
-  isGoogleAuth: {
-    type: Boolean,
-    default: false
   },
   profilePhoto: {
     type: String
