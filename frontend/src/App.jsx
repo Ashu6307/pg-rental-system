@@ -157,6 +157,8 @@ const MainApp = () => {
         {/* Session Management */}
         <Route path="/session-expired" element={<SessionExpiredPage />} />
         
+        {/* Google OAuth Callback */}
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
         
         {/* Authentication Routes - Only accessible when NOT authenticated */}
         <Route path="/loaders" element={<LoaderDemo />} />
