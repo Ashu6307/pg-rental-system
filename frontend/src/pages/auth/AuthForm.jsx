@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope, FaPhone, FaUserCircle, FaUserTie, FaUserShield, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { toast, Toaster } from 'react-hot-toast';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
 import authService from '../../services/authService';
 
 const AuthForm = ({
@@ -13,8 +12,6 @@ const AuthForm = ({
   loading,
   setLoading
 }) => {
-  const { login } = useContext(AuthContext);
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
@@ -613,12 +610,19 @@ const AuthForm = ({
       }
     }
     // For normal login
-  return (
-    formData.email &&
-    /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) &&
-    formData.password
-  );
-};
+    return (
+      formData.email &&
+      /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) &&
+      formData.password
+    );
+  };
+
+  // Google Auth handler - Temporarily disabled for reconstruction
+  const handleGoogleAuth = async () => {
+    toast.info('Google OAuth will be implemented soon!');
+    setLoading(false);
+    // TODO: Implement Google OAuth from scratch
+  };
 
   return (
     <>
@@ -830,35 +834,36 @@ const AuthForm = ({
             <form className="space-y-6" onSubmit={handleSubmit}>
               {/* Google login/register button at top with Google icon */}
               {!(role === 'admin' && isLogin) && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-center gap-2 py-2 px-4 mb-4 rounded bg-white text-gray-900 font-semibold shadow border border-gray-300 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                    onClick={() => toast.info('Google OAuth will be implemented soon!')}
-                    disabled={loading}
-                  >
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 mb-4 rounded-lg bg-white text-gray-900 font-semibold shadow-md border border-gray-300 hover:bg-gray-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleGoogleAuth}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                  ) : (
                     <span className="text-xl"><FcGoogle /></span>
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                        <span>Connecting...</span>
-                      </div>
-                    ) : (
-                      <span>{isLogin ? 'Login with Google' : 'Sign up with Google'}</span>
-                    )}
-                  </button>
-                  
-                  {/* OR divider */}
-                  <div className="relative mb-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">OR</span>
-                    </div>
+                  )}
+                  {loading 
+                    ? 'Connecting...' 
+                    : (isLogin ? 'Login with Google' : 'Sign up with Google')
+                  }
+                </button>
+              )}
+              
+              {/* Divider */}
+              {!(role === 'admin' && isLogin) && (
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">Or continue with email</span>
                   </div>
                 </div>
               )}
+              
               {/* Registration fields for user/owner/admin */}
               {!isLogin && (
                 <>
