@@ -104,13 +104,6 @@ const AuthForm = ({
     }
   };
 
-  // Debug useEffect to track showOtpModal state changes (development only)
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('State Update - emailVerified:', emailVerified, 'verifiedOtp:', verifiedOtp);
-    }
-  }, [showOtpModal, emailVerified, verifiedOtp]);
-
   // Password strength checker
   const checkPasswordStrength = (password) => {
     let score = 0;
@@ -443,14 +436,10 @@ const AuthForm = ({
         }
       }
       
-      console.log('Auth payload:', payload);
-      console.log('Endpoint:', endpoint);
       
       const data = isLogin 
         ? await authService.login(payload)
         : await authService.register(payload);
-      
-      console.log('Auth response:', data);
       
       // Handle admin login requiring OTP
       if (role === 'admin' && isLogin && data.requiresOTP) {
@@ -500,7 +489,6 @@ const AuthForm = ({
           }
         }
       } else {
-        console.log('Auth error:', data);
         toast.error(data.message || data.error || 'Something went wrong');
       }
     } catch (error) {

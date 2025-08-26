@@ -34,14 +34,8 @@ router.post('/register', async (req, res) => {
     otp // Add OTP field for verification
   } = req.body;
   try {
-    // Debug logging
-    console.log('Registration request body:', req.body);
-    console.log('OTP received:', otp);
-    console.log('Email received:', email);
-    
     // Check if OTP is provided and valid
     if (!otp) {
-      console.log('No OTP provided in request');
       return res.status(400).json({ error: 'Email verification OTP is required.' });
     }
 

@@ -252,7 +252,6 @@ async function checkEmailExists(req, res) {
     });
 
   } catch (error) {
-    console.log('Email check error:', error);
     return res.status(500).json({ 
       success: false, 
       message: 'Error checking email availability' 

@@ -31,11 +31,9 @@ export async function sendEmail({ to, subject, html, attachmentBuffer }) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       await transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent successfully to ${to} (attempt ${attempt})`);
       return { success: true, attempt };
     } catch (error) {
       lastError = error;
-      console.log(`📧 Email attempt ${attempt} failed for ${to}:`, error.message);
       // Don't retry on certain errors
       if (error.code === 'EENVELOPE' && error.responseCode === 421) {
         console.log(`🚫 Gmail rate limit hit for ${to}, skipping retries`);
@@ -44,14 +42,12 @@ export async function sendEmail({ to, subject, html, attachmentBuffer }) {
       // Exponential backoff: 1s, 2s, 4s
       if (attempt < maxRetries) {
         const backoffTime = Math.pow(2, attempt - 1) * 1000;
-        console.log(`⏳ Waiting ${backoffTime}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, backoffTime));
       }
     }
   }
 
   // Email failed after all retries
-  console.log(`❌ Email failed to ${to} after ${maxRetries} attempts:`, lastError?.message);
   // Don't throw error - return failure status instead to prevent server crash
   return { 
     success: false, 

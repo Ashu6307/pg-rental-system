@@ -7,9 +7,7 @@ export const authService = {
     // Check both 'role' and 'userType' fields
     const userRole = credentials.role || credentials.userType;
     const endpoint = userRole === 'admin' ? '/api/admin/login' : '/api/auth/login';
-    console.log('AuthService Login - Role:', userRole, 'Endpoint:', endpoint, 'Credentials:', credentials); // Debug log
     const response = await apiService.post(endpoint, credentials);
-    console.log('AuthService Login Response:', response); // Debug log
     return response;
   },
 
@@ -22,7 +20,6 @@ export const authService = {
   // OTP Operations
   async sendOtp(email, role = 'user') {
     const endpoint = role === 'admin' ? '/api/admin/send-otp' : '/api/otp/send-otp';
-    console.log('SendOTP - Role:', role, 'Endpoint:', endpoint); // Debug log
     return await apiService.post(endpoint, { email, role });
   },
 
