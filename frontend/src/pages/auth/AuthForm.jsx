@@ -260,6 +260,12 @@ const AuthForm = ({
     // Email domain suggestions
     if (e.target.name === 'email') {
       generateEmailSuggestions(value);
+      // Reset email verification status when email changes
+      if (value !== formData.email && emailVerified) {
+        setEmailVerified(false);
+        setVerifiedOtp("");
+        toast.info('Email changed. Please verify the new email address.');
+      }
     }
     
     setFormData({
@@ -999,9 +1005,17 @@ const AuthForm = ({
                   {(!isLogin && role !== 'admin') && (
                     <button
                       type="button"
-                      className={`px-3 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (role === 'admin' ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-blue-500 text-white hover:bg-blue-600') : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-                      disabled={!(formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email))}
+                      className={`px-3 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${
+                        emailVerified 
+                          ? 'bg-green-500 text-white cursor-not-allowed'
+                          : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) 
+                            ? (role === 'admin' ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-blue-500 text-white hover:bg-blue-600') 
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                      disabled={emailVerified || !(formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email))}
                       onClick={async () => {
+                        if (emailVerified) return; // Prevent action if already verified
+                        
                         // First check if email already exists
                         try {
                           const response = await fetch('http://localhost:5000/api/otp/check-email', {
@@ -1044,7 +1058,14 @@ const AuthForm = ({
                         }
                       }}
                     >
-                      Verify Email
+                      {emailVerified ? (
+                        <>
+                          <FaCheckCircle className="inline mr-1" />
+                          Email Verified
+                        </>
+                      ) : (
+                        'Verify Email'
+                      )}
                     </button>
                   )}
                 </div>
