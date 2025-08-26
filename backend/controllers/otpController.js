@@ -110,16 +110,35 @@ async function sendOtp(req, res) {
   await Otp.deleteMany({ email });
   await Otp.create({ email, otp, expiresAt, tenantId, role: userRole });
   
-  // Fix sendEmail call - use correct parameter format
-  await sendEmail({ 
+  // Try to send email with error handling
+  const emailResult = await sendEmail({ 
     to: email, 
     subject: 'Your OTP Code', 
     html: `<h2>Your OTP Code</h2><p>Your OTP is: <strong>${otp}</strong></p><p>This OTP will expire in 5 minutes.</p>` 
   });
   
-  await logOtpAction(email, 'send', 'success', 'OTP sent', req);
-  await logAnalytics(email, 'send', 'success');
-  res.json({ success: true, message: 'OTP sent' });
+  if (emailResult.success) {
+    await logOtpAction(email, 'send', 'success', 'OTP sent successfully', req);
+    return res.json({ success: true, message: 'OTP sent successfully' });
+  } else {
+    // Email failed but OTP is still generated and stored
+    await logOtpAction(email, 'send', 'email_failed', `Email failed: ${emailResult.error}`, req);
+    
+    // Check if it's a rate limit issue
+    if (emailResult.responseCode === 421) {
+      return res.json({ 
+        success: true, 
+        message: 'OTP generated. Email service temporarily unavailable, but OTP is valid for verification.',
+        warning: 'Email delivery may be delayed due to high volume'
+      });
+    }
+    
+    return res.json({ 
+      success: true, 
+      message: 'OTP generated successfully. Email delivery may be delayed.',
+      warning: 'Email service temporarily unavailable'
+    });
+  }
 };
 
 async function verifyOtp(req, res) {
