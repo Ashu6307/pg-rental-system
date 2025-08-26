@@ -617,29 +617,11 @@ const AuthForm = ({
     );
   };
 
-  // Google Auth handler
+  // Google Auth handler - Temporarily disabled for reconstruction
   const handleGoogleAuth = async () => {
-    try {
-      setLoading(true);
-      
-      // For development, check if Google credentials are configured
-      if (process.env.NODE_ENV === 'development') {
-        const response = await fetch('/api/googleAuth/check-config');
-        if (!response.ok) {
-          toast.error('Google OAuth is not properly configured. Please contact administrator.');
-          setLoading(false);
-          return;
-        }
-      }
-      
-      // Redirect to backend Google OAuth endpoint with role parameter
-      const redirectUrl = `/api/googleAuth/google?role=${role}&mode=${isLogin ? 'login' : 'register'}`;
-      window.location.href = redirectUrl;
-    } catch (err) {
-      console.error('Google authentication error:', err);
-      toast.error('Google authentication failed. Please try again.');
-      setLoading(false);
-    }
+    toast.info('Google OAuth will be implemented soon!');
+    setLoading(false);
+    // TODO: Implement Google OAuth from scratch
   };
 
   return (
