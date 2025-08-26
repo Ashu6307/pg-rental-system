@@ -1399,18 +1399,106 @@ const AuthForm = ({
                 </button>
               </div>
               {role === 'admin' && isLogin && showOtp && (
-                <div className="mb-4">
-                  <label htmlFor="otp" className="block text-sm font-medium text-gray-700">Enter OTP</label>
-                  <input
-                    id="otp"
-                    name="otp"
-                    type="text"
-                    value={otp}
-                    onChange={e => setOtp(e.target.value)}
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-                    placeholder="Enter OTP sent to your email"
-                  />
-                  {otpError && <p className="text-red-500 text-xs mt-1">{otpError}</p>}
+                <div className="space-y-4">
+                  {/* Admin OTP Step Indicator */}
+                  <div className="flex items-center justify-center space-x-2 mb-6">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        1
+                      </div>
+                      <span className="ml-2 text-sm font-medium text-gray-700">Email</span>
+                    </div>
+                    <div className="w-8 h-0.5 bg-red-300"></div>
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        2
+                      </div>
+                      <span className="ml-2 text-sm font-medium text-red-600 font-bold">OTP</span>
+                    </div>
+                  </div>
+
+                  {/* OTP Sent Success Message */}
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center">
+                      <FaCheckCircle className="h-5 w-5 text-red-500 mr-2" />
+                      <div>
+                        <p className="text-sm font-medium text-red-800">
+                          Admin OTP sent successfully!
+                        </p>
+                        <p className="text-sm text-red-600">
+                          Please check your email <strong>{formData.email}</strong> for the OTP code.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* OTP Input with Individual Digits */}
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-gray-700">Enter Admin OTP</label>
+                    <div className="flex justify-center space-x-2">
+                      {[...Array(6)].map((_, index) => (
+                        <input
+                          key={index}
+                          type="text"
+                          maxLength="1"
+                          value={otp[index] || ''}
+                          onChange={(e) => {
+                            const newOtp = otp.split('');
+                            newOtp[index] = e.target.value;
+                            setOtp(newOtp.join(''));
+                            
+                            // Auto-focus next input
+                            if (e.target.value && index < 5) {
+                              const nextInput = e.target.parentElement.children[index + 1];
+                              if (nextInput) nextInput.focus();
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            // Handle backspace to go to previous input
+                            if (e.key === 'Backspace' && !otp[index] && index > 0) {
+                              const prevInput = e.target.parentElement.children[index - 1];
+                              if (prevInput) prevInput.focus();
+                            }
+                          }}
+                          className="w-12 h-12 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all duration-200"
+                          placeholder="●"
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* OTP Timer and Resend */}
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 mb-2">
+                        Didn't receive the OTP?
+                      </p>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await authService.sendOtp(formData.email, 'admin');
+                            toast.success('Admin OTP resent successfully!');
+                          } catch (error) {
+                            toast.error('Failed to resend OTP');
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                      >
+                        Resend Admin OTP
+                      </button>
+                    </div>
+
+                    {otpError && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-red-600 text-sm font-medium">{otpError}</p>
+                      </div>
+                    )}
+                    
+                    {otpSuccess && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-green-600 text-sm font-medium">{otpSuccess}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </form>
