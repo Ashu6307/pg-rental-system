@@ -1,0 +1,164 @@
+@keyframes scroll-x {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-30%); }
+}
+.animate-scroll-x {
+  animation: scroll-x 30s linear infinite;
+}
+/* Attractive Card Styles */
+.card-attractive {
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  overflow: visible;
+  position: relative;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.card-attractive:hover {
+  box-shadow: 0 16px 48px 0 rgba(123, 31, 162, 0.18), 0 0 0 4px #a78bfa33;
+  transform: translateY(-6px) scale(1.04);
+}
+.card-gradient {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
+  opacity: 0.7;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Animated gradient border for badges */
+.badge-animated-border {
+  position: relative;
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px 0 rgba(31,38,135,0.10);
+  z-index: 1;
+  overflow: hidden;
+}
+.badge-animated-border:before {
+  content: "";
+  position: absolute;
+  top: -3px; left: -3px; right: -3px; bottom: -3px;
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg, #7C3AED, #EC4899, #7C3AED);
+  z-index: -1;
+  animation: rotateBorder 2s linear infinite;
+}
+@keyframes rotateBorder {
+  100% { transform: rotate(360deg); }
+}
+/* Hide scrollbar for carousels - Cross-browser compatible */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  overflow: -moz-scrollbars-none; /* Firefox older versions */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+  width: 0; /* Additional fallback */
+  height: 0; /* Additional fallback */
+}
+/* Modern Firefox support with feature detection */
+@supports (scrollbar-width: none) {
+  .hide-scrollbar {
+    scrollbar-width: none; /* Firefox 64+ */
+  }
+}
+
+/* Infinite scroll carousel */
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 24px;
+  animation: infiniteScroll 60s linear infinite;
+  width: fit-content;
+}
+
+.carousel-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes infiniteScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.carousel-item {
+  flex: 0 0 auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-width: 280px;
+}
+
+.carousel-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* Different speeds for different carousels */
+.pg-carousel-track {
+  animation: infiniteScroll 45s linear infinite;
+}
+
+.bike-carousel-track {
+  animation: infiniteScroll 50s linear infinite;
+}
+
+.testimonial-carousel-track {
+  animation: infiniteScroll 55s linear infinite;
+}
+
+/* Gradient fade effect on carousel edges */
+.carousel-container::before,
+.carousel-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.carousel-container::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(248,250,252,1), rgba(248,250,252,0));
+}
+
+.carousel-container::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(248,250,252,1), rgba(248,250,252,0));
+}
+
+/* Tailwind base styles (if using Tailwind) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', Arial, sans-serif;
+  background: #f8fafc;
+  color: #222;
+}
+
+/* Custom global styles */
+.loader {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #0f172a;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

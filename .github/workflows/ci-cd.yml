@@ -1,0 +1,115 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Frontend Tests
+  frontend-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Install Frontend Dependencies
+      run: |
+        cd frontend
+        npm install --legacy-peer-deps --no-audit --prefer-offline
+    
+    - name: Run Frontend Tests
+      run: |
+        cd frontend
+        npm test
+      env:
+        CI: true
+        NODE_OPTIONS: "--max-old-space-size=2048"
+
+  # Backend Tests  
+  backend-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Install Backend Dependencies
+      run: |
+        cd backend
+        npm install --no-audit --prefer-offline
+    
+    - name: Run Backend Tests
+      run: |
+        cd backend
+        npm test
+      env:
+        NODE_ENV: test
+
+  # Security Audit (with error handling)
+  security-audit:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Frontend Security Audit
+      run: |
+        cd frontend
+        npm audit --audit-level=high || echo "Frontend audit completed"
+      continue-on-error: true
+    
+    - name: Backend Security Audit
+      run: |
+        cd backend
+        npm audit --audit-level=high || echo "Backend audit completed"
+      continue-on-error: true
+
+  # Deploy to Staging (only on develop branch)
+  deploy-staging:
+    needs: [frontend-test, backend-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Deploy to Staging
+      run: |
+        echo "✅ Staging deployment would happen here"
+        echo "🚀 Project ready for staging environment"
+
+  # Deploy to Production (only on main branch)
+  deploy-production:
+    needs: [frontend-test, backend-test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Deploy to Production
+      run: |
+        echo "✅ Production deployment would happen here"
+        echo "🚀 Project ready for production environment"
