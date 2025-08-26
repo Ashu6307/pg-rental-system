@@ -31,7 +31,6 @@ import UserProfile from './pages/user/UserProfile.jsx';
 import LoyaltyPoints from './pages/user/LoyaltyPoints.jsx';
 import Home from './pages/Home';
 import Navbar from './components/Navbar';
-import GoogleCallback from './components/GoogleCallback';
 
 import About from './pages/About.jsx';
 import Bike from './pages/Bike.jsx';
@@ -157,9 +156,6 @@ const MainApp = () => {
         
         {/* Session Management */}
         <Route path="/session-expired" element={<SessionExpiredPage />} />
-        
-        {/* Google OAuth Callback */}
-        <Route path="/auth/google/callback" element={<GoogleCallback />} />
         
         {/* Authentication Routes - Only accessible when NOT authenticated */}
         <Route path="/loaders" element={<LoaderDemo />} />

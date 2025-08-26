@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema({
   phone: { type: String },
   role: { type: String, enum: ['user', 'owner', 'admin', 'sub_admin'], default: 'user' },
   created_at: { type: Date, default: Date.now },
-  status: { type: String, enum: ['active', 'blocked', 'pending'], default: 'pending' },
+  status: { type: String, enum: ['active', 'blocked', 'pending'], default: 'active' },
   data_consent: { type: Boolean, default: false },
   consent_date: { type: Date },
   tenantId: {
@@ -21,15 +21,6 @@ const UserSchema = new mongoose.Schema({
   },
   lastLogin: {
     type: Date,
-  },
-  googleId: {
-    type: String,
-    unique: true,
-    sparse: true
-  },
-  isGoogleAuth: {
-    type: Boolean,
-    default: false
   },
   profilePhoto: {
     type: String
