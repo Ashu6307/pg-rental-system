@@ -32,20 +32,6 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
-  // Debug admin state on mount
-  useEffect(() => {
-    console.log('AdminDashboard: Component mounted with state:', {
-      user: user?.name || 'No user',
-      role,
-      isAuthenticated,
-      token: token ? 'exists' : 'none',
-      sessionExpired: localStorage.getItem('auth_session_expired'),
-      lastActivity: localStorage.getItem('auth_last_activity'),
-      pathname: window.location.pathname
-    });
-  }, [user, role, isAuthenticated, token]);
-  
   // Enhanced stats with comprehensive admin data
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -123,7 +109,6 @@ const AdminDashboard = () => {
         
         // Fetch admin dashboard stats
         const dashboardRes = await axios.get('http://localhost:5000/api/admin/dashboard', { headers });
-        console.log('Dashboard API Response:', dashboardRes.data); // Debug log
         
         if (dashboardRes.data.dashboard) {
           setStats(prevStats => ({

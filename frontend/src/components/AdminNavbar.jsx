@@ -8,7 +8,6 @@ const AdminNavbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    console.log('AdminNavbar: Admin logout initiated');
     // Clear any session expired flags before logout
     localStorage.removeItem('auth_session_expired');
     localStorage.removeItem('auth_last_activity');

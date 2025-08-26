@@ -43,9 +43,6 @@ const Bike = () => {
       const response = await apiService.get(`/api/bikes/public?${queryParams}`);
       const data = response.data || response;
       
-      console.log('Bike API Response:', data);
-      console.log('First bike images:', data.bikes?.[0]?.images);
-      
       setBikes(data.bikes || data || []);
       setFilteredBikes(data.bikes || data || []);
     } catch (error) {
@@ -233,7 +230,6 @@ const Bike = () => {
         {/* Bikes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredBikes.map(bike => {
-            console.log('Rendering bike:', bike.brand, bike.model, 'Images:', bike.images);
             return (
             <div
               key={bike._id}

@@ -29,13 +29,10 @@ const OwnerHeader = () => {
   }, []);
 
   const handleLogout = async () => {
-    console.log('Owner logout initiated...');
     setShowDropdown(false); // Close dropdown immediately
     
     try {
-      console.log('Calling AuthContext logout...');
       await logout();
-      console.log('Logout successful, navigating to login...');
       navigate('/owner/login');
     } catch (error) {
       console.error('Logout error:', error);

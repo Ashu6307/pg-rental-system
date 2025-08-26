@@ -15,7 +15,6 @@ const SessionExpiredPage = () => {
     
     // Admin should never reach this page - redirect immediately
     if (expiredRole === 'admin') {
-      console.log('SessionExpiredPage: Admin detected, redirecting to admin dashboard');
       localStorage.removeItem('auth_expired_role');
       localStorage.removeItem('auth_session_expired');
       navigate('/admin');

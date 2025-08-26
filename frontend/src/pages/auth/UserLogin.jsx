@@ -10,8 +10,6 @@ const UserLogin = () => {
   const { login } = useContext(AuthContext);
   
   const handleAuthSuccess = async (data, formData) => {
-    console.log('handleAuthSuccess called with data:', data);
-    
     if (!data.token) {
       console.error('No token in response!', data);
       toast.error('Login failed - no token received');
@@ -21,9 +19,6 @@ const UserLogin = () => {
     try {
       // Use AuthContext login method (industry standard)
       const result = await login(data.token, data.user || data);
-      
-      console.log('Login successful, token stored via AuthContext');
-      console.log('Login result:', result);
       
       // Show success message
       toast.success('Login successful!');

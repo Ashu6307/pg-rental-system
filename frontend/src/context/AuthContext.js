@@ -20,12 +20,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Tab isolation: Each tab maintains its own session
     // No cross-tab communication needed as sessions are tab-specific
-    console.log('AuthContext: Tab-specific session initialized', tabId);
     
     // Clean up any old localStorage tokens completely
     const oldToken = localStorage.getItem('token');
     if (oldToken) {
-      console.log('AuthContext: Removing old localStorage token for tab isolation');
       localStorage.removeItem('token');
       localStorage.removeItem('auth_last_activity');
       localStorage.removeItem('auth_tab_id');
@@ -36,8 +34,6 @@ export const AuthProvider = ({ children }) => {
 
   // Industry Standard: Tab-specific logout handler
   const handleGlobalLogout = useCallback(() => {
-    console.log('AuthContext: Performing tab-specific logout');
-    
     // Clear all auth data
     setToken('');
     setUser(null);
@@ -66,14 +62,8 @@ export const AuthProvider = ({ children }) => {
   const handleSessionExpiration = useCallback(() => {
     // Admin users are completely exempt from session expiration
     if (role === 'admin') {
-      console.log('AuthContext: Session expiration completely disabled for admin - no action taken');
       return;
     }
-    
-    console.log('AuthContext: Session expired due to 30 minutes of inactivity');
-    console.log('Last activity timestamp:', sessionStorage.getItem('auth_last_activity'));
-    console.log('Current timestamp:', Date.now());
-    console.log('User role:', role);
     
     // Store expired user's role for smart redirect (Industry Standard)
     if (role) {
@@ -91,7 +81,6 @@ export const AuthProvider = ({ children }) => {
   const checkSessionActivity = useCallback(() => {
     // Skip session timeout for admin users
     if (role === 'admin') {
-      console.log('AuthContext: Session timeout disabled for admin user');
       return;
     }
     
@@ -102,7 +91,6 @@ export const AuthProvider = ({ children }) => {
       
       // Session timeout after 30 minutes of inactivity (Increased for better UX)
       if (timeSinceActivity > 30 * 60 * 1000) {
-        console.log('AuthContext: Session timeout due to inactivity (30 minutes)');
         handleSessionExpiration();
       }
     }
@@ -128,7 +116,6 @@ export const AuthProvider = ({ children }) => {
         
         // If session expired due to inactivity (10 minutes)
         if (timeSinceActivity > 10 * 60 * 1000) {
-          console.log('AuthContext: Session expired due to inactivity during validation');
           // Don't call handleSessionExpiration here to avoid infinite loop
           localStorage.removeItem('token');
           localStorage.setItem('auth_session_expired', Date.now().toString());
@@ -146,11 +133,8 @@ export const AuthProvider = ({ children }) => {
       
       // Check if JWT token is expired (Admin gets special treatment)
       if (payload.exp <= currentTime) {
-        console.log('AuthContext: JWT token has expired');
-        
         // For admin, never set session expired flag or logout
         if (payload.role === 'admin') {
-          console.log('AuthContext: Admin token expired - continuing without logout');
           // Admin continues with expired token - backend will handle renewal
           // Do not set session expired flag
           // Do not logout
@@ -169,7 +153,6 @@ export const AuthProvider = ({ children }) => {
       
       // Check if token expires in next 5 minutes (refresh window)
       if (payload.exp - currentTime < 300) {
-        console.log('AuthContext: Token expires soon, attempting refresh');
         // TODO: Implement token refresh endpoint
         // const refreshedToken = await apiService.post('/api/auth/refresh');
         // if (refreshedToken.token) {
@@ -188,7 +171,6 @@ export const AuthProvider = ({ children }) => {
           response = await apiService.get('/api/auth/me');
         }
       } catch (error) {
-        console.log('AuthContext: Token validation failed:', error);
         return false;
       }
       
@@ -210,8 +192,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Invalid token response');
       }
     } catch (error) {
-      console.error('AuthContext: Token validation failed:', error);
-      
       // Clear auth state for ANY validation failure
       sessionStorage.removeItem('token');
       localStorage.setItem('auth_session_expired', Date.now().toString());
@@ -237,7 +217,6 @@ export const AuthProvider = ({ children }) => {
       // If on admin route, always clear session expired flags
       if (currentPath.startsWith('/admin')) {
         if (sessionExpired) {
-          console.log('AuthContext: Admin route detected - clearing session expired flags');
           localStorage.removeItem('auth_session_expired');
         }
         // Continue normal admin flow - no redirect
@@ -245,11 +224,9 @@ export const AuthProvider = ({ children }) => {
         try {
           const payload = JSON.parse(atob(storedToken.split('.')[1]));
           if (payload.role === 'admin') {
-            console.log('AuthContext: Admin token with session expired - clearing and continuing');
             localStorage.removeItem('auth_session_expired');
             // Continue normal flow for admin
           } else {
-            console.log('AuthContext: Previous session expired detected for non-admin user');
             localStorage.removeItem('auth_session_expired');
             setIsAuthenticated(false);
             setUser(null);
@@ -264,7 +241,6 @@ export const AuthProvider = ({ children }) => {
           }
         } catch (error) {
           // If token parsing fails, treat as non-admin
-          console.log('AuthContext: Error parsing token, treating as non-admin expired session');
           localStorage.removeItem('auth_session_expired');
           setIsAuthenticated(false);
           setUser(null);
@@ -279,7 +255,6 @@ export const AuthProvider = ({ children }) => {
         }
       } else if (sessionExpired && !storedToken) {
         // No token but session expired flag exists - clear and redirect for non-admin
-        console.log('AuthContext: Session expired with no token');
         localStorage.removeItem('auth_session_expired');
         setIsAuthenticated(false);
         setUser(null);
@@ -295,22 +270,17 @@ export const AuthProvider = ({ children }) => {
       
       // Only validate token if one exists
       if (storedToken) {
-        console.log('AuthContext: Found stored token, validating...');
         const isValid = await validateTokenAndRefresh();
         
         if (isValid) {
-          console.log('AuthContext: Token validation successful');
           // Start periodic token validation (every 5 minutes)
           tokenRefreshInterval.current = setInterval(validateTokenAndRefresh, 5 * 60 * 1000);
           
           // Start session activity monitoring (every 1 minute) - Disabled for Admin
           if (role !== 'admin') {
             sessionCheckInterval.current = setInterval(checkSessionActivity, 60 * 1000);
-          } else {
-            console.log('AuthContext: Session monitoring disabled for admin user');
           }
         } else {
-          console.log('AuthContext: Token validation failed, clearing session');
           // Clear invalid token
           sessionStorage.removeItem('token');
           setToken('');
@@ -321,9 +291,6 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       } else {
         // No token found - user is not logged in
-        if (process.env.NODE_ENV === 'development') {
-          console.log('AuthContext: No token found - user not logged in');
-        }
         setIsAuthenticated(false);
         setUser(null);
         setRole('');
@@ -349,8 +316,6 @@ export const AuthProvider = ({ children }) => {
     try {
       // If first param is a token string (direct login from successful auth)
       if (typeof tokenOrEmail === 'string' && tokenOrEmail.length > 50) {
-        console.log('AuthContext: Direct login with JWT token');
-        
         // Validate token format (JWT has 3 parts)
         const tokenParts = tokenOrEmail.split('.');
         if (tokenParts.length !== 3) {
@@ -407,15 +372,12 @@ export const AuthProvider = ({ children }) => {
         throw new Error(response.message || 'Login failed');
       }
     } catch (error) {
-      console.error('AuthContext: Login error:', error);
       throw error;
     }
   };
 
   // Industry Standard: Secure logout with cross-tab communication
   const logout = () => {
-    console.log('AuthContext: Initiating secure logout');
-    
     // Send logout signal to all tabs FIRST
     localStorage.setItem('auth_logout_signal', Date.now().toString());
     
@@ -439,7 +401,6 @@ export const AuthProvider = ({ children }) => {
     
     // Skip activity tracking for admin users
     if (role === 'admin') {
-      console.log('AuthContext: Activity tracking disabled for admin user');
       return;
     }
     

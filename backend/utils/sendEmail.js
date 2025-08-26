@@ -34,9 +34,8 @@ export async function sendEmail({ to, subject, html, attachmentBuffer }) {
       return { success: true, attempt };
     } catch (error) {
       lastError = error;
-      // Don't retry on certain errors
+      // Gmail rate limit hit
       if (error.code === 'EENVELOPE' && error.responseCode === 421) {
-        console.log(`🚫 Gmail rate limit hit for ${to}, skipping retries`);
         break;
       }
       // Exponential backoff: 1s, 2s, 4s
