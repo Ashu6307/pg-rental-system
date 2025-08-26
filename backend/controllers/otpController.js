@@ -4,8 +4,8 @@ import User from '../models/User.js';
 import OwnerProfile from '../models/OwnerProfile.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { sendEmail } from '../utils/sendEmail.js';
-import emailTemplates from '../utils/emailTemplates.js';
+// Enhanced Email System Import
+import EmailManager from '../modules/email/EmailManager.js';
 import OtpAudit from '../models/OtpAudit.js';
 import axios from 'axios';
 import Settings from '../models/Settings.js';
@@ -111,39 +111,26 @@ async function sendOtp(req, res) {
   await Otp.deleteMany({ email });
   await Otp.create({ email, otp, expiresAt, tenantId, role: userRole });
   
-  // Try to send email with professional template
-  const emailResult = await sendEmail({ 
-    to: email, 
-    subject: '🔐 Email Verification - PG & Bike Rental', 
-    html: emailTemplates.otpVerification({
-      name: 'User',
-      email: email,
-      role: userRole,
-      otp: otp,
-      purpose: 'email verification'
-    })
-  });
-  
-  if (emailResult.success) {
+  // Send OTP email using Enhanced Email Manager
+  try {
+    await EmailManager.sendOTPEmail(
+      { email, name: 'User' }, 
+      otp, 
+      'email verification',
+      { useQueue: false } // High priority - immediate sending
+    );
+    
     await logOtpAction(email, 'send', 'success', 'OTP sent successfully', req);
     return res.json({ success: true, message: 'OTP sent successfully' });
-  } else {
-    // Email failed but OTP is still generated and stored
-    await logOtpAction(email, 'send', 'email_failed', `Email failed: ${emailResult.error}`, req);
     
-    // Check if it's a rate limit issue
-    if (emailResult.responseCode === 421) {
-      return res.json({ 
-        success: true, 
-        message: 'OTP generated. Email service temporarily unavailable, but OTP is valid for verification.',
-        warning: 'Email delivery may be delayed due to high volume'
-      });
-    }
+  } catch (emailError) {
+    // Email failed but OTP is still generated and stored
+    await logOtpAction(email, 'send', 'email_failed', `Email failed: ${emailError.message}`, req);
     
     return res.json({ 
       success: true, 
-      message: 'OTP generated successfully. Email delivery may be delayed.',
-      warning: 'Email service temporarily unavailable'
+      message: 'OTP generated. Email service temporarily unavailable, but OTP is valid for verification.',
+      warning: 'Email delivery may be delayed'
     });
   }
 };
@@ -201,16 +188,26 @@ async function resendOtp(req, res) {
   await Otp.deleteMany({ email });
   await Otp.create({ email, otp, expiresAt, tenantId, role: userRole });
   
-  // Fix sendEmail call - use correct parameter format
-  await sendEmail({ 
-    to: email, 
-    subject: 'Your OTP Code', 
-    html: `<h2>Your OTP Code</h2><p>Your OTP is: <strong>${otp}</strong></p><p>This OTP will expire in 5 minutes.</p>` 
-  });
-  
-  await logOtpAction(email, 'resend', 'success', 'OTP resent', req);
-  await logAnalytics(email, 'resend', 'success');
-  res.json({ success: true, message: 'OTP resent' });
+  // Send OTP email using Enhanced Email Manager
+  try {
+    await EmailManager.sendOTPEmail(
+      { email, name: 'User' }, 
+      otp, 
+      'OTP resend request',
+      { useQueue: false } // High priority - immediate sending
+    );
+    
+    await logOtpAction(email, 'resend', 'success', 'OTP resent', req);
+    await logAnalytics(email, 'resend', 'success');
+    res.json({ success: true, message: 'OTP resent' });
+    
+  } catch (emailError) {
+    await logOtpAction(email, 'resend', 'email_failed', `Email failed: ${emailError.message}`, req);
+    res.json({ 
+      success: true, 
+      message: 'OTP generated. Email service temporarily unavailable, but OTP is valid for verification.' 
+    });
+  }
 };
 
 // Check if email already exists for registration

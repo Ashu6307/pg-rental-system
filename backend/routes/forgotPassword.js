@@ -1,8 +1,8 @@
 import express from 'express';
 import User from '../models/User.js';
 import OTP from '../models/Otp.js';
-import { sendEmail } from '../utils/sendEmail.js';
-import emailTemplates from '../utils/emailTemplates.js';
+// Enhanced Email System Import
+import EmailManager from '../modules/email/EmailManager.js';
 const router = express.Router();
 
 // Forgot password endpoint - Send OTP
@@ -27,22 +27,22 @@ router.post('/forgot-password', async (req, res) => {
     });
     await otpRecord.save();
     
-    // Send OTP email using professional template
-    const emailResult = await sendEmail({ 
-      to: email, 
-      subject: '🔑 Password Reset Request - PG & Bike Rental', 
-      html: emailTemplates.passwordReset({
-        name: user.name || 'User',
-        email: email,
-        role: role,
-        otp: otp
-      })
-    });
-    
-    if (emailResult.success) {
+    // Send password reset OTP email using Enhanced Email Manager
+    try {
+      await EmailManager.sendOTPEmail(
+        user, 
+        otp, 
+        'password reset',
+        { useQueue: false } // High priority - immediate sending
+      );
+      
       res.json({ success: true, message: 'OTP sent to your email for password reset' });
-    } else {
-      res.status(500).json({ success: false, message: 'Failed to send OTP email' });
+    } catch (emailError) {
+      console.error('Password reset email failed:', emailError.message);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to send OTP email. Please try again.' 
+      });
     }
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

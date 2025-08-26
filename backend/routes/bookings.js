@@ -1,10 +1,10 @@
 import express from 'express';
 import Invoice from '../models/Invoice.js';
 import User from '../models/User.js';
-import { sendEmail } from '../utils/sendEmail.js';
-import emailTemplates from '../utils/emailTemplates.js';
 import { generateInvoicePDFBuffer } from '../utils/invoicePDF.js';
 import { authenticateJWT } from '../middleware/auth.js';
+// Enhanced Email System Import
+import EmailManager from '../modules/email/EmailManager.js';
 const router = express.Router();
 
 // Get user bookings (for /api/bookings)
@@ -49,26 +49,20 @@ router.post('/', authenticateJWT, async (req, res) => {
       footer: ''
     });
     await invoice.save();
-    // Generate PDF and send email with professional template
+    // Generate PDF for attachment
     const pdfBuffer = await generateInvoicePDFBuffer({ ...invoice.toObject(), user });
     
-    // Send booking request confirmation email (pending approval)
-    const emailTemplate = emailTemplates.bookingRequested({
-      name: user.name,
-      itemType: booking.item_type,
-      itemName: booking.item_name,
-      bookingId: booking.bookingId || booking._id.toString(),
-      itemAddress: booking.item_address || 'Address not provided',
-      startDate: booking.start_date ? new Date(booking.start_date).toLocaleDateString() : null,
-      endDate: booking.end_date ? new Date(booking.end_date).toLocaleDateString() : null
-    });
-    
-    await sendEmail({ 
-      to: user.email, 
-      subject: `📝 ${booking.item_type} Booking Request Submitted - PG & Bike Rental`, 
-      html: emailTemplate,
-      attachmentBuffer: pdfBuffer 
-    });
+    // Send booking request confirmation email using Enhanced Email Manager
+    await EmailManager.sendBookingEmail(
+      user,
+      booking,
+      'booking_request',
+      {}, // additional data
+      {
+        useQueue: true, // Use email queue for better performance
+        attachmentBuffer: pdfBuffer // Attach invoice PDF
+      }
+    );
     // Notification
     await sendNotification({
       userId: req.user.id,

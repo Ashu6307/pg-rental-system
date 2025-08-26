@@ -6,8 +6,8 @@ import User from '../models/User.js';
 import Admin from '../models/Admin.js';
 import Otp from '../models/Otp.js';
 import { authenticateJWT } from '../middleware/auth.js';
-import { sendEmail } from '../utils/sendEmail.js';
-import emailTemplates from '../utils/emailTemplates.js';
+// Enhanced Email System Import
+import EmailManager from '../modules/email/EmailManager.js';
 import { sendNotification } from '../utils/notificationService.js';
 import { logAction } from '../utils/auditLogService.js';
 import { Parser } from 'json2csv';
@@ -55,15 +55,20 @@ router.post('/send-otp', async (req, res) => {
       role: 'admin'
     });
 
-    // Send OTP via email with professional template
-    const emailContent = emailTemplates.otpVerification(otp, 'Admin Login');
-    await sendEmail({
-      to: email,
-      subject: '🔐 Admin Access OTP - BikeRental Pro',
-      html: emailContent
-    });
-
-    res.json({ success: true, message: 'OTP sent to your email' });
+    // Send OTP email using Enhanced Email Manager
+    try {
+      await EmailManager.sendOTPEmail(
+        { email, name: 'Admin' }, 
+        otp, 
+        'admin login',
+        { useQueue: false } // High priority - immediate sending
+      );
+      
+      res.json({ success: true, message: 'OTP sent to your email' });
+    } catch (emailError) {
+      console.error('Admin OTP send error:', emailError);
+      res.status(500).json({ success: false, message: 'Failed to send OTP' });
+    }
   } catch (error) {
     console.error('Admin OTP send error:', error);
     res.status(500).json({ success: false, message: 'Failed to send OTP' });

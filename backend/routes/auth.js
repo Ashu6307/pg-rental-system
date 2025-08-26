@@ -5,8 +5,8 @@ import { hashPassword, comparePassword, authenticateJWT } from '../middleware/au
 import uploadKYC from '../middleware/uploadKYC.js';
 import OwnerProfile from '../models/OwnerProfile.js';
 import { blacklistToken, logSuspiciousActivity } from '../middleware/security.js';
-import { sendEmail } from '../utils/sendEmail.js';
-import emailTemplates from '../utils/emailTemplates.js';
+// Enhanced Email System Import
+import EmailManager from '../modules/email/EmailManager.js';
 
 const router = express.Router();
 
@@ -118,17 +118,10 @@ router.post('/register', async (req, res) => {
     // Clean up all OTPs for this email
     await otpRecord.deleteMany({ email });
 
-    // Send welcome email
+    // Send welcome email using Enhanced Email Manager
     try {
-      await sendEmail({
-        to: email,
-        subject: '🎉 Welcome to PG & Bike Rental Platform!',
-        html: emailTemplates.userWelcome({
-          name: user.name,
-          role: user.role,
-          email: email
-        })
-      });
+      await EmailManager.sendWelcomeEmail(user, { useQueue: false });
+      console.log('Welcome email sent successfully via EmailManager');
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError);
       // Don't fail registration if welcome email fails

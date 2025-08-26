@@ -111,6 +111,10 @@ app.use('/api/owner/webhook-logs', ownerWebhookLogsRoutes);
 app.use('/api/owner/rate-limit-feedbacks', ownerRateLimitFeedbacksRoutes);
 app.use('/api/owner/versioned-settings', ownerVersionedSettingsRoutes);
 
+// Enhanced Email System Routes
+import { emailRoutes } from './modules/email/index.js';
+app.use('/api/emails', emailRoutes);
+
 // User-specific protected routes (These routes already have their own auth middleware)
 app.use('/api/users', usersRoutes);
 app.use('/api/bookings', bookingRoutes);
