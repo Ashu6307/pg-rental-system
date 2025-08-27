@@ -955,6 +955,7 @@ const AuthForm = ({
                       required
                       value={formData.email}
                       onChange={handleChange}
+                      onFocus={() => setShowEmailSuggestions(false)}
                       readOnly={emailVerified} // Make email field read-only after verification
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                         emailVerified 
@@ -963,15 +964,9 @@ const AuthForm = ({
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
                           : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
                           ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                          : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                       }`}
                       placeholder="Enter your email address"
-                      style={{ 
-                        position: 'relative',
-                        zIndex: 1,
-                        transform: 'translateZ(0)',
-                        isolation: 'isolate'
-                      }}
                     />
                     {emailVerified ? (
                       <div className="absolute right-3 top-2.5 flex items-center gap-1">
@@ -994,19 +989,16 @@ const AuthForm = ({
                         <button
                           key={index}
                           type="button"
-                          className={`w-full text-left px-3 py-2 text-sm transition-colors duration-200 ${
-                            role === 'admin' 
-                              ? 'hover:bg-red-50 hover:text-red-700' 
-                              : role === 'owner' 
-                              ? 'hover:bg-green-50 hover:text-green-700' 
-                              : 'hover:bg-blue-50 hover:text-blue-700'
-                          }`}
+                          className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
                           onClick={() => {
                             setFormData(prev => ({ ...prev, email: suggestion }));
                             setShowEmailSuggestions(false);
                           }}
                         >
-                          {suggestion}
+                          <span className="flex items-center gap-2">
+                            <FaEnvelope className="h-3 w-3 text-gray-400" />
+                            {suggestion}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -2010,20 +2002,15 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     required
                     value={formData.email}
                     onChange={handleEmailChange}
+                    onFocus={() => setShowEmailSuggestions(false)}
                     className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                       formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) && formData.email.length > 0
                         ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
                         : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
                         ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                        : `border-gray-300 focus:ring-${roleColor}-500 focus:border-${roleColor}-500`
+                        : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                     }`}
                     placeholder={`Enter your ${role} email address`}
-                    style={{ 
-                      position: 'relative',
-                      zIndex: 1,
-                      transform: 'translateZ(0)',
-                      isolation: 'isolate'
-                    }}
                   />
                   {formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) && formData.email.length > 0 ? (
                     <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
@@ -2041,16 +2028,13 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                       <button
                         key={index}
                         type="button"
-                        className={`w-full text-left px-3 py-2 text-sm transition-colors duration-200 ${
-                          role === 'admin' 
-                            ? 'hover:bg-red-50 hover:text-red-700' 
-                            : role === 'owner' 
-                            ? 'hover:bg-green-50 hover:text-green-700' 
-                            : 'hover:bg-blue-50 hover:text-blue-700'
-                        }`}
+                        className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
                         onClick={() => handleEmailSuggestionClick(suggestion)}
                       >
-                        {suggestion}
+                        <span className="flex items-center gap-2">
+                          <FaEnvelope className="h-3 w-3 text-gray-400" />
+                          {suggestion}
+                        </span>
                       </button>
                     ))}
                   </div>

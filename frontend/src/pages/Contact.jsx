@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaWhatsapp, FaBuilding } from 'react-icons/fa';
+import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaWhatsapp, FaBuilding, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import apiService from '../services/api';
 import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
 
@@ -13,9 +13,32 @@ const Contact = () => {
   const [content, setContent] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Email suggestions state
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
+  const [emailSuggestions, setEmailSuggestions] = useState([]);
 
   // Use the new ScrollManager hook
   const scrollToTop = useScrollToTop({ behavior: 'smooth', enableMultiTiming: true });
+
+  // Email domain suggestions
+  const generateEmailSuggestions = (email) => {
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'rediffmail.com'];
+    const emailParts = email.split('@');
+    
+    if (emailParts.length === 2 && emailParts[1].length > 0) {
+      const domain = emailParts[1].toLowerCase();
+      const suggestions = commonDomains
+        .filter(d => d.startsWith(domain) && d !== domain)
+        .slice(0, 3)
+        .map(d => `${emailParts[0]}@${d}`);
+      
+      setEmailSuggestions(suggestions);
+      setShowEmailSuggestions(suggestions.length > 0);
+    } else {
+      setShowEmailSuggestions(false);
+    }
+  };
 
   useEffect(() => {
     const fetchContactContent = async () => {
@@ -41,6 +64,11 @@ const Contact = () => {
       setFormData({ ...formData, attachments: files });
     } else {
       setFormData({ ...formData, [name]: value });
+      
+      // Generate email suggestions when email field changes
+      if (name === 'email') {
+        generateEmailSuggestions(value);
+      }
     }
   };
 
@@ -151,7 +179,51 @@ const Contact = () => {
               </div>
               <div>
                 <label htmlFor="email" className="block text-gray-700 text-base font-semibold mb-2">Email Address *</label>
-                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required disabled={isSubmitting} className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition disabled:bg-gray-100 shadow-sm text-sm" placeholder="Your email address" />
+                <div className="relative">
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    onFocus={() => setShowEmailSuggestions(false)}
+                    required 
+                    disabled={isSubmitting} 
+                    className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 transition disabled:bg-gray-100 shadow-sm text-sm" 
+                    placeholder="Your email address" 
+                  />
+                  
+                  {/* Email validation icons */}
+                  {formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
+                    <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                  ) : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
+                    <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                  ) : (
+                    <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                  )}
+                  
+                  {/* Email Suggestions Dropdown */}
+                  {showEmailSuggestions && emailSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
+                      {emailSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, email: suggestion }));
+                            setShowEmailSuggestions(false);
+                          }}
+                        >
+                          <span className="flex items-center gap-2">
+                            <FaEnvelope className="h-3 w-3 text-gray-400" />
+                            {suggestion}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>

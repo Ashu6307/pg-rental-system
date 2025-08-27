@@ -1,6 +1,7 @@
 // AdminUserManagement.jsx
 // Admin user management page (add/edit/delete, RBAC, industry-level)
 import React, { useEffect, useState } from 'react';
+import { FaEnvelope, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import axios from 'axios';
 
 const roles = [
@@ -91,14 +92,25 @@ export default function AdminUserManagement() {
           onChange={handleChange}
           className="p-2 border rounded w-full"
         />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="p-2 border rounded w-full"
-        />
+        <div className="relative">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500"
+          />
+          
+          {/* Email validation icons */}
+          {form.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(form.email) ? (
+            <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+          ) : form.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(form.email) ? (
+            <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+          ) : (
+            <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+          )}
+        </div>
         <input
           type="password"
           name="password"

@@ -1,6 +1,7 @@
 // MultiTenancySettings.jsx
 // User multi-tenancy settings page (industry-level)
 import React, { useEffect, useState } from 'react';
+import { FaEnvelope, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import axios from 'axios';
 
 export default function MultiTenancySettings() {
@@ -59,9 +60,26 @@ export default function MultiTenancySettings() {
           </div>
           {/* Example settings fields, can be extended for advanced config */}
           <div className="flex flex-col gap-2">
-            <label>
+            <label className="flex items-center gap-2">
               Support Email:
-              <input type="email" name="supportEmail" value={settings.supportEmail || ''} onChange={handleChange} className="ml-2 p-1 border rounded" />
+              <div className="relative">
+                <input 
+                  type="email" 
+                  name="supportEmail" 
+                  value={settings.supportEmail || ''} 
+                  onChange={handleChange} 
+                  className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500" 
+                />
+                
+                {/* Email validation icons */}
+                {settings.supportEmail && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(settings.supportEmail) ? (
+                  <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                ) : settings.supportEmail && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(settings.supportEmail) ? (
+                  <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                ) : (
+                  <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                )}
+              </div>
             </label>
             <label>
               Theme Color:
