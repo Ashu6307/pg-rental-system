@@ -1845,7 +1845,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     const message = errorMessage.toLowerCase();
     
     if (message.includes('invalid')) {
-      return 'Invalid OTP - Please check and enter the correct 6-digit code';
+      return 'Invalid OTP - Please check and enter the correct OTP';
     } else if (message.includes('expired')) {
       return 'OTP Expired - Please request a new OTP to continue';
     } else if (message.includes('used') || message.includes('already')) {
@@ -2223,7 +2223,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                   ) : (
                     <div className="flex items-center gap-2">
                       <FaLock className="h-4 w-4" />
-                      <span>Send Reset OTP</span>
+                      <span>Send OTP</span>
                     </div>
                   )}
                 </button>
@@ -2350,7 +2350,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     ) : (
                       <div className="flex items-center gap-2">
                         <FaCheckCircle className="h-4 w-4" />
-                        <span>Verify Reset OTP</span>
+                        <span>Verify OTP</span>
                       </div>
                     )}
                   </button>
@@ -2540,7 +2540,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           {/* Navigation Links */}
           <div className="mt-3 space-y-2">
             {/* Back to credentials for step 2 only */}
-            {currentStep === 2 && (
+            {/* {currentStep === 2 && (
               <div className="text-center">
                 <p className="text-sm text-gray-600">
                   Wrong email?{' '}
@@ -2554,7 +2554,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                 </p>
               </div>
             )}
-            
+             */}
             {/* Login link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">

@@ -1,32 +1,51 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { AuthContext } from '../../context/AuthContext';
-import authService from '../../services/authService';
-import { FaUserShield, FaEnvelope, FaEye, FaEyeSlash, FaCheckCircle, FaExclamationCircle, FaLock, FaHome } from 'react-icons/fa';
-import { handleEmailChange, isValidEmail, generateEmailSuggestions } from '../../utils/emailValidation';
+import React, { useState, useContext, useEffect } from "react";
+import OtpInput from '../../components/OtpInput';
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { AuthContext } from "../../context/AuthContext";
+import authService from "../../services/authService";
+import {
+  FaUserShield,
+  FaEnvelope,
+  FaEye,
+  FaEyeSlash,
+  FaCheckCircle,
+  FaExclamationCircle,
+  FaLock,
+  FaHome,
+} from "react-icons/fa";
+import {
+  handleEmailChange,
+  isValidEmail,
+  generateEmailSuggestions,
+} from "../../utils/emailValidation";
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [otpError, setOtpError] = useState('');
-  const [otpSuccess, setOtpSuccess] = useState('');
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [otpSuccess, setOtpSuccess] = useState("");
+  const [focusedOtpIndex, setFocusedOtpIndex] = useState(-1);
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
-  
+
+  // State to make all OTP boxes red on error
+  const [otpAllRed, setOtpAllRed] = useState(false);
+  const [otpAllGreen, setOtpAllGreen] = useState(false);
+
   // Email validation state
-  const [emailError, setEmailError] = useState('');
-  
+  const [emailError, setEmailError] = useState("");
+
   // Email suggestions
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState([]);
-  
+
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
@@ -35,7 +54,7 @@ const AdminLogin = () => {
     let interval = null;
     if (resendTimer > 0) {
       interval = setInterval(() => {
-        setResendTimer(timer => {
+        setResendTimer((timer) => {
           if (timer <= 1) {
             setCanResend(true);
             return 0;
@@ -49,51 +68,59 @@ const AdminLogin = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    if (name === 'email') {
+
+    if (name === "email") {
       const processedValue = handleEmailChange(
-        value, 
-        (email) => setFormData(prev => ({ ...prev, email })), 
+        value,
+        (email) => setFormData((prev) => ({ ...prev, email })),
         setEmailError,
         setEmailSuggestions
       );
       // Show suggestions if there's an @ and partial domain typed
-      setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
+      setShowEmailSuggestions(
+        processedValue.includes("@") &&
+          processedValue.split("@")[1] &&
+          processedValue.split("@")[1].length > 0
+      );
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.email || !formData.password) {
-      toast.error('Please enter both email and password');
+      toast.error("Please enter both email and password");
       return;
     }
 
     // Validate email format
     if (!isValidEmail(formData.email)) {
-      toast.error('Please enter a valid email address');
+      toast.error("Please enter a valid email address");
       return;
     }
 
     setLoading(true);
-    setOtpError('');
-    
+    setOtpError("");
+
     try {
       // Send OTP for admin login with password verification
-      const result = await authService.sendOtp(formData.email, 'admin', formData.password);
-      
+      const result = await authService.sendOtp(
+        formData.email,
+        "admin",
+        formData.password
+      );
+
       if (result.success) {
         setOtpSent(true);
         setCanResend(false);
         setResendTimer(60);
-        toast.success('Admin OTP sent to your email!');
+        toast.success("Admin OTP sent to your email!");
       }
     } catch (error) {
-      setOtpError(error.message || 'Failed to send OTP');
-      toast.error(error.message || 'Failed to send OTP');
+      setOtpError(error.message || "Failed to send OTP");
+      toast.error(error.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
@@ -102,70 +129,82 @@ const AdminLogin = () => {
   // OTP Error handling functions
   const getOtpErrorMessage = (error) => {
     const message = error.toLowerCase();
-    if (message.includes('invalid')) return 'Invalid OTP entered';
-    if (message.includes('expired')) return 'OTP has expired';
-    if (message.includes('used')) return 'OTP already used';
-    return 'OTP verification failed';
+    if (message.includes("invalid")) return "Invalid OTP entered";
+    if (message.includes("expired")) return "OTP has expired";
+    if (message.includes("used")) return "OTP already used";
+    return "OTP verification failed";
   };
 
   const getOtpErrorIcon = (error) => {
     const message = error.toLowerCase();
-    if (message.includes('expired')) return '⏰';
-    if (message.includes('used')) return '✓';
-    return '❌';
+    if (message.includes("expired")) return "⏰";
+    if (message.includes("used")) return "✓";
+    return "❌";
   };
 
   const handleOtpError = (error) => {
     const errorMessage = getOtpErrorMessage(error);
     const errorIcon = getOtpErrorIcon(error);
     setOtpError(`${errorIcon} ${errorMessage}`);
-    
+
+    // Turn all OTP boxes red on error
+    setOtpAllRed(true);
+
     // Clear OTP on certain errors
-    if (error.toLowerCase().includes('invalid') || error.toLowerCase().includes('used')) {
-      setOtp('');
+    if (
+      error.toLowerCase().includes("invalid") ||
+      error.toLowerCase().includes("used")
+    ) {
+      setOtp("");
     }
+    // Remove red after a short delay (optional UX, or keep until user types)
+    // setTimeout(() => setOtpAllRed(false), 1200);
   };
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    
+
     if (!otp || otp.length !== 6) {
-      setOtpError('❌ Please enter complete 6-digit OTP');
+      setOtpError("❌ Please enter complete 6-digit OTP");
       return;
     }
 
     // Validate OTP contains only digits
     if (!/^\d{6}$/.test(otp)) {
-      setOtpError('❌ OTP must contain only numbers');
+      setOtpError("❌ OTP must contain only numbers");
       return;
     }
 
     setLoading(true);
-    setOtpError('');
-    
+    setOtpError("");
+
     try {
       // Use the correct OTP verification endpoint for admin
-      const loginResult = await authService.verifyOtp(formData.email, otp, 'admin');
-      
+      const loginResult = await authService.verifyOtp(
+        formData.email,
+        otp,
+        "admin"
+      );
+
       if (loginResult.token && loginResult.user) {
         await login(loginResult.token, loginResult.user);
-        
+
         // Enhanced session management
-        sessionStorage.setItem('auth_last_activity', Date.now().toString());
-        sessionStorage.setItem('admin_login_time', Date.now().toString());
-        localStorage.removeItem('auth_session_expired');
-        
-        setOtpSuccess('✅ Login successful!');
-        toast.success('🎉 Admin login successful! Welcome back.', {
+        sessionStorage.setItem("auth_last_activity", Date.now().toString());
+        sessionStorage.setItem("admin_login_time", Date.now().toString());
+        localStorage.removeItem("auth_session_expired");
+
+        setOtpSuccess("✅ Login successful!");
+        toast.success("🎉 Admin login successful! Welcome back.", {
           duration: 3000,
-          icon: '👑'
+          icon: "👑",
         });
-        
-        navigate('/admin', { replace: true });
+
+        navigate("/admin", { replace: true });
       }
     } catch (error) {
-      handleOtpError(error.message || 'Failed to verify OTP');
-      toast.error(error.message || 'Failed to verify OTP');
+      handleOtpError(error.message || "Failed to verify OTP");
+      toast.error(error.message || "Failed to verify OTP");
     } finally {
       setLoading(false);
     }
@@ -173,19 +212,60 @@ const AdminLogin = () => {
 
   const handleResendOtp = async () => {
     if (!canResend) return;
-    
+
     setLoading(true);
     try {
-      await authService.sendOtp(formData.email, 'admin', formData.password);
+      await authService.sendOtp(formData.email, "admin", formData.password);
       setCanResend(false);
       setResendTimer(60);
-      toast.success('Admin OTP resent successfully!');
+      toast.success("Admin OTP resent successfully!");
     } catch (error) {
-      toast.error('Failed to resend OTP');
+      toast.error("Failed to resend OTP");
     } finally {
       setLoading(false);
     }
   };
+
+  // Real-time OTP verification
+  useEffect(() => {
+    if (otpSent && otp.length === 6 && /^\d{6}$/.test(otp)) {
+      // Auto verify OTP
+      (async () => {
+        setLoading(true);
+        setOtpError("");
+        try {
+          const loginResult = await authService.verifyOtp(
+            formData.email,
+            otp,
+            "admin"
+          );
+          if (loginResult.token && loginResult.user) {
+            // Show all green before login
+            setOtpAllGreen(true);
+            setOtpSuccess("✅ Login successful!");
+            toast.success("🎉 Admin login successful! Welcome back.", {
+              duration: 3000,
+              icon: "👑",
+            });
+            // Wait 700ms for green effect, then login
+            setTimeout(async () => {
+              await login(loginResult.token, loginResult.user);
+              sessionStorage.setItem("auth_last_activity", Date.now().toString());
+              sessionStorage.setItem("admin_login_time", Date.now().toString());
+              localStorage.removeItem("auth_session_expired");
+              navigate("/admin", { replace: true });
+            }, 700);
+          }
+        } catch (error) {
+          handleOtpError(error.message || "Failed to verify OTP");
+          toast.error(error.message || "Failed to verify OTP");
+        } finally {
+          setLoading(false);
+        }
+      })();
+    }
+    // eslint-disable-next-line
+  }, [otp]);
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-red-50 via-white to-red-100">
@@ -205,7 +285,6 @@ const AdminLogin = () => {
         </div>
 
         <div className="mt-6 p-6 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl bg-gradient-to-br from-red-50 via-white to-red-100 transition-all duration-500 ease-in-out">
-          
           {/* Step 1: Email & Password */}
           {!otpSent && (
             <div className="flex flex-col">
@@ -215,14 +294,18 @@ const AdminLogin = () => {
                   <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                     1
                   </div>
-                  <span className="ml-2 text-sm font-bold text-red-600">Credentials</span>
+                  <span className="ml-2 text-sm font-bold text-red-600">
+                    Credentials
+                  </span>
                 </div>
                 <div className="w-8 h-0.5 bg-gray-300"></div>
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center text-sm font-bold">
                     2
                   </div>
-                  <span className="ml-2 text-sm font-medium text-gray-500">OTP</span>
+                  <span className="ml-2 text-sm font-medium text-gray-500">
+                    OTP
+                  </span>
                 </div>
               </div>
 
@@ -230,7 +313,10 @@ const AdminLogin = () => {
                 <div className="space-y-2">
                   {/* Email Input */}
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Admin Email <span className="text-red-500">*</span>
                     </label>
                     <div className="mt-1 relative">
@@ -245,14 +331,14 @@ const AdminLogin = () => {
                         onFocus={() => setShowEmailSuggestions(false)}
                         className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                           emailError
-                            ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                            ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                             : formData.email && isValidEmail(formData.email)
-                            ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
-                            : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
+                            ? "border-green-500 focus:ring-green-500 focus:border-green-500"
+                            : "border-gray-300 focus:ring-red-500 focus:border-red-500"
                         }`}
                         placeholder="Enter admin email address"
                       />
-                      
+
                       {/* Email validation icons */}
                       {emailError ? (
                         <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
@@ -261,7 +347,7 @@ const AdminLogin = () => {
                       ) : (
                         <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
                       )}
-                      
+
                       {/* Email Suggestions Dropdown */}
                       {showEmailSuggestions && emailSuggestions.length > 0 && (
                         <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
@@ -271,9 +357,12 @@ const AdminLogin = () => {
                               type="button"
                               className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
                               onClick={() => {
-                                setFormData(prev => ({ ...prev, email: suggestion }));
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  email: suggestion,
+                                }));
                                 setShowEmailSuggestions(false);
-                                setEmailError(''); // Clear error when suggestion is selected
+                                setEmailError(""); // Clear error when suggestion is selected
                               }}
                             >
                               <span className="flex items-center gap-2">
@@ -285,7 +374,7 @@ const AdminLogin = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Email Error Message - Fixed height container */}
                     <div className="h-5 mt-1">
                       {emailError && (
@@ -296,14 +385,17 @@ const AdminLogin = () => {
 
                   {/* Password Input */}
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Password <span className="text-red-500">*</span>
                     </label>
                     <div className="mt-1 relative">
                       <input
                         id="password"
                         name="password"
-                        type={showPassword ? 'text' : 'password'}
+                        type={showPassword ? "text" : "password"}
                         autoComplete="current-password"
                         required
                         value={formData.password}
@@ -338,7 +430,7 @@ const AdminLogin = () => {
                         Sending OTP...
                       </div>
                     ) : (
-                      'Send OTP'
+                      "Send OTP"
                     )}
                   </button>
 
@@ -346,7 +438,7 @@ const AdminLogin = () => {
                   <div className="text-center">
                     <button
                       type="button"
-                      onClick={() => navigate('/admin/forgot-password')}
+                      onClick={() => navigate("/admin/forgot-password")}
                       className="text-sm text-red-600 hover:text-red-800 font-medium underline"
                     >
                       Forgot Admin Password?
@@ -357,7 +449,7 @@ const AdminLogin = () => {
                   <div className="text-center">
                     <button
                       type="button"
-                      onClick={() => navigate('/')}
+                      onClick={() => navigate("/")}
                       className="text-gray-500 hover:text-gray-700 text-sm inline-flex items-center gap-1"
                     >
                       <FaHome className="h-3 w-3" />
@@ -378,14 +470,18 @@ const AdminLogin = () => {
                   <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                     ✓
                   </div>
-                  <span className="ml-2 text-sm font-medium text-gray-700">Credentials</span>
+                  <span className="ml-2 text-sm font-medium text-gray-700">
+                    Credentials
+                  </span>
                 </div>
                 <div className="w-8 h-0.5 bg-red-300"></div>
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                     2
                   </div>
-                  <span className="ml-2 text-sm font-bold text-red-600">OTP</span>
+                  <span className="ml-2 text-sm font-bold text-red-600">
+                    OTP
+                  </span>
                 </div>
               </div>
 
@@ -408,66 +504,17 @@ const AdminLogin = () => {
 
                   {/* OTP Input with Individual Digits */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 text-center">Enter Admin OTP</label>
-                    <div className="flex justify-center space-x-2">
-                      {[...Array(6)].map((_, index) => (
-                        <input
-                          key={index}
-                          type="text"
-                          maxLength="1"
-                          value={otp[index] || ''}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            
-                            // Allow only digits
-                            if (value !== '' && !/^[0-9]$/.test(value)) {
-                              return;
-                            }
-                            
-                            const newOtp = otp.split('');
-                            newOtp[index] = value;
-                            setOtp(newOtp.join(''));
-                            
-                            // Clear any previous error when user starts typing
-                            if (otpError) {
-                              setOtpError('');
-                            }
-                            
-                            // Auto-focus next input
-                            if (value && index < 5) {
-                              const nextInput = e.target.parentElement.children[index + 1];
-                              if (nextInput) nextInput.focus();
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            // Handle backspace to go to previous input
-                            if (e.key === 'Backspace' && !otp[index] && index > 0) {
-                              const prevInput = e.target.parentElement.children[index - 1];
-                              if (prevInput) prevInput.focus();
-                            }
-                          }}
-                          onPaste={(e) => {
-                            e.preventDefault();
-                            const pastedData = e.clipboardData.getData('text');
-                            
-                            // Allow only digits and limit to 6 characters
-                            const digits = pastedData.replace(/\D/g, '').slice(0, 6);
-                            
-                            if (digits.length > 0) {
-                              setOtp(digits.padEnd(6, ''));
-                              
-                              // Focus the next empty input or the last one
-                              const nextIndex = Math.min(digits.length, 5);
-                              const targetInput = e.target.parentElement.children[nextIndex];
-                              if (targetInput) targetInput.focus();
-                            }
-                          }}
-                          className="w-10 h-10 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all duration-200"
-                          placeholder="●"
-                        />
-                      ))}
-                    </div>
-                    
+                    <label className="block text-sm font-medium text-gray-700 text-center">
+                      Enter Admin OTP
+                    </label>
+                    <OtpInput
+                      value={otp}
+                      onChange={setOtp}
+                      error={otpAllRed}
+                      success={otpAllGreen}
+                      loading={loading}
+                    />
+
                     {/* OTP Timer and Resend */}
                     <div className="text-center">
                       <p className="text-xs text-gray-600 mb-2">
@@ -478,12 +525,14 @@ const AdminLogin = () => {
                         onClick={handleResendOtp}
                         disabled={!canResend}
                         className={`text-xs font-medium underline ${
-                          canResend 
-                            ? 'text-red-600 hover:text-red-800' 
-                            : 'text-gray-400 cursor-not-allowed'
+                          canResend
+                            ? "text-red-600 hover:text-red-800"
+                            : "text-gray-400 cursor-not-allowed"
                         }`}
                       >
-                        {canResend ? 'Resend Admin OTP' : `Resend in ${resendTimer}s`}
+                        {canResend
+                          ? "Resend Login OTP"
+                          : `Resend in ${resendTimer}s`}
                       </button>
                     </div>
 
@@ -491,13 +540,17 @@ const AdminLogin = () => {
                     <div className="h-12 mt-2">
                       {otpError && (
                         <div className="p-2 bg-red-50 border border-red-200 rounded-md">
-                          <p className="text-red-600 text-xs font-medium text-center">{otpError}</p>
+                          <p className="text-red-600 text-xs font-medium text-center">
+                            {otpError}
+                          </p>
                         </div>
                       )}
-                      
+
                       {otpSuccess && (
                         <div className="p-2 bg-green-50 border border-green-200 rounded-md">
-                          <p className="text-green-600 text-xs font-medium text-center">{otpSuccess}</p>
+                          <p className="text-green-600 text-xs font-medium text-center">
+                            {otpSuccess}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -516,7 +569,7 @@ const AdminLogin = () => {
                         Verifying...
                       </div>
                     ) : (
-                      'Verify & Login'
+                      "Verify & Login"
                     )}
                   </button>
 
@@ -528,9 +581,9 @@ const AdminLogin = () => {
                         type="button"
                         onClick={() => {
                           setOtpSent(false);
-                          setOtp('');
-                          setOtpError('');
-                          setOtpSuccess('');
+                          setOtp("");
+                          setOtpError("");
+                          setOtpSuccess("");
                         }}
                         className="text-sm text-red-600 hover:text-red-800 font-medium underline"
                       >
@@ -542,7 +595,7 @@ const AdminLogin = () => {
                     <div className="text-center">
                       <button
                         type="button"
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate("/")}
                         className="text-gray-500 hover:text-gray-700 text-sm inline-flex items-center gap-1"
                       >
                         <FaHome className="h-3 w-3" />
@@ -554,7 +607,6 @@ const AdminLogin = () => {
               </form>
             </div>
           )}
-          
         </div>
       </div>
     </div>
