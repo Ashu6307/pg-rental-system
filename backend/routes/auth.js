@@ -8,6 +8,7 @@ import { blacklistToken, logSuspiciousActivity } from '../middleware/security.js
 // Enhanced Email System Import
 import EmailManager from '../modules/email/EmailManager.js';
 import rateLimit from 'express-rate-limit';
+import { isValidIndianMobile, getNormalizedMobile } from '../utils/mobileValidation.js';
 
 const router = express.Router();
 
@@ -86,6 +87,14 @@ router.post('/register', async (req, res) => {
     if (!strongRegex.test(password)) {
       return res.status(400).json({ error: 'Password must contain uppercase, lowercase, number, and special character.' });
     }
+
+    // Mobile number validation for non-admin users
+    if (role !== 'admin' && phone && !isValidIndianMobile(phone)) {
+      return res.status(400).json({ error: 'Please enter a valid Indian mobile number (10 digits, starting with 6-9).' });
+    }
+
+    // Normalize phone number for storage
+    const normalizedPhone = phone ? getNormalizedMobile(phone) : null;
     
     const password_hash = await hashPassword(password);
     let user;
@@ -98,7 +107,7 @@ router.post('/register', async (req, res) => {
         name: ownerName,
         email,
         password_hash,
-        phone,
+        phone: normalizedPhone,
         role,
         businessType,
         emailVerified: true, // Mark as verified since OTP was successful
@@ -111,7 +120,7 @@ router.post('/register', async (req, res) => {
         name,
         email,
         password_hash,
-        phone,
+        phone: normalizedPhone,
         role: role || 'user',
         gender,
         dob,

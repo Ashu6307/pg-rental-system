@@ -4,6 +4,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { toast, Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import authService from '../../services/authService';
+import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
 
 const AuthForm = ({
   mode = 'login',
@@ -294,8 +295,8 @@ const AuthForm = ({
         toast.error('📞 Phone number is required', { icon: '⚠️' });
         return false;
       }
-      if (role !== 'admin' && !/^[6-9]\d{9}$/.test(formData.phone.replace(/\D/g, ''))) {
-        toast.error('📱 Please enter a valid mobile number', { 
+      if (role !== 'admin' && !isValidIndianMobile(formData.phone)) {
+        toast.error('📱 Please enter a valid Indian mobile number', { 
           icon: '❌',
           duration: 4000 
         });
@@ -583,7 +584,7 @@ const AuthForm = ({
           formData.email &&
           /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) &&
           formData.phone &&
-          /^[6-9]\d{9}$/.test(formData.phone.replace(/\D/g, '')) &&
+          isValidIndianMobile(formData.phone) &&
           formData.password &&
           formData.confirmPassword &&
           formData.password === formData.confirmPassword &&
@@ -597,7 +598,7 @@ const AuthForm = ({
           formData.email &&
           /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) &&
           formData.phone &&
-          /^[6-9]\d{9}$/.test(formData.phone.replace(/\D/g, '')) &&
+          isValidIndianMobile(formData.phone) &&
           formData.password &&
           formData.confirmPassword &&
           formData.password === formData.confirmPassword &&
@@ -1093,18 +1094,18 @@ const AuthForm = ({
                       required={!isLogin}
                       value={formData.phone}
                       onChange={handleChange}
-                      maxLength="14" // Support various formatting: 9876543210, 987-654-3210, or 987 654 3210
+                      maxLength="10" // Support 10 digit Indian mobile numbers
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
-                        formData.phone && formData.phone.replace(/\D/g, '').length === 10 && /^[6-9]/.test(formData.phone.replace(/\D/g, ''))
+                        formData.phone && isValidIndianMobile(formData.phone)
                           ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                          : formData.phone && formData.phone.length > 0 && (formData.phone.replace(/\D/g, '').length !== 10 || !/^[6-9]/.test(formData.phone.replace(/\D/g, '')))
+                          : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                       }`}
                       placeholder="Enter phone number (e.g., 9876543210)"
                     />
                     <div className="absolute right-3 top-2.5">
-                      {formData.phone && formData.phone.replace(/\D/g, '').length === 10 && /^[6-9]/.test(formData.phone.replace(/\D/g, '')) ? (
+                      {formData.phone && isValidIndianMobile(formData.phone) ? (
                         <FaCheckCircle className="h-5 w-5 text-green-500" />
                       ) : formData.phone && formData.phone.length > 0 ? (
                         <FaExclamationCircle className="h-5 w-5 text-red-500" />
@@ -1113,9 +1114,9 @@ const AuthForm = ({
                       )}
                     </div>
                   </div>
-                  {formData.phone && formData.phone.length > 0 && (formData.phone.replace(/\D/g, '').length !== 10 || !/^[6-9]/.test(formData.phone.replace(/\D/g, ''))) && (
+                  {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
                     <p className="text-red-500 text-xs mt-1">
-                      📱 Please enter a valid mobile number
+                      📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
                     </p>
                   )}
                 </div>

@@ -14,9 +14,11 @@ import {
   FaChartLine,
   FaEnvelope,
   FaCheckCircle,
-  FaExclamationCircle
+  FaExclamationCircle,
+  FaPhone
 } from 'react-icons/fa';
 import FileUpload from '../../components/FileUpload.jsx';
+import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
 
 const PG_TYPE_OPTIONS = ['Single', 'Double', 'Triple', 'Four'];
 const GENDER_OPTIONS = [
@@ -170,7 +172,10 @@ export default function PGManagement() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    if (name.includes('.')) {
+    if (name === 'contactNumber') {
+      const formatted = formatPhoneNumber(value);
+      setForm(prev => ({ ...prev, contactNumber: formatted }));
+    } else if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setForm(prev => ({
         ...prev,
@@ -275,14 +280,38 @@ export default function PGManagement() {
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number *</label>
-        <input
-          name="contactNumber"
-          value={form.contactNumber}
-          onChange={handleChange}
-          placeholder="+91-XXXXXXXXXX"
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-        />
+        <div className="relative">
+          <input
+            name="contactNumber"
+            type="tel"
+            value={form.contactNumber}
+            onChange={handleChange}
+            maxLength="10"
+            placeholder="Enter contact number (e.g., 9876543210)"
+            className={`appearance-none block w-full p-3 pr-10 border rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 ${
+              form.contactNumber && isValidIndianMobile(form.contactNumber)
+                ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                : form.contactNumber && form.contactNumber.length > 0 && !isValidIndianMobile(form.contactNumber)
+                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+            }`}
+            required
+          />
+          <div className="absolute right-3 top-3.5">
+            {form.contactNumber && isValidIndianMobile(form.contactNumber) ? (
+              <FaCheckCircle className="h-5 w-5 text-green-500" />
+            ) : form.contactNumber && form.contactNumber.length > 0 ? (
+              <FaExclamationCircle className="h-5 w-5 text-red-500" />
+            ) : (
+              <FaPhone className="h-5 w-5 text-gray-400" />
+            )}
+          </div>
+        </div>
+        {form.contactNumber && form.contactNumber.length > 0 && !isValidIndianMobile(form.contactNumber) && (
+          <p className="text-red-500 text-xs mt-1">
+            📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+          </p>
+        )}
       </div>
 
       <div className="md:col-span-2">

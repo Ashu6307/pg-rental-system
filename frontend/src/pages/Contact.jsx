@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaWhatsapp, FaBuilding, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import apiService from '../services/api';
 import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
+import { formatPhoneNumber, isValidIndianMobile } from '../utils/mobileValidation';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -62,6 +63,10 @@ const Contact = () => {
     const { name, value, files } = e.target;
     if (name === 'attachments') {
       setFormData({ ...formData, attachments: files });
+    } else if (name === 'phone') {
+      // Format phone number
+      const formatted = formatPhoneNumber(value);
+      setFormData({ ...formData, phone: formatted });
     } else {
       setFormData({ ...formData, [name]: value });
       
@@ -174,7 +179,40 @@ const Contact = () => {
                 </div>
                 <div>
                   <label htmlFor="phone" className="block text-gray-700 text-base font-semibold mb-2">Phone Number *</label>
-                  <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} required disabled={isSubmitting} className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition disabled:bg-gray-100 shadow-sm text-sm" placeholder="Your phone number" />
+                  <div className="relative">
+                    <input 
+                      type="tel" 
+                      id="phone" 
+                      name="phone" 
+                      value={formData.phone} 
+                      onChange={handleChange} 
+                      maxLength="10"
+                      required 
+                      disabled={isSubmitting} 
+                      className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
+                        formData.phone && isValidIndianMobile(formData.phone)
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                          : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
+                          ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                          : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
+                      }`}
+                      placeholder="Enter mobile number (e.g., 9876543210)" 
+                    />
+                    <div className="absolute right-3 top-2.5">
+                      {formData.phone && isValidIndianMobile(formData.phone) ? (
+                        <FaCheckCircle className="h-5 w-5 text-green-500" />
+                      ) : formData.phone && formData.phone.length > 0 ? (
+                        <FaExclamationCircle className="h-5 w-5 text-red-500" />
+                      ) : (
+                        <FaPhone className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+                  {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
+                    <p className="text-red-500 text-xs mt-1">
+                      📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+                    </p>
+                  )}
                 </div>
               </div>
               <div>

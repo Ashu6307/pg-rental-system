@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaEnvelope, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaEnvelope, FaCheckCircle, FaExclamationCircle, FaPhone } from 'react-icons/fa';
 import FileUpload from '../../components/FileUpload.jsx';
+import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
 
 export default function OwnerProfile() {
   const [profile, setProfile] = useState(null);
@@ -35,7 +36,12 @@ export default function OwnerProfile() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+    if (name === 'phone') {
+      const formatted = formatPhoneNumber(value);
+      setForm({ ...form, phone: formatted });
+    } else {
+      setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -90,7 +96,39 @@ export default function OwnerProfile() {
               <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
             )}
           </div>
-          <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" className="input" />
+          
+          <div className="relative">
+            <input 
+              name="phone" 
+              value={form.phone} 
+              onChange={handleChange} 
+              type="tel"
+              maxLength="10"
+              placeholder="Phone Number" 
+              className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
+                form.phone && isValidIndianMobile(form.phone)
+                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                  : form.phone && form.phone.length > 0 && !isValidIndianMobile(form.phone)
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              }`}
+            />
+            <div className="absolute right-3 top-2.5">
+              {form.phone && isValidIndianMobile(form.phone) ? (
+                <FaCheckCircle className="h-5 w-5 text-green-500" />
+              ) : form.phone && form.phone.length > 0 ? (
+                <FaExclamationCircle className="h-5 w-5 text-red-500" />
+              ) : (
+                <FaPhone className="h-5 w-5 text-gray-400" />
+              )}
+            </div>
+          </div>
+          {form.phone && form.phone.length > 0 && !isValidIndianMobile(form.phone) && (
+            <p className="text-red-500 text-xs mt-1">
+              📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+            </p>
+          )}
+          
           <input name="address" value={form.address} onChange={handleChange} placeholder="Address" className="input" />
           <label className="flex items-center">
             <input type="checkbox" name="consent" checked={form.consent} onChange={handleChange} /> GDPR/Data Consent

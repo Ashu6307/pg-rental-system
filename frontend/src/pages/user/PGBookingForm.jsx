@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { FaEnvelope, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaEnvelope, FaCheckCircle, FaExclamationCircle, FaPhone } from 'react-icons/fa';
 import TermsPopup from '../components/TermsPopup';
 import { bookPG } from '../api/pgBookingAPI';
+import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
 
 const PGBookingForm = ({ pg }) => {
   const colors = { main: 'bg-blue-50', btn: 'bg-blue-600 hover:bg-blue-700', text: 'text-blue-700' };
@@ -26,6 +27,17 @@ const PGBookingForm = ({ pg }) => {
   const [showTerms, setShowTerms] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [message, setMessage] = useState('');
+
+  // Phone number formatters
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setPhone(formatted);
+  };
+
+  const handleEmergencyPhoneChange = (e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setEmergencyPhone(formatted);
+  };
 
   // Dummy OTP send
   const sendOtp = () => {
@@ -78,8 +90,38 @@ const PGBookingForm = ({ pg }) => {
           <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full border rounded px-3 py-2" required />
         </div>
         <div>
-          <label className="block font-semibold mb-1">Phone</label>
-          <input type="text" value={phone} onChange={e => setPhone(e.target.value)} className="w-full border rounded px-3 py-2" required />
+          <label className="block font-semibold mb-1">Phone Number <span className="text-red-500">*</span></label>
+          <div className="relative">
+            <input 
+              type="tel" 
+              value={phone} 
+              onChange={handlePhoneChange} 
+              maxLength="10"
+              className={`appearance-none block w-full px-3 py-2 pr-10 border rounded placeholder-gray-400 focus:outline-none sm:text-sm ${
+                phone && isValidIndianMobile(phone)
+                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                  : phone && phone.length > 0 && !isValidIndianMobile(phone)
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              }`}
+              placeholder="Enter mobile number (e.g., 9876543210)" 
+              required 
+            />
+            <div className="absolute right-3 top-2.5">
+              {phone && isValidIndianMobile(phone) ? (
+                <FaCheckCircle className="h-5 w-5 text-green-500" />
+              ) : phone && phone.length > 0 ? (
+                <FaExclamationCircle className="h-5 w-5 text-red-500" />
+              ) : (
+                <FaPhone className="h-5 w-5 text-gray-400" />
+              )}
+            </div>
+          </div>
+          {phone && phone.length > 0 && !isValidIndianMobile(phone) && (
+            <p className="text-red-500 text-xs mt-1">
+              📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+            </p>
+          )}
         </div>
         <div>
           <label className="block font-semibold mb-1">Email</label>
@@ -126,7 +168,36 @@ const PGBookingForm = ({ pg }) => {
         </div>
         <div>
           <label className="block font-semibold mb-1">Emergency Contact Phone</label>
-          <input type="text" value={emergencyPhone} onChange={e => setEmergencyPhone(e.target.value)} className="w-full border rounded px-3 py-2" />
+          <div className="relative">
+            <input 
+              type="tel" 
+              value={emergencyPhone} 
+              onChange={handleEmergencyPhoneChange} 
+              maxLength="10"
+              className={`appearance-none block w-full px-3 py-2 pr-10 border rounded placeholder-gray-400 focus:outline-none sm:text-sm ${
+                emergencyPhone && isValidIndianMobile(emergencyPhone)
+                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                  : emergencyPhone && emergencyPhone.length > 0 && !isValidIndianMobile(emergencyPhone)
+                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                  : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              }`}
+              placeholder="Enter emergency contact number" 
+            />
+            <div className="absolute right-3 top-2.5">
+              {emergencyPhone && isValidIndianMobile(emergencyPhone) ? (
+                <FaCheckCircle className="h-5 w-5 text-green-500" />
+              ) : emergencyPhone && emergencyPhone.length > 0 ? (
+                <FaExclamationCircle className="h-5 w-5 text-red-500" />
+              ) : (
+                <FaPhone className="h-5 w-5 text-gray-400" />
+              )}
+            </div>
+          </div>
+          {emergencyPhone && emergencyPhone.length > 0 && !isValidIndianMobile(emergencyPhone) && (
+            <p className="text-red-500 text-xs mt-1">
+              📱 Please enter a valid Indian mobile number
+            </p>
+          )}
         </div>
         <div>
           <label className="block font-semibold mb-1">Gender</label>
