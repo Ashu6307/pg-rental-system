@@ -22,6 +22,7 @@ import authRoutes from './routes/auth.js';
 import homeRoutes from './routes/home.js';
 import otpRoutes from './routes/otp.js';
 import forgotPasswordRoutes from './routes/forgotPassword.js';
+import softDeleteRoutes from './routes/softDelete.js';
 import { checkJwtExpiry } from './middleware/security.js';
 import ownerBookingsRoutes from './routes/ownerBookings.js';
 import ownerRevenueRoutes from './routes/ownerRevenue.js';
@@ -80,6 +81,7 @@ app.use('/api/auth', authMeRouter); // Auth/me endpoint for user profile
 app.use('/api/admin', adminRoutes); // Admin authentication and management
 app.use('/api/otp', otpRoutes); // OTP verification
 app.use('/api/forgot-password', forgotPasswordRoutes); // Password reset
+app.use('/api/soft-delete', softDeleteRoutes); // Soft delete operations
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/pg_bike_rental', {

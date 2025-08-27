@@ -1,13 +1,13 @@
 // softDeleteController.js
 // Industry-level soft delete + audit log controller
-const AuditLog = require('../models/AuditLog');
+import AuditLog from '../models/AuditLog.js';
 
 // Generic soft delete for any model
-exports.softDelete = async (req, res) => {
+export const softDelete = async (req, res) => {
   try {
     const { model, id, userId } = req.body;
-    const Model = require(`../models/${model}`);
-    const doc = await Model.findById(id);
+    const Model = await import(`../models/${model}.js`);
+    const doc = await Model.default.findById(id);
     if (!doc) return res.status(404).json({ error: `${model} not found` });
     doc.status = 'deleted';
     await doc.save();
@@ -19,11 +19,11 @@ exports.softDelete = async (req, res) => {
 };
 
 // Restore soft deleted record
-exports.restore = async (req, res) => {
+export const restore = async (req, res) => {
   try {
     const { model, id, userId } = req.body;
-    const Model = require(`../models/${model}`);
-    const doc = await Model.findById(id);
+    const Model = await import(`../models/${model}.js`);
+    const doc = await Model.default.findById(id);
     if (!doc) return res.status(404).json({ error: `${model} not found` });
     doc.status = 'active';
     await doc.save();
@@ -33,3 +33,5 @@ exports.restore = async (req, res) => {
     res.status(500).json({ error: 'Failed to restore' });
   }
 };
+
+export default { softDelete, restore };

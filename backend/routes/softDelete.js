@@ -1,11 +1,12 @@
 // softDelete.js
-const express = require('express');
+import express from 'express';
+import { softDelete, restore } from '../controllers/softDeleteController.js';
+
 const router = express.Router();
-const softDeleteController = require('../controllers/softDeleteController');
 
 // Soft delete any entity
-router.post('/delete', softDeleteController.softDelete);
+router.post('/delete', softDelete);
 // Restore soft deleted entity
-router.post('/restore', softDeleteController.restore);
+router.post('/restore', restore);
 
-module.exports = router;
+export default router;

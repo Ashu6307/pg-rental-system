@@ -944,13 +944,14 @@ const AuthForm = ({
               {/* Common fields for login/register */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
-                <div className="mt-1 flex items-center gap-2 relative">
-                  <div className="relative w-full">
+                <div className="mt-1 flex items-center gap-2 relative" style={{ contain: 'layout' }}>
+                  <div className="relative w-full" style={{ isolation: 'isolate' }}>
                     <input
                       id="email"
                       name="email"
                       type="email"
                       autoComplete="email"
+                      autoFocus={false}
                       required
                       value={formData.email}
                       onChange={handleChange}
@@ -965,6 +966,12 @@ const AuthForm = ({
                           : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                       }`}
                       placeholder="Enter your email address"
+                      style={{ 
+                        position: 'relative',
+                        zIndex: 1,
+                        transform: 'translateZ(0)',
+                        isolation: 'isolate'
+                      }}
                     />
                     {emailVerified ? (
                       <div className="absolute right-3 top-2.5 flex items-center gap-1">
@@ -982,7 +989,7 @@ const AuthForm = ({
                   
                   {/* Email Suggestions Dropdown */}
                   {showEmailSuggestions && emailSuggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 mt-1">
+                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
                       {emailSuggestions.map((suggestion, index) => (
                         <button
                           key={index}
@@ -1579,9 +1586,10 @@ const AuthForm = ({
             <div className="mt-4 text-center">
               <a
                 href={getHomePath()}
-                className="text-gray-500 hover:text-gray-700 text-sm"
+                className="text-gray-500 hover:text-gray-700 text-sm inline-flex items-center gap-1"
               >
-                ← Back to Home
+                <FaHome className="h-3 w-3" />
+                Back to Home
               </a>
             </div>
           </div>
@@ -1668,25 +1676,20 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Email domain suggestions
+  // Email domain suggestions (same as registration page)
   const generateEmailSuggestions = (email) => {
-    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'rediffmail.com', 'icloud.com', 'protonmail.com'];
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'rediffmail.com'];
     const emailParts = email.split('@');
     
     if (emailParts.length === 2 && emailParts[1].length > 0) {
       const domain = emailParts[1].toLowerCase();
       const suggestions = commonDomains
         .filter(d => d.startsWith(domain) && d !== domain)
-        .slice(0, 4) // Show max 4 suggestions
+        .slice(0, 3)
         .map(d => `${emailParts[0]}@${d}`);
       
       setEmailSuggestions(suggestions);
       setShowEmailSuggestions(suggestions.length > 0);
-    } else if (emailParts.length === 1 && emailParts[0].length > 2) {
-      // Only show suggestions if username is at least 3 characters
-      const suggestions = commonDomains.slice(0, 3).map(d => `${emailParts[0]}@${d}`);
-      setEmailSuggestions(suggestions);
-      setShowEmailSuggestions(true);
     } else {
       setShowEmailSuggestions(false);
     }
@@ -1952,8 +1955,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     : 'bg-blue-50';
 
   return (
-    <div className={`min-h-screen flex flex-col justify-start sm:px-2 lg:px-4 ${bgColor}`}>
-      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-16 mt-4">
+    <div className={`min-h-screen flex flex-col justify-start sm:px-2 lg:px-4 overflow-visible ${bgColor}`}>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-16 mt-4 overflow-visible">
         <div className="flex justify-center">
           <div className="flex flex-col items-center space-y-2 w-full">
             <span className="relative group">
@@ -1979,7 +1982,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           {currentStep === 3 && 'Create your new secure password'}
         </p>
         
-        <div className={`p-8 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl ${
+        <div className={`p-8 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl overflow-visible ${
           role === 'admin'
             ? 'bg-gradient-to-br from-red-50 via-white to-red-100'
             : role === 'owner'
@@ -1992,17 +1995,18 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           
           {/* Step 1: Email Input */}
           {currentStep === 1 && (
-            <form onSubmit={handleSendOtp} className="space-y-6">
-              <div>
+            <form onSubmit={handleSendOtp} className="space-y-6 overflow-visible">
+              <div className="relative">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   {role.charAt(0).toUpperCase() + role.slice(1)} Email Address <span className="text-red-500">*</span>
                 </label>
-                <div className="mt-1 relative">
+                <div className="mt-1 relative" style={{ contain: 'layout', isolation: 'isolate' }}>
                   <input
                     id="email"
                     name="email"
                     type="email"
                     autoComplete="email"
+                    autoFocus={false}
                     required
                     value={formData.email}
                     onChange={handleEmailChange}
@@ -2014,6 +2018,12 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                         : `border-gray-300 focus:ring-${roleColor}-500 focus:border-${roleColor}-500`
                     }`}
                     placeholder={`Enter your ${role} email address`}
+                    style={{ 
+                      position: 'relative',
+                      zIndex: 1,
+                      transform: 'translateZ(0)',
+                      isolation: 'isolate'
+                    }}
                   />
                   {formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) && formData.email.length > 0 ? (
                     <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
@@ -2026,7 +2036,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                 
                 {/* Email Suggestions Dropdown */}
                 {showEmailSuggestions && emailSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 mt-1">
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
                     {emailSuggestions.map((suggestion, index) => (
                       <button
                         key={index}
@@ -2408,7 +2418,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
             <div className="text-center">
               <a
                 href="/"
-                className="text-gray-500 hover:text-gray-700 text-sm flex items-center justify-center gap-1"
+                className="text-gray-500 hover:text-gray-700 text-sm inline-flex items-center gap-1"
               >
                 <FaHome className="h-3 w-3" />
                 Back to Home

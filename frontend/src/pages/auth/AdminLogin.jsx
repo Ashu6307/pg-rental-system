@@ -1,47 +1,9 @@
-// ...existing code...
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { AuthContext } from '../../context/AuthContext';
 import authService from '../../services/authService';
-import { FaUserShield, FaEnvelope, FaEye, FaEyeSlash, FaCheckCircle, FaExclamationCircle, FaLock } from 'react-icons/fa';
-
-const AdminLogin = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [otpError, setOtpError] = useState('');
-  const [otpSuccess, setOtpSuccess] = useState('');
-  const [resendTimer, setResendTimer] = useState(0);
-  const [canResend, setCanResend] = useState(true);
-  
-  // Email suggestions
-  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
-  const [emailSuggestions, setEmailSuggestions] = useState([]);
-  
-  const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
-
-  // OTP Timer countdown
-  useEffect(() => {
-    let interval = null;
-    if (resendTimer > 0) {
-      interval = setInterval(() => {
-        setResendTimer(timer => {
-          if (timer <= 1) {
-            setCanResend(true);
-// ...existing code...
-import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { AuthContext } from '../../context/AuthContext';
-import authService from '../../services/authService';
-import { FaUserShield, FaEnvelope, FaEye, FaEyeSlash, FaCheckCircle, FaExclamationCircle, FaLock } from 'react-icons/fa';
+import { FaUserShield, FaEnvelope, FaEye, FaEyeSlash, FaCheckCircle, FaExclamationCircle, FaLock, FaHome } from 'react-icons/fa';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -269,7 +231,7 @@ const AdminLogin = () => {
                       
                       {/* Email Suggestions Dropdown */}
                       {showEmailSuggestions && emailSuggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 mt-1">
+                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
                           {emailSuggestions.map((suggestion, index) => (
                             <button
                               key={index}
@@ -355,9 +317,10 @@ const AdminLogin = () => {
                     <button
                       type="button"
                       onClick={() => navigate('/')}
-                      className="text-sm text-gray-600 hover:text-gray-800 font-medium underline"
+                      className="text-gray-500 hover:text-gray-700 text-sm inline-flex items-center gap-1"
                     >
-                      ← Back to Home
+                      <FaHome className="h-3 w-3" />
+                      Back to Home
                     </button>
                   </div>
                 </div>
@@ -508,9 +471,10 @@ const AdminLogin = () => {
                       <button
                         type="button"
                         onClick={() => navigate('/')}
-                        className="text-sm text-gray-600 hover:text-gray-800 font-medium underline"
+                        className="text-gray-500 hover:text-gray-700 text-sm inline-flex items-center gap-1"
                       >
-                        ← Back to Home
+                        <FaHome className="h-3 w-3" />
+                        Back to Home
                       </button>
                     </div>
                   </div>
@@ -522,7 +486,6 @@ const AdminLogin = () => {
         </div>
       </div>
     </div>
-// ...existing code...
   );
 };
 
