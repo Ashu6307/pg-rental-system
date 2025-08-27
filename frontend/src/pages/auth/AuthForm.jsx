@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope, FaPhone, FaUserCircle, FaUserTie, FaUserShield, FaCheckCircle, FaExclamationCircle, FaHome, FaArrowLeft } from 'react-icons/fa';
+import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope, FaPhone, FaUserCircle, FaUserTie, FaUserShield, FaCheckCircle, FaExclamationCircle, FaHome, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { toast, Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
@@ -1970,7 +1970,13 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
   };
 
   const handleOtpChange = (index, value) => {
-    if (value.length > 1) return; // Only allow single digit
+    // Only allow single digit and numbers only
+    if (value.length > 1) return;
+    
+    // Check if value is a digit (0-9) or empty
+    if (value !== '' && !/^[0-9]$/.test(value)) {
+      return; // Don't allow non-numeric characters
+    }
     
     const otpArray = formData.otp.split('');
     otpArray[index] = value;
@@ -2003,7 +2009,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     const themeColor = role === 'admin' ? 'red' : role === 'owner' ? 'green' : 'blue';
 
     return (
-      <div className="flex items-center justify-center space-x-2 mb-6 w-full">
+      <div className="flex items-center justify-center space-x-2 mb-4 w-full">
         <div className="flex items-center justify-center space-x-2">
           {steps.map((step, index) => (
             <React.Fragment key={step.number}>
@@ -2026,9 +2032,13 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                 </span>
               </div>
               {index < steps.length - 1 && (
-                <div className={`w-8 h-0.5 ${
-                  currentStep > step.number ? `bg-${themeColor}-600` : 'bg-gray-300'
-                }`}></div>
+                <div className="flex items-center">
+                  <span className={`text-lg font-bold ${
+                    currentStep > step.number ? `text-${themeColor}-600` : 'text-gray-400'
+                  }`}>
+                    →
+                  </span>
+                </div>
               )}
             </React.Fragment>
           ))}
@@ -2048,13 +2058,13 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     : 'bg-blue-50';
 
   return (
-    <div className={`min-h-screen flex items-center justify-center py-2 px-4 overflow-hidden ${bgColor}`} style={{ overflow: 'hidden', height: '100vh' }}>
-      <div className="w-full max-w-md mx-auto overflow-visible" style={{ transform: 'translateY(-2rem)' }}>
+    <div className={`min-h-screen flex items-center justify-center py-1 px-4 overflow-hidden ${bgColor}`} style={{ overflow: 'hidden', height: '100vh' }}>
+      <div className="w-full max-w-md mx-auto overflow-visible" style={{ transform: 'translateY(-3rem)' }}>
         <div className="flex justify-center">
           <div className="flex flex-col items-center space-y-1 w-full">
             <span className="relative group">
               <IconComponent
-                className={`h-12 w-12 ${iconColor} drop-shadow-lg`}
+                className={`h-10 w-10 ${iconColor} drop-shadow-lg`}
                 title={`${role.charAt(0).toUpperCase() + role.slice(1)} Password Reset`}
               />
               <span className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
@@ -2075,7 +2085,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           {currentStep === 3 && 'Create your new secure password'}
         </p>
         
-        <div className={`p-6 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl overflow-visible ${
+        <div className={`p-4 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl overflow-visible ${
           role === 'admin'
             ? 'bg-gradient-to-br from-red-50 via-white to-red-100'
             : role === 'owner'
@@ -2088,7 +2098,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           
           {/* Step 1: Email Input */}
           {currentStep === 1 && (
-            <form onSubmit={handleSendOtp} className="space-y-6 overflow-visible">
+            <form onSubmit={handleSendOtp} className="space-y-4 overflow-visible">
               <div className="relative">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   {role.charAt(0).toUpperCase() + role.slice(1)} Email Address <span className="text-red-500">*</span>
@@ -2181,27 +2191,27 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           {currentStep === 2 && (
             <div className="space-y-4">
               {/* OTP Sent Success Message */}
-              <div className={`p-3 ${
+              <div className={`p-2 ${
                 role === 'admin' 
                   ? 'bg-red-50 border-red-200' 
                   : role === 'owner' 
                   ? 'bg-green-50 border-green-200' 
                   : 'bg-blue-50 border-blue-200'
-              } border rounded-xl`}>
+              } border rounded-lg`}>
                 <div className="flex items-center">
-                  <FaCheckCircle className={`h-5 w-5 ${
+                  <FaCheckCircle className={`h-4 w-4 ${
                     role === 'admin' ? 'text-red-500' : role === 'owner' ? 'text-green-500' : 'text-blue-500'
-                  } mr-3`} />
+                  } mr-2`} />
                   <div>
-                    <p className={`text-sm font-medium ${
+                    <p className={`text-xs font-medium ${
                       role === 'admin' ? 'text-red-800' : role === 'owner' ? 'text-green-800' : 'text-blue-800'
                     }`}>
                       Reset OTP sent successfully!
                     </p>
-                    <p className={`text-sm mt-1 ${
+                    <p className={`text-xs ${
                       role === 'admin' ? 'text-red-600' : role === 'owner' ? 'text-green-600' : 'text-blue-600'
                     }`}>
-                      Please check your email <strong>{formData.email}</strong> for the reset code.
+                      Check email <strong>{formData.email}</strong> for code.
                     </p>
                   </div>
                 </div>
@@ -2221,6 +2231,12 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                         value={formData.otp[index] || ''}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck="false"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         className={`w-12 h-12 text-center text-lg font-bold border-2 border-gray-300 rounded-xl focus:outline-none transition-all duration-200 shadow-sm ${
                           role === 'admin' 
                             ? 'focus:border-red-500 focus:ring-2 focus:ring-red-200' 
@@ -2256,15 +2272,18 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     </button>
                   </div>
 
-                  {otpError && (
-                    <div className={`p-3 ${
-                      role === 'admin' ? 'bg-red-50 border-red-200' : 
-                      role === 'owner' ? 'bg-green-50 border-green-200' : 
-                      'bg-blue-50 border-blue-200'
-                    } border rounded-md`}>
-                      <p className="text-red-600 text-sm font-medium">{otpError}</p>
-                    </div>
-                  )}
+                  {/* OTP Error Message - Fixed Position */}
+                  <div className="relative h-8">
+                    {otpError && (
+                      <div className={`absolute top-0 left-0 w-full p-2 ${
+                        role === 'admin' ? 'bg-red-50 border-red-200' : 
+                        role === 'owner' ? 'bg-green-50 border-green-200' : 
+                        'bg-blue-50 border-blue-200'
+                      } border rounded-md shadow-sm z-10`}>
+                        <p className="text-red-600 text-xs font-medium text-center">{otpError}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="pt-3">
@@ -2475,30 +2494,20 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           )}
 
           {/* Navigation Links */}
-          <div className="mt-4 space-y-3">
-            {/* Back to credentials for step 2 and 3 */}
-            {currentStep > 1 && (
+          <div className="mt-3 space-y-2">
+            {/* Back to credentials for step 2 only */}
+            {currentStep === 2 && (
               <div className="text-center">
-                {currentStep === 2 ? (
-                  <p className="text-sm text-gray-600">
-                    Wrong email?{' '}
-                    <button
-                      onClick={() => setCurrentStep(1)}
-                      className={`text-${roleColor}-600 hover:text-${roleColor}-800 font-medium underline transition-colors duration-200`}
-                    >
-                      Edit Email
-                    </button>
-                    {' '}and correct
-                  </p>
-                ) : (
+                <p className="text-sm text-gray-600">
+                  Wrong email?{' '}
                   <button
-                    onClick={() => setCurrentStep(currentStep - 1)}
-                    className={`text-${roleColor}-600 hover:text-${roleColor}-800 text-sm font-medium flex items-center justify-center gap-2 mx-auto transition-colors duration-200`}
+                    onClick={() => setCurrentStep(1)}
+                    className={`text-${roleColor}-600 hover:text-${roleColor}-800 font-medium underline transition-colors duration-200`}
                   >
-                    <FaArrowLeft className="h-3 w-3" />
-                    Back to OTP Verification
+                    Edit Email
                   </button>
-                )}
+                  {' '}and correct
+                </p>
               </div>
             )}
             
