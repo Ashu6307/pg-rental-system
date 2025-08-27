@@ -184,13 +184,6 @@ router.post('/login', loginLimiter, async (req, res) => {
       });
     }
 
-    if (user.status === 'pending') {
-      return res.status(403).json({ 
-        error: 'Your account is pending verification. Please verify your email.',
-        action: 'resend_verification'
-      });
-    }
-
     const valid = await comparePassword(password, user.password_hash);
     if (!valid) {
       // Log failed login attempt for security
