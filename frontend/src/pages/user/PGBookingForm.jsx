@@ -4,10 +4,15 @@ import { FaEnvelope, FaCheckCircle, FaExclamationCircle, FaPhone } from 'react-i
 import TermsPopup from '../components/TermsPopup';
 import { bookPG } from '../api/pgBookingAPI';
 import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
+import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/nameValidation';
+import { handleEmailChange, isValidEmail, getEmailValidationError } from '../../utils/emailValidation';
 
 const PGBookingForm = ({ pg }) => {
   const colors = { main: 'bg-blue-50', btn: 'bg-blue-600 hover:bg-blue-700', text: 'text-blue-700' };
   const [name, setName] = useState('');
+  const [nameError, setNameError] = useState(''); // Name validation error
+  const [emergencyNameError, setEmergencyNameError] = useState(''); // Emergency contact name error
+  const [emailError, setEmailError] = useState(''); // Email validation error
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
@@ -86,8 +91,45 @@ const PGBookingForm = ({ pg }) => {
         <h2 className={`text-3xl font-extrabold mb-6 text-center ${colors.text}`}>PG Booking</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block font-semibold mb-1">Full Name</label>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full border rounded px-3 py-2" required />
+          <label className="block font-semibold mb-1">Full Name <span className="text-red-500">*</span></label>
+          <div className="relative">
+            <input 
+              type="text" 
+              value={name} 
+              onChange={(e) => {
+                const processedValue = handleNameChange(e.target.value, setName, setNameError);
+              }}
+              maxLength="20"
+              className={`w-full border rounded px-3 py-2 pr-10 ${
+                nameError 
+                  ? 'border-red-500 bg-red-50' 
+                  : name && isValidName(name)
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-gray-300'
+              }`}
+              placeholder="Enter your full name (4-20 chars)"
+              required 
+            />
+            <div className="absolute right-3 top-2.5 flex items-center space-x-1">
+              {name && (
+                isValidName(name) ? (
+                  <FaCheckCircle className="h-4 w-4 text-green-500" />
+                ) : (
+                  <FaExclamationCircle className="h-4 w-4 text-red-500" />
+                )
+              )}
+            </div>
+          </div>
+          <div className="flex justify-between items-center mt-1">
+            <div className="h-5">
+              {nameError && (
+                <p className="text-xs text-red-600">{nameError}</p>
+              )}
+            </div>
+            <div className="text-xs text-gray-500">
+              {name.length}/20 characters
+            </div>
+          </div>
         </div>
         <div>
           <label className="block font-semibold mb-1">Phone Number <span className="text-red-500">*</span></label>
@@ -127,25 +169,45 @@ const PGBookingForm = ({ pg }) => {
           </div>
         </div>
         <div>
-          <label className="block font-semibold mb-1">Email</label>
+          <label className="block font-semibold mb-1">Email Address <span className="text-red-500">*</span></label>
           <div className="relative">
             <input 
               type="email" 
               value={email} 
-              onChange={e => setEmail(e.target.value)} 
-              className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500" 
+              onChange={(e) => {
+                const processedValue = handleEmailChange(
+                  e.target.value, 
+                  setEmail, 
+                  setEmailError
+                );
+              }}
+              className={`appearance-none block w-full px-3 py-2 pr-10 border rounded placeholder-gray-400 focus:outline-none ${
+                emailError 
+                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                  : email && isValidEmail(email)
+                    ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                    : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              }`}
+              placeholder="Enter your email address"
               required 
             />
             
             {/* Email validation icons */}
-            {email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) ? (
+            {emailError ? (
               <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-            ) : email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) ? (
+            ) : email && isValidEmail(email) ? (
               <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
             ) : (
               <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
             )}
           </div>
+          
+          {/* Email Error Message */}
+          {emailError && (
+            <div className="mt-1">
+              <p className="text-xs text-red-600">{emailError}</p>
+            </div>
+          )}
         </div>
         <div>
           <label className="block font-semibold mb-1">Address</label>
@@ -167,7 +229,43 @@ const PGBookingForm = ({ pg }) => {
         </div>
         <div>
           <label className="block font-semibold mb-1">Emergency Contact Name</label>
-          <input type="text" value={emergencyName} onChange={e => setEmergencyName(e.target.value)} className="w-full border rounded px-3 py-2" />
+          <div className="relative">
+            <input 
+              type="text" 
+              value={emergencyName} 
+              onChange={(e) => {
+                const processedValue = handleNameChange(e.target.value, setEmergencyName, setEmergencyNameError);
+              }}
+              maxLength="20"
+              className={`w-full border rounded px-3 py-2 pr-10 ${
+                emergencyNameError 
+                  ? 'border-red-500 bg-red-50' 
+                  : emergencyName && isValidName(emergencyName)
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-gray-300'
+              }`}
+              placeholder="Emergency contact name (4-20 chars)"
+            />
+            <div className="absolute right-3 top-2.5 flex items-center space-x-1">
+              {emergencyName && (
+                isValidName(emergencyName) ? (
+                  <FaCheckCircle className="h-4 w-4 text-green-500" />
+                ) : (
+                  <FaExclamationCircle className="h-4 w-4 text-red-500" />
+                )
+              )}
+            </div>
+          </div>
+          <div className="flex justify-between items-center mt-1">
+            <div className="h-5">
+              {emergencyNameError && (
+                <p className="text-xs text-red-600">{emergencyNameError}</p>
+              )}
+            </div>
+            <div className="text-xs text-gray-500">
+              {emergencyName.length}/20 characters
+            </div>
+          </div>
         </div>
         <div>
           <label className="block font-semibold mb-1">Emergency Contact Phone</label>

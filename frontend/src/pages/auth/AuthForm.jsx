@@ -5,6 +5,8 @@ import { toast, Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import authService from '../../services/authService';
 import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
+import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/nameValidation';
+import { handleEmailChange, isValidEmail, getEmailValidationError, generateEmailSuggestions } from '../../utils/emailValidation';
 
 const AuthForm = ({
   mode = 'login',
@@ -44,6 +46,9 @@ const AuthForm = ({
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false); // Email domain suggestions
   const [emailSuggestions, setEmailSuggestions] = useState([]); // Email suggestions array
   const [acceptTerms, setAcceptTerms] = useState(false); // Terms and Privacy Policy acceptance
+  const [nameError, setNameError] = useState(''); // Name validation error
+  const [ownerNameError, setOwnerNameError] = useState(''); // Owner name validation error
+  const [emailError, setEmailError] = useState(''); // Email validation error
 
   const isLogin = mode === 'login';
 
@@ -871,15 +876,42 @@ const AuthForm = ({
                           autoComplete="name"
                           required={!isLogin}
                           value={formData.name}
-                          onChange={handleChange}
-                          maxLength="50"
-                          className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                          placeholder="Enter your full name"
+                          onChange={(e) => {
+                            const processedValue = handleNameChange(e.target.value, 
+                              (value) => setFormData({...formData, name: value}), 
+                              setNameError
+                            );
+                          }}
+                          maxLength="20"
+                          className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
+                            nameError 
+                              ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                              : formData.name && isValidName(formData.name)
+                                ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                          placeholder="Enter your full name (4-20 chars)"
                         />
-                        <FaUser className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                        <div className="absolute right-3 top-2.5 flex items-center space-x-1">
+                          {formData.name && (
+                            isValidName(formData.name) ? (
+                              <FaCheckCircle className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <FaExclamationCircle className="h-4 w-4 text-red-500" />
+                            )
+                          )}
+                          <FaUser className="h-4 w-4 text-gray-400" />
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {formData.name.length}/50 characters
+                      <div className="flex justify-between items-center mt-1">
+                        <div className="h-5">
+                          {nameError && (
+                            <p className="text-xs text-red-600">{nameError}</p>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {formData.name.length}/20 characters
+                        </div>
                       </div>
                     </div>
                   )}
@@ -897,15 +929,42 @@ const AuthForm = ({
                               type="text"
                               required
                               value={formData.ownerName}
-                              onChange={handleChange}
-                              maxLength="50"
-                              className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                              placeholder="Enter owner name"
+                              onChange={(e) => {
+                                const processedValue = handleNameChange(e.target.value, 
+                                  (value) => setFormData({...formData, ownerName: value}), 
+                                  setOwnerNameError
+                                );
+                              }}
+                              maxLength="20"
+                              className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
+                                ownerNameError 
+                                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                                  : formData.ownerName && isValidName(formData.ownerName)
+                                    ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                                    : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
+                              }`}
+                              placeholder="Enter owner name (4-20 chars)"
                             />
-                            <FaUserTie className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                            <div className="absolute right-3 top-2.5 flex items-center space-x-1">
+                              {formData.ownerName && (
+                                isValidName(formData.ownerName) ? (
+                                  <FaCheckCircle className="h-4 w-4 text-green-500" />
+                                ) : (
+                                  <FaExclamationCircle className="h-4 w-4 text-red-500" />
+                                )
+                              )}
+                              <FaUserTie className="h-4 w-4 text-gray-400" />
+                            </div>
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {formData.ownerName.length}/50 characters
+                          <div className="flex justify-between items-center mt-1">
+                            <div className="h-5">
+                              {ownerNameError && (
+                                <p className="text-xs text-red-600">{ownerNameError}</p>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {formData.ownerName.length}/20 characters
+                            </div>
                           </div>
                         </div>
                         <div>
@@ -932,43 +991,50 @@ const AuthForm = ({
               {/* Common fields for login/register */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
-                <div className="mt-1 flex items-center gap-2 relative" style={{ contain: 'layout' }}>
-                  <div className="relative w-full" style={{ isolation: 'isolate' }}>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      autoFocus={false}
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      onFocus={() => setShowEmailSuggestions(false)}
-                      readOnly={emailVerified} // Make email field read-only after verification
-                      className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
-                        emailVerified 
-                          ? 'border-green-500 bg-green-50 text-green-800 cursor-not-allowed' 
-                          : formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
-                          ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
-                          : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
-                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                          : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
-                      }`}
-                      placeholder="Enter your email address"
-                    />
-                    {emailVerified ? (
-                      <div className="absolute right-3 top-2.5 flex items-center gap-1">
-                        <FaCheckCircle className="h-5 w-5 text-green-500" />
-                        <span className="text-xs text-green-600 font-medium">Verified</span>
-                      </div>
-                    ) : formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) && formData.email.length > 0 ? (
-                      <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                    ) : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
-                      <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-                    ) : (
-                      <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
-                    )}
-                  </div>
+                <div className="mt-1 relative" style={{ contain: 'layout', isolation: 'isolate' }}>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    autoFocus={false}
+                    required
+                    value={formData.email}
+                    onChange={(e) => {
+                      const processedValue = handleEmailChange(
+                        e.target.value, 
+                        (value) => setFormData({...formData, email: value}), 
+                        setEmailError,
+                        setEmailSuggestions
+                      );
+                      // Show suggestions only if there's an @ and no error
+                      setShowEmailSuggestions(processedValue.includes('@') && !emailError);
+                    }}
+                    onFocus={() => setShowEmailSuggestions(false)}
+                    readOnly={emailVerified} // Make email field read-only after verification
+                    className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
+                      emailVerified 
+                        ? 'border-green-500 bg-green-50 text-green-800 cursor-not-allowed' 
+                        : emailError
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        : formData.email && isValidEmail(formData.email)
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
+                    }`}
+                    placeholder="Enter your email address"
+                  />
+                  {emailVerified ? (
+                    <div className="absolute right-3 top-2.5 flex items-center gap-1">
+                      <FaCheckCircle className="h-5 w-5 text-green-500" />
+                      <span className="text-xs text-green-600 font-medium">Verified</span>
+                    </div>
+                  ) : emailError ? (
+                    <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                  ) : formData.email && isValidEmail(formData.email) ? (
+                    <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                  ) : (
+                    <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                  )}
                   
                   {/* Email Suggestions Dropdown */}
                   {showEmailSuggestions && emailSuggestions.length > 0 && (
@@ -992,9 +1058,17 @@ const AuthForm = ({
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  {/* Verify Email Button for registration only (not for admin) */}
-                  {(!isLogin && role !== 'admin') && (
+                
+                {/* Email Error Message */}
+                {emailError && (
+                  <div className="mt-1">
+                    <p className="text-xs text-red-600">{emailError}</p>
+                  </div>
+                )}
+                
+                {/* Verify Email Button for registration only (not for admin) */}
+                {(!isLogin && role !== 'admin') && (
+                  <div className="mt-2">
                     <button
                       type="button"
                       className={`px-3 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${
@@ -1064,8 +1138,8 @@ const AuthForm = ({
                         'Verify Email'
                       )}
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
               {!isLogin && (
                 <div>
@@ -1601,6 +1675,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
   const [otpSuccess, setOtpSuccess] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
+  const [emailError, setEmailError] = useState(''); // Email validation error
   
   // Email suggestions
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
@@ -1678,10 +1753,15 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     }
   };
 
-  const handleEmailChange = (e) => {
-    const email = e.target.value;
-    setFormData(prev => ({ ...prev, email }));
-    generateEmailSuggestions(email);
+  const handleEmailInput = (e) => {
+    const processedValue = handleEmailChange(
+      e.target.value, 
+      (value) => setFormData(prev => ({ ...prev, email: value })), 
+      setEmailError,
+      setEmailSuggestions
+    );
+    // Show suggestions only if there's an @ and no error
+    setShowEmailSuggestions(processedValue.includes('@') && !emailError);
   };
 
   const handleEmailSuggestionClick = (suggestion) => {
@@ -1692,7 +1772,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     
-    if (!formData.email || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
+    if (!formData.email || !isValidEmail(formData.email)) {
       toast.error('Please enter a valid email address');
       return;
     }
@@ -1992,20 +2072,20 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     autoFocus={false}
                     required
                     value={formData.email}
-                    onChange={handleEmailChange}
+                    onChange={handleEmailInput}
                     onFocus={() => setShowEmailSuggestions(false)}
                     className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
-                      formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) && formData.email.length > 0
-                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
-                        : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
-                        ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                      emailError
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        : formData.email && isValidEmail(formData.email)
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
                         : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                     }`}
                     placeholder={`Enter your ${role} email address`}
                   />
-                  {formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) && formData.email.length > 0 ? (
+                  {emailError ? (
                     <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                  ) : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
+                  ) : formData.email && isValidEmail(formData.email) ? (
                     <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
                   ) : (
                     <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
@@ -2030,12 +2110,19 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     ))}
                   </div>
                 )}
+                
+                {/* Email Error Message */}
+                {emailError && (
+                  <div className="mt-1">
+                    <p className="text-xs text-red-600">{emailError}</p>
+                  </div>
+                )}
               </div>
 
               <div>
                 <button
                   type="submit"
-                  disabled={loading || !formData.email || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)}
+                  disabled={loading || !formData.email || !isValidEmail(formData.email) || emailError}
                   className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200 ${
                     role === 'admin' 
                       ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300' 

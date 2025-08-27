@@ -3,6 +3,8 @@ import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaWhatsapp,
 import apiService from '../services/api';
 import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
 import { formatPhoneNumber, isValidIndianMobile } from '../utils/mobileValidation';
+import { handleNameChange, isValidName, getNameValidationError, formatName } from '../utils/nameValidation';
+import { handleEmailChange, isValidEmail, getEmailValidationError, generateEmailSuggestions } from '../utils/emailValidation';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +20,12 @@ const Contact = () => {
   // Email suggestions state
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState([]);
+  
+  // Name validation state
+  const [nameError, setNameError] = useState('');
+  
+  // Email validation state
+  const [emailError, setEmailError] = useState('');
 
   // Use the new ScrollManager hook
   const scrollToTop = useScrollToTop({ behavior: 'smooth', enableMultiTiming: true });
@@ -175,7 +183,51 @@ const Contact = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="name" className="block text-gray-700 text-base font-semibold mb-2">Full Name *</label>
-                  <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required disabled={isSubmitting} className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition disabled:bg-gray-100 shadow-sm text-sm" placeholder="Your full name" autoFocus />
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      id="name" 
+                      name="name" 
+                      value={formData.name} 
+                      onChange={(e) => {
+                        const processedValue = handleNameChange(e.target.value, 
+                          (value) => setFormData({...formData, name: value}), 
+                          setNameError
+                        );
+                      }}
+                      required 
+                      disabled={isSubmitting} 
+                      maxLength="20"
+                      className={`w-full px-3 py-2 pr-10 border rounded-xl focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
+                        nameError 
+                          ? 'border-red-500 focus:ring-red-400 focus:border-red-400 bg-red-50' 
+                          : formData.name && isValidName(formData.name)
+                            ? 'border-green-500 focus:ring-green-400 focus:border-green-400 bg-green-50'
+                            : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
+                      }`}
+                      placeholder="Your full name (4-20 chars)" 
+                      autoFocus 
+                    />
+                    <div className="absolute right-3 top-2.5 flex items-center space-x-1">
+                      {formData.name && (
+                        isValidName(formData.name) ? (
+                          <FaCheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <FaExclamationCircle className="h-4 w-4 text-red-500" />
+                        )
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <div className="h-5">
+                      {nameError && (
+                        <p className="text-xs text-red-600">{nameError}</p>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {formData.name.length}/20 characters
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="phone" className="block text-gray-700 text-base font-semibold mb-2">Phone Number *</label>
@@ -220,32 +272,49 @@ const Contact = () => {
               </div>
               <div>
                 <label htmlFor="email" className="block text-gray-700 text-base font-semibold mb-2">Email Address *</label>
-                <div className="relative">
-                  <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    value={formData.email} 
-                    onChange={handleChange} 
-                    onFocus={() => setShowEmailSuggestions(false)}
-                    required 
-                    disabled={isSubmitting} 
-                    className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 transition disabled:bg-gray-100 shadow-sm text-sm" 
-                    placeholder="Your email address" 
-                  />
-                  
-                  {/* Email validation icons */}
-                  {formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
-                    <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                  ) : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
-                    <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-                  ) : (
-                    <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
-                  )}
-                  
-                  {/* Email Suggestions Dropdown */}
-                  {showEmailSuggestions && emailSuggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
+                <div>
+                  <label htmlFor="email" className="block text-gray-700 text-base font-semibold mb-2">Email Address *</label>
+                  <div className="relative">
+                    <input 
+                      type="email" 
+                      id="email" 
+                      name="email" 
+                      value={formData.email} 
+                      onChange={(e) => {
+                        const processedValue = handleEmailChange(
+                          e.target.value, 
+                          (value) => setFormData({...formData, email: value}), 
+                          setEmailError,
+                          setEmailSuggestions
+                        );
+                        // Show suggestions only if there's an @ and no error
+                        setShowEmailSuggestions(processedValue.includes('@') && !emailError);
+                      }}
+                      onFocus={() => setShowEmailSuggestions(false)}
+                      required 
+                      disabled={isSubmitting} 
+                      className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
+                        emailError 
+                          ? 'border-red-500 focus:ring-red-400 focus:border-red-400 bg-red-50' 
+                          : formData.email && isValidEmail(formData.email)
+                            ? 'border-green-500 focus:ring-green-400 focus:border-green-400 bg-green-50'
+                            : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
+                      }`}
+                      placeholder="Your email address" 
+                    />
+                    
+                    {/* Email validation icons */}
+                    {emailError ? (
+                      <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                    ) : formData.email && isValidEmail(formData.email) ? (
+                      <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                    ) : (
+                      <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                    )}
+                    
+                    {/* Email Suggestions Dropdown */}
+                    {showEmailSuggestions && emailSuggestions.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
                       {emailSuggestions.map((suggestion, index) => (
                         <button
                           key={index}
@@ -262,6 +331,14 @@ const Contact = () => {
                           </span>
                         </button>
                       ))}
+                    </div>
+                  )}
+                  </div>
+                  
+                  {/* Email Error Message */}
+                  {emailError && (
+                    <div className="mt-1">
+                      <p className="text-xs text-red-600">{emailError}</p>
                     </div>
                   )}
                 </div>

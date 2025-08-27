@@ -9,6 +9,7 @@ import { blacklistToken, logSuspiciousActivity } from '../middleware/security.js
 import EmailManager from '../modules/email/EmailManager.js';
 import rateLimit from 'express-rate-limit';
 import { isValidIndianMobile, getNormalizedMobile } from '../utils/mobileValidation.js';
+import { validateName, formatName, processName } from '../utils/nameValidation.js';
 
 const router = express.Router();
 
@@ -88,6 +89,22 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Password must contain uppercase, lowercase, number, and special character.' });
     }
 
+    // Name validation for regular users
+    if (role !== 'admin' && name) {
+      const nameValidation = validateName(name);
+      if (!nameValidation.isValid) {
+        return res.status(400).json({ error: nameValidation.error });
+      }
+    }
+
+    // Owner name validation for owners
+    if (role === 'owner' && ownerName) {
+      const ownerNameValidation = validateName(ownerName);
+      if (!ownerNameValidation.isValid) {
+        return res.status(400).json({ error: `Owner ${ownerNameValidation.error.toLowerCase()}` });
+      }
+    }
+
     // Mobile number validation for non-admin users
     if (role !== 'admin' && phone && !isValidIndianMobile(phone)) {
       return res.status(400).json({ error: 'Please enter a valid Indian mobile number (10 digits, starting with 6-9).' });
@@ -95,6 +112,10 @@ router.post('/register', async (req, res) => {
 
     // Store phone number as is (already 10 digits)
     const normalizedPhone = phone ? phone.replace(/\D/g, '') : null;
+    
+    // Format names before storing
+    const formattedName = name ? formatName(name) : null;
+    const formattedOwnerName = ownerName ? formatName(ownerName) : null;
     
     const password_hash = await hashPassword(password);
     let user;
@@ -104,7 +125,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'Business type must be PG, Bike, or Both.' });
       }
       user = new User({
-        name: ownerName,
+        name: formattedOwnerName,
         email,
         password_hash,
         phone: normalizedPhone,
@@ -117,7 +138,7 @@ router.post('/register', async (req, res) => {
       // OwnerProfile will be completed later when owner adds product
     } else {
       user = new User({
-        name,
+        name: formattedName,
         email,
         password_hash,
         phone: normalizedPhone,

@@ -3,6 +3,8 @@ import axios from 'axios';
 import { FaEnvelope, FaCheckCircle, FaExclamationCircle, FaPhone } from 'react-icons/fa';
 import FileUpload from '../../components/FileUpload.jsx';
 import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
+import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/nameValidation';
+import { handleEmailChange, isValidEmail, getEmailValidationError } from '../../utils/emailValidation';
 
 export default function OwnerProfile() {
   const [profile, setProfile] = useState(null);
@@ -10,6 +12,8 @@ export default function OwnerProfile() {
   const [loading, setLoading] = useState(false);
   const [avatar, setAvatar] = useState('');
   const [error, setError] = useState('');
+  const [nameError, setNameError] = useState(''); // Name validation error
+  const [emailError, setEmailError] = useState(''); // Email validation error
 
   useEffect(() => {
     fetchProfile();
@@ -75,25 +79,88 @@ export default function OwnerProfile() {
       {error && <div className="text-red-600 mb-2">{error}</div>}
       <form onSubmit={handleSubmit} className="bg-white shadow rounded p-4 mb-6">
         <div className="grid grid-cols-2 gap-4">
-          <input name="name" value={form.name} onChange={handleChange} placeholder="Name" className="input" required />
-          <div className="relative">
-            <input 
-              name="email" 
-              type="email"
-              value={form.email} 
-              onChange={handleChange} 
-              placeholder="Email" 
-              className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm" 
-              required 
-            />
+          <div>
+            <div className="relative">
+              <input 
+                name="name" 
+                value={form.name} 
+                onChange={(e) => {
+                  const processedValue = handleNameChange(e.target.value, 
+                    (value) => setForm({...form, name: value}), 
+                    setNameError
+                  );
+                }}
+                placeholder="Name (4-20 chars)" 
+                maxLength="20"
+                className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
+                  nameError 
+                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                    : form.name && isValidName(form.name)
+                      ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                }`}
+                required 
+              />
+              <div className="absolute right-3 top-2.5 flex items-center space-x-1">
+                {form.name && (
+                  isValidName(form.name) ? (
+                    <FaCheckCircle className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <FaExclamationCircle className="h-4 w-4 text-red-500" />
+                  )
+                )}
+              </div>
+            </div>
+            <div className="flex justify-between items-center mt-1">
+              <div className="h-5">
+                {nameError && (
+                  <p className="text-xs text-red-600">{nameError}</p>
+                )}
+              </div>
+              <div className="text-xs text-gray-500">
+                {form.name.length}/20
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="relative">
+              <input 
+                name="email" 
+                type="email"
+                value={form.email} 
+                onChange={(e) => {
+                  const processedValue = handleEmailChange(
+                    e.target.value, 
+                    (value) => setForm({...form, email: value}), 
+                    setEmailError
+                  );
+                }}
+                placeholder="Email Address" 
+                className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
+                  emailError 
+                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                    : form.email && isValidEmail(form.email)
+                      ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                      : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                }`}
+                required 
+              />
+              
+              {/* Email validation icons */}
+              {emailError ? (
+                <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+              ) : form.email && isValidEmail(form.email) ? (
+                <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+              ) : (
+                <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+              )}
+            </div>
             
-            {/* Email validation icons */}
-            {form.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(form.email) ? (
-              <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-            ) : form.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(form.email) ? (
-              <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-            ) : (
-              <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+            {/* Email Error Message */}
+            {emailError && (
+              <div className="mt-1">
+                <p className="text-xs text-red-600">{emailError}</p>
+              </div>
             )}
           </div>
           
