@@ -172,24 +172,11 @@ const AuthForm = ({
     return password.split('').sort(() => 0.5 - Math.random()).join('');
   };
 
-  // Phone number formatter with smart dash removal
+  // Phone number formatter (only digits, no dashes)
   const formatPhoneNumber = (value) => {
-    // Remove all non-digits
+    // Remove all non-digits and limit to 10
     const cleaned = value.replace(/\D/g, '');
-    
-    // Limit to 10 digits
-    const limited = cleaned.slice(0, 10);
-    
-    // Format based on length
-    if (limited.length === 0) {
-      return '';
-    } else if (limited.length <= 3) {
-      return limited;
-    } else if (limited.length <= 6) {
-      return `${limited.slice(0, 3)}-${limited.slice(3)}`;
-    } else {
-      return `${limited.slice(0, 3)}-${limited.slice(3, 6)}-${limited.slice(6)}`;
-    }
+    return cleaned.slice(0, 10);
   };
 
   // OTP input handler with auto-tab
@@ -1094,7 +1081,7 @@ const AuthForm = ({
                       required={!isLogin}
                       value={formData.phone}
                       onChange={handleChange}
-                      maxLength="13" // Allow +91 prefix and country codes
+                      maxLength="10" // Support 10 digit Indian mobile numbers
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                         formData.phone && isValidIndianMobile(formData.phone)
                           ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
@@ -1102,7 +1089,7 @@ const AuthForm = ({
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                       }`}
-                      placeholder="Enter phone: 9876543210 or +919876543210"
+                      placeholder="Enter phone number (e.g., 9876543210)"
                     />
                     <div className="absolute right-3 top-2.5">
                       {formData.phone && isValidIndianMobile(formData.phone) ? (

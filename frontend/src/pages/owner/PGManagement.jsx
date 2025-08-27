@@ -286,8 +286,8 @@ export default function PGManagement() {
             type="tel"
             value={form.contactNumber}
             onChange={handleChange}
-            maxLength="13"
-            placeholder="Contact: 9876543210 or +919876543210"
+            maxLength="10"
+            placeholder="Enter contact number (e.g., 9876543210)"
             className={`appearance-none block w-full p-3 pr-10 border rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 ${
               form.contactNumber && isValidIndianMobile(form.contactNumber)
                 ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'

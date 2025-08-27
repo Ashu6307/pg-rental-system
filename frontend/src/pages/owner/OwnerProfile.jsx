@@ -103,8 +103,8 @@ export default function OwnerProfile() {
               value={form.phone} 
               onChange={handleChange} 
               type="tel"
-              maxLength="13"
-              placeholder="Phone: 9876543210 or +919876543210" 
+              maxLength="10"
+              placeholder="Phone Number" 
               className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                 form.phone && isValidIndianMobile(form.phone)
                   ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'

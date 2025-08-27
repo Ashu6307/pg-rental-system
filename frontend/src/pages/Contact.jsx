@@ -186,7 +186,7 @@ const Contact = () => {
                       name="phone" 
                       value={formData.phone} 
                       onChange={handleChange} 
-                      maxLength="13"
+                      maxLength="10"
                       required 
                       disabled={isSubmitting} 
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
@@ -196,7 +196,7 @@ const Contact = () => {
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
                       }`}
-                      placeholder="Enter mobile: 9876543210 or +919876543210" 
+                      placeholder="Enter mobile number (e.g., 9876543210)" 
                     />
                     <div className="absolute right-3 top-2.5">
                       {formData.phone && isValidIndianMobile(formData.phone) ? (
