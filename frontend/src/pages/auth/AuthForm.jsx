@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope, FaPhone, FaUserCircle, FaUserTie, FaUserShield, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope, FaPhone, FaUserCircle, FaUserTie, FaUserShield, FaCheckCircle, FaExclamationCircle, FaHome, FaArrowLeft } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { toast, Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
@@ -987,7 +987,13 @@ const AuthForm = ({
                         <button
                           key={index}
                           type="button"
-                          className="w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 text-sm"
+                          className={`w-full text-left px-3 py-2 text-sm transition-colors duration-200 ${
+                            role === 'admin' 
+                              ? 'hover:bg-red-50 hover:text-red-700' 
+                              : role === 'owner' 
+                              ? 'hover:bg-green-50 hover:text-green-700' 
+                              : 'hover:bg-blue-50 hover:text-blue-700'
+                          }`}
                           onClick={() => {
                             setFormData(prev => ({ ...prev, email: suggestion }));
                             setShowEmailSuggestions(false);
@@ -1008,7 +1014,11 @@ const AuthForm = ({
                         emailVerified 
                           ? 'bg-green-500 text-white cursor-not-allowed'
                           : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) 
-                            ? (role === 'admin' ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-blue-500 text-white hover:bg-blue-600') 
+                            ? (role === 'admin' 
+                              ? 'bg-red-500 text-white hover:bg-red-600' 
+                              : role === 'owner' 
+                              ? 'bg-green-500 text-white hover:bg-green-600' 
+                              : 'bg-blue-500 text-white hover:bg-blue-600') 
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                       disabled={emailVerified || !(formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email))}
@@ -1217,7 +1227,13 @@ const AuthForm = ({
                               icon: '🔐'
                             });
                           }}
-                          className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 hover:underline"
+                          className={`text-xs font-medium flex items-center gap-1 hover:underline ${
+                            role === 'admin' 
+                              ? 'text-red-600 hover:text-red-800' 
+                              : role === 'owner' 
+                              ? 'text-green-600 hover:text-green-800' 
+                              : 'text-blue-600 hover:text-blue-800'
+                          }`}
                         >
                           <FaLock className="h-3 w-3" />
                           Generate Strong Password
@@ -1298,7 +1314,13 @@ const AuthForm = ({
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className={`h-4 w-4 border-gray-300 rounded ${
+                        role === 'admin' 
+                          ? 'text-red-600 focus:ring-red-500' 
+                          : role === 'owner' 
+                          ? 'text-green-600 focus:ring-green-500' 
+                          : 'text-blue-600 focus:ring-blue-500'
+                      }`}
                     />
                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                       Remember me
@@ -1413,7 +1435,7 @@ const AuthForm = ({
                       <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                         2
                       </div>
-                      <span className="ml-2 text-sm font-medium text-red-600 font-bold">OTP</span>
+                      <span className="ml-2 text-sm font-bold text-red-600">OTP</span>
                     </div>
                   </div>
 
@@ -1509,7 +1531,13 @@ const AuthForm = ({
                   {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
                   <Link
                     to={getTogglePath()}
-                    className={`${role === 'owner' ? 'text-green-600 hover:text-green-800' : 'text-blue-600 hover:text-blue-800'} font-medium`}
+                    className={`${
+                      role === 'admin' 
+                        ? 'text-red-600 hover:text-red-800' 
+                        : role === 'owner' 
+                        ? 'text-green-600 hover:text-green-800' 
+                        : 'text-blue-600 hover:text-blue-800'
+                    } font-medium`}
                   >
                     {isLogin
                       ? `${role.charAt(0).toUpperCase() + role.slice(1)} Register`
@@ -1567,30 +1595,63 @@ const AuthForm = ({
 
 // Reusable ForgotPasswordForm component styled same as login form
 export const ForgotPasswordForm = ({ role = 'user' }) => {
-  const [email, setEmail] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState('');
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentStep, setCurrentStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
+  const [formData, setFormData] = useState({
+    email: '',
+    otp: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [forgotPasswordStrength, setForgotPasswordStrength] = useState({ score: 0, message: '', color: '', requirements: {} });
   const [loading, setLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpSuccess, setOtpSuccess] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
-  // Email suggestions states
+  
+  // Email suggestions
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState([]);
 
-  // Lock scrolling when component mounts
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = 'unset';
+  // Password strength checker for forgot password
+  const checkPasswordStrength = (password) => {
+    let score = 0;
+    const requirements = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
     };
-  }, []);
 
-  // Countdown timer for resend OTP
+    // Calculate score based on requirements
+    if (requirements.length) score += 1;
+    if (requirements.uppercase) score += 1;
+    if (requirements.lowercase) score += 1;
+    if (requirements.number) score += 1;
+    if (requirements.special) score += 1;
+    if (password.length >= 12) score += 1; // Bonus for longer passwords
+
+    let message = '';
+    let color = '';
+
+    if (score <= 2) {
+      message = 'Weak password';
+      color = 'text-red-600';
+    } else if (score <= 4) {
+      message = 'Medium strength';
+      color = 'text-yellow-600';
+    } else {
+      message = 'Strong password';
+      color = 'text-green-600';
+    }
+
+    return { score, message, color, requirements };
+  };
+
+  // OTP Timer countdown
   useEffect(() => {
     let interval = null;
     if (resendTimer > 0) {
@@ -1604,553 +1665,758 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
         });
       }, 1000);
     }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Password strength calculation
-  const calculatePasswordStrength = (password) => {
-    let score = 0;
-    let requirements = {
-      length: password.length >= 8,
-      lowercase: /[a-z]/.test(password),
-      uppercase: /[A-Z]/.test(password),
-      number: /[0-9]/.test(password),
-      special: /[^A-Za-z0-9]/.test(password)
-    };
-    
-    if (!password) {
-      return { score: 0, requirements };
-    }
-    
-    // Calculate score based on requirements
-    if (requirements.length) score += 1;
-    if (password.length >= 12) score += 1;
-    if (requirements.lowercase) score += 1;
-    if (requirements.uppercase) score += 1;
-    if (requirements.number) score += 1;
-    if (requirements.special) score += 1;
-    
-    return { score, requirements };
-  };
-
-  const passwordStrength = calculatePasswordStrength(newPassword);
-
-  // Email domain suggestion logic for forgot password
+  // Email domain suggestions
   const generateEmailSuggestions = (email) => {
-    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'rediffmail.com'];
+    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'rediffmail.com', 'icloud.com', 'protonmail.com'];
     const emailParts = email.split('@');
     
     if (emailParts.length === 2 && emailParts[1].length > 0) {
       const domain = emailParts[1].toLowerCase();
       const suggestions = commonDomains
         .filter(d => d.startsWith(domain) && d !== domain)
-        .slice(0, 3)
+        .slice(0, 4) // Show max 4 suggestions
         .map(d => `${emailParts[0]}@${d}`);
       
       setEmailSuggestions(suggestions);
       setShowEmailSuggestions(suggestions.length > 0);
+    } else if (emailParts.length === 1 && emailParts[0].length > 2) {
+      // Only show suggestions if username is at least 3 characters
+      const suggestions = commonDomains.slice(0, 3).map(d => `${emailParts[0]}@${d}`);
+      setEmailSuggestions(suggestions);
+      setShowEmailSuggestions(true);
     } else {
       setShowEmailSuggestions(false);
     }
   };
 
-  const handleSendOtp = async () => {
-    if (!email) return;
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    setFormData(prev => ({ ...prev, email }));
+    generateEmailSuggestions(email);
+  };
+
+  const handleEmailSuggestionClick = (suggestion) => {
+    setFormData(prev => ({ ...prev, email: suggestion }));
+    setShowEmailSuggestions(false);
+  };
+
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.email || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
     setLoading(true);
+    setOtpError('');
+    
     try {
-      const res = await fetch(`http://localhost:5000/api/forgot-password/forgot-password`, {
+      const res = await fetch(`http://localhost:5000/api/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, role })
+        body: JSON.stringify({ email: formData.email, role })
       });
       const data = await res.json();
+      
       if (data.success) {
-        setOtpSent(true);
-        // Start 60 second countdown for resend
-        setCanResend(false);
+        setOtpSuccess('OTP sent successfully to your email!');
+        toast.success(`🔐 ${role.charAt(0).toUpperCase() + role.slice(1)} password reset OTP sent successfully!`, {
+          duration: 4000,
+          icon: '📧'
+        });
+        
+        setCurrentStep(2);
         setResendTimer(60);
-        toast.success(data.message);
+        setCanResend(false);
       } else {
-        toast.error(data.message);
+        setOtpError(data.message || 'Failed to send OTP');
+        toast.error(data.message || 'Failed to send reset OTP');
       }
-    } catch (err) {
+    } catch (error) {
+      setOtpError('Network error. Please try again.');
       toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifyOtp = async () => {
-    if (!otp) return;
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.otp || formData.otp.length !== 6) {
+      setOtpError('Please enter valid 6-digit OTP');
+      return;
+    }
+
     setLoading(true);
+    setOtpError('');
+    
     try {
-      // Remove spaces from OTP before sending to backend
-      const cleanOtp = otp.replace(/\s/g, '');
+      const cleanOtp = formData.otp.replace(/\s/g, '');
       const res = await fetch(`http://localhost:5000/api/otp/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp: cleanOtp, role })
+        body: JSON.stringify({ email: formData.email, otp: cleanOtp, role })
       });
       const data = await res.json();
+      
       if (data.success) {
-        setOtpVerified(true);
-        toast.success(data.message);
+        setOtpSuccess('OTP verified successfully!');
+        toast.success('✅ OTP verified! Please set your new password.', {
+          duration: 3000,
+          icon: '🔓'
+        });
+        
+        setCurrentStep(3);
       } else {
-        toast.error(data.message);
+        setOtpError(data.message || 'Invalid OTP');
+        toast.error(data.message || 'Invalid OTP');
       }
-    } catch (err) {
+    } catch (error) {
+      setOtpError('Network error. Please try again.');
       toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!newPassword) return;
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.newPassword || formData.newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long');
+      return;
+    }
+    
+    if (forgotPasswordStrength.score <= 2) {
+      toast.error('Please choose a stronger password');
+      return;
+    }
+    
+    if (formData.newPassword !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
+    
     try {
-      // Remove spaces from OTP before sending to backend
-      const cleanOtp = otp.replace(/\s/g, '');
+      const cleanOtp = formData.otp.replace(/\s/g, '');
       const res = await fetch(`http://localhost:5000/api/forgot-password/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp: cleanOtp, newPassword, role })
+        body: JSON.stringify({ 
+          email: formData.email, 
+          otp: cleanOtp, 
+          newPassword: formData.newPassword, 
+          role 
+        })
       });
       const data = await res.json();
+      
       if (data.success) {
-        toast.success(data.message);
+        toast.success(`🎉 Password reset successful! Please login with your new password.`, {
+          duration: 5000,
+          icon: '✅'
+        });
+        
+        // Role-based redirect after password reset
         setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          // Role-based redirect after password reset
           const redirectUrl = role === 'admin'
             ? '/admin/login'
             : role === 'owner' 
             ? '/owner/login' 
-            : role === 'user' 
-            ? '/user/login' 
-            : '/login';
+            : '/user/login';
           window.location.href = redirectUrl;
         }, 2000);
       } else {
-        toast.error(data.message);
+        toast.error(data.message || 'Failed to reset password');
       }
-    } catch (err) {
+    } catch (error) {
       toast.error('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper for role-based color and icon - Full color configuration like login page
+  const handleResendOtp = async () => {
+    if (!canResend) return;
+    
+    setLoading(true);
+    setOtpError('');
+    
+    try {
+      const res = await fetch(`http://localhost:5000/api/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, role })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setOtpSuccess('OTP resent successfully!');
+        toast.success(`📧 ${role.charAt(0).toUpperCase() + role.slice(1)} reset OTP resent successfully!`);
+        
+        setResendTimer(60);
+        setCanResend(false);
+      } else {
+        setOtpError(data.message || 'Failed to resend OTP');
+        toast.error(data.message || 'Failed to resend OTP');
+      }
+    } catch (error) {
+      setOtpError('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpChange = (index, value) => {
+    if (value.length > 1) return; // Only allow single digit
+    
+    const otpArray = formData.otp.split('');
+    otpArray[index] = value;
+    const newOtp = otpArray.join('');
+    
+    setFormData(prev => ({ ...prev, otp: newOtp }));
+    
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    // Handle backspace to go to previous input
+    if (e.key === 'Backspace' && !formData.otp[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
+  const renderStepIndicator = () => {
+    const steps = [
+      { number: 1, label: 'Email' },
+      { number: 2, label: 'OTP' },
+      { number: 3, label: 'Password' }
+    ];
+
+    const themeColor = role === 'admin' ? 'red' : role === 'owner' ? 'green' : 'blue';
+
+    return (
+      <div className="flex items-center justify-center space-x-2 mb-8">
+        {steps.map((step, index) => (
+          <React.Fragment key={step.number}>
+            <div className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                currentStep >= step.number 
+                  ? `bg-${themeColor}-600 text-white` 
+                  : 'bg-gray-300 text-gray-600'
+              }`}>
+                {step.number}
+              </div>
+              <span className={`ml-2 text-sm font-medium ${
+                currentStep === step.number 
+                  ? `text-${themeColor}-600 font-bold` 
+                  : currentStep > step.number 
+                  ? 'text-gray-700' 
+                  : 'text-gray-500'
+              }`}>
+                {step.label}
+              </span>
+            </div>
+            {index < steps.length - 1 && (
+              <div className={`w-8 h-0.5 ${
+                currentStep > step.number ? `bg-${themeColor}-600` : 'bg-gray-300'
+              }`}></div>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
+  // Helper for role-based color and icon
   const roleColor = role === 'admin' ? 'red' : role === 'owner' ? 'green' : 'blue';
-  const colorClass = {
-    red: 'text-red-700 bg-red-700 hover:bg-red-900 focus:ring-red-500',
-    green: 'text-green-700 bg-green-700 hover:bg-green-900 focus:ring-green-500',
-    blue: 'text-blue-700 bg-blue-700 hover:bg-blue-900 focus:ring-blue-500',
-  }[roleColor];
   const IconComponent = role === 'admin' ? FaUserShield : role === 'owner' ? FaUserTie : FaUserCircle;
   const iconColor = role === 'admin' ? 'text-red-600' : role === 'owner' ? 'text-green-600' : 'text-blue-600';
   const bgColor = role === 'admin' 
-    ? 'bg-gradient-to-br from-red-50 via-white to-red-100' 
+    ? 'bg-red-50' 
     : role === 'owner' 
-    ? 'bg-gradient-to-br from-green-50 via-white to-green-100' 
-    : 'bg-gradient-to-br from-blue-50 via-white to-blue-100';
+    ? 'bg-green-50' 
+    : 'bg-blue-50';
 
   return (
-    <div className={`min-h-screen max-h-screen overflow-hidden flex flex-col justify-start sm:px-2 lg:px-4 ${bgColor}`}>
-      <div className={`sm:mx-auto sm:w-full sm:max-w-md mb-16 mt-4`}>
+    <div className={`min-h-screen flex flex-col justify-start sm:px-2 lg:px-4 ${bgColor}`}>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-16 mt-4">
         <div className="flex justify-center">
           <div className="flex flex-col items-center space-y-2 w-full">
             <span className="relative group">
-              <IconComponent 
+              <IconComponent
                 className={`h-16 w-16 ${iconColor} drop-shadow-lg`}
-                title={
-                  role === 'admin'
-                    ? 'Admin Forgot Password'
-                    : role === 'owner'
-                    ? 'Owner Forgot Password'
-                    : 'User Forgot Password'
-                }
+                title={`${role.charAt(0).toUpperCase() + role.slice(1)} Password Reset`}
               />
               <span className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                {role === 'admin'
-                  ? 'Admin Password Reset'
-                  : role === 'owner'
-                  ? 'Owner Password Reset'
-                  : 'User Password Reset'}
+                {role.charAt(0).toUpperCase() + role.slice(1)} Password Reset
               </span>
             </span>
             <div className="text-base font-semibold text-gray-700 mt-1">
-              {role === 'admin' ? 'Admin' : role === 'owner' ? 'Owner' : 'User'}
+              {role.charAt(0).toUpperCase() + role.slice(1)}
             </div>
             <h2 className="text-center text-3xl font-extrabold text-gray-900">
-              {role.charAt(0).toUpperCase() + role.slice(1)} Forgot Password
+              Reset {role.charAt(0).toUpperCase() + role.slice(1)} Password
             </h2>
           </div>
         </div>
         <p className="text-center text-sm text-gray-600 mb-6">
-          Enter your registered email to reset your password
+          {currentStep === 1 && 'Enter your email to receive reset instructions'}
+          {currentStep === 2 && 'Verify your identity with OTP'}
+          {currentStep === 3 && 'Create your new secure password'}
         </p>
-        <div>
-          <div
-            className={
-              `p-8 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl ` +
-              (role === 'admin'
-                ? 'bg-gradient-to-br from-red-50 via-white to-red-100'
-                : role === 'owner'
-                ? 'bg-gradient-to-br from-green-50 via-white to-green-100'
-                : 'bg-gradient-to-br from-blue-50 via-white to-blue-100')
-            }
-          >
-            <form className="space-y-6">
-              {!otpSent && (
-                <>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
-                    <div className="mt-1 flex items-center gap-2 relative">
-                      <div className="relative w-full">
-                        <input
-                          id="email"
-                          name="email"
-                          type="email"
-                          autoComplete="email"
-                          required
-                          value={email}
-                          onChange={(e) => {
-                            setEmail(e.target.value);
-                            generateEmailSuggestions(e.target.value);
-                          }}
-                          className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
-                            email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) && email.length > 0
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
-                              : email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)
-                              ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                          }`}
-                          placeholder="Enter your email address"
-                        />
-                        {email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) && email.length > 0 ? (
-                          <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                        ) : email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) ? (
-                          <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-                        ) : (
-                          <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
-                        )}
-                      </div>
-                      
-                      {/* Email Suggestions Dropdown */}
-                      {showEmailSuggestions && emailSuggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 mt-1">
-                          {emailSuggestions.map((suggestion, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              className="w-full text-left px-3 py-2 hover:bg-blue-50 hover:text-blue-700 text-sm"
-                              onClick={() => {
-                                setEmail(suggestion);
-                                setShowEmailSuggestions(false);
-                              }}
-                            >
-                              {suggestion}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {email && email.length > 0 && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) && (
-                      <p className="text-red-500 text-xs mt-1">
-                        📧 Please enter a valid email address
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    disabled={loading || !email || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)}
-                    className={`w-full py-2 px-4 rounded font-semibold text-white ${colorClass} disabled:opacity-50 mt-2 transition-all duration-200 ${
-                      !loading && email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email) 
-                        ? 'hover:shadow-lg transform hover:-translate-y-0.5' 
-                        : ''
+        
+        <div className={`p-8 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl ${
+          role === 'admin'
+            ? 'bg-gradient-to-br from-red-50 via-white to-red-100'
+            : role === 'owner'
+            ? 'bg-gradient-to-br from-green-50 via-white to-green-100'
+            : 'bg-gradient-to-br from-blue-50 via-white to-blue-100'
+        }`}>
+          
+          {/* Step Indicator */}
+          {renderStepIndicator()}
+          
+          {/* Step 1: Email Input */}
+          {currentStep === 1 && (
+            <form onSubmit={handleSendOtp} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  {role.charAt(0).toUpperCase() + role.slice(1)} Email Address <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={formData.email}
+                    onChange={handleEmailChange}
+                    className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
+                      formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) && formData.email.length > 0
+                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
+                        ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        : `border-gray-300 focus:ring-${roleColor}-500 focus:border-${roleColor}-500`
                     }`}
-                    onClick={handleSendOtp}
-                  >
-                    {loading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                        Sending OTP...
-                      </span>
-                    ) : (
-                      'Send OTP'
-                    )}
-                  </button>
-                </>
-              )}
-              {otpSent && !otpVerified && (
-                <>
-                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center">
-                      <FaCheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                      <div>
-                        <p className="text-sm font-medium text-green-800">
-                          OTP sent successfully!
-                        </p>
-                        <p className="text-sm text-green-600">
-                          Please check your email <strong>{email}</strong> for the OTP code.
-                        </p>
-                      </div>
+                    placeholder={`Enter your ${role} email address`}
+                  />
+                  {formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) && formData.email.length > 0 ? (
+                    <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                  ) : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
+                    <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                  ) : (
+                    <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                  )}
+                </div>
+                
+                {/* Email Suggestions Dropdown */}
+                {showEmailSuggestions && emailSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 mt-1">
+                    {emailSuggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className={`w-full text-left px-3 py-2 text-sm transition-colors duration-200 ${
+                          role === 'admin' 
+                            ? 'hover:bg-red-50 hover:text-red-700' 
+                            : role === 'owner' 
+                            ? 'hover:bg-green-50 hover:text-green-700' 
+                            : 'hover:bg-blue-50 hover:text-blue-700'
+                        }`}
+                        onClick={() => handleEmailSuggestionClick(suggestion)}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading || !formData.email || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)}
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200 ${
+                    role === 'admin' 
+                      ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300' 
+                      : role === 'owner' 
+                      ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300' 
+                      : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300'
+                  } disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Sending Reset OTP...</span>
                     </div>
-                  </div>
-                  <label className="block text-sm font-medium text-gray-700">Enter OTP</label>
-                  <div className="mt-1 relative">
-                    <input
-                      type="text"
-                      value={otp}
-                      onChange={(e) => {
-                        let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
-                        if (value.length <= 6) {
-                          // Add spaces after every digit
-                          const formattedValue = value.split('').join(' ').trim();
-                          setOtp(formattedValue);
-                        }
-                      }}
-                      className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 text-center text-xl tracking-widest ${
-                        role === 'admin' 
-                          ? 'focus:ring-red-500' 
-                          : role === 'owner' 
-                          ? 'focus:ring-green-500' 
-                          : 'focus:ring-blue-500'
-                      }`}
-                      placeholder="0 0 0 0 0 0"
-                      maxLength="11"
-                      required
-                    />
-                  </div>
-                  
-                  <div className="flex space-x-3 mt-4">
-                    <button
-                      type="button"
-                      disabled={loading || otp.replace(/\s/g, '').length !== 6}
-                      className={`flex-1 py-2 px-4 rounded font-semibold text-white ${colorClass} disabled:opacity-50`}
-                      onClick={handleVerifyOtp}
-                    >
-                      {loading ? 'Verifying...' : 'Verify OTP'}
-                    </button>
-                    
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (canResend) {
-                          handleSendOtp();
-                        }
-                      }}
-                      disabled={loading || !canResend}
-                      className={`px-4 py-2 border border-gray-300 rounded font-semibold hover:bg-gray-50 disabled:opacity-50 ${
-                        !canResend ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600'
-                      }`}
-                    >
-                      {loading ? "Resending..." : !canResend ? `Resend (${resendTimer}s)` : "Resend"}
-                    </button>
-                  </div>
-                  
-                  <div className="text-center mt-4">
-                    <p className="text-sm text-gray-500">
-                      Didn't receive the OTP? Check your spam folder.
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <FaLock className="h-4 w-4" />
+                      <span>Send Reset OTP</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Step 2: OTP Verification */}
+          {currentStep === 2 && (
+            <form onSubmit={handleVerifyOtp} className="space-y-6">
+              {/* OTP Sent Success Message */}
+              <div className={`mb-4 p-4 ${
+                role === 'admin' 
+                  ? 'bg-red-50 border-red-200' 
+                  : role === 'owner' 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-blue-50 border-blue-200'
+              } border rounded-lg`}>
+                <div className="flex items-center">
+                  <FaCheckCircle className={`h-5 w-5 ${
+                    role === 'admin' ? 'text-red-500' : role === 'owner' ? 'text-green-500' : 'text-blue-500'
+                  } mr-2`} />
+                  <div>
+                    <p className={`text-sm font-medium ${
+                      role === 'admin' ? 'text-red-800' : role === 'owner' ? 'text-green-800' : 'text-blue-800'
+                    }`}>
+                      Reset OTP sent successfully!
+                    </p>
+                    <p className={`text-sm ${
+                      role === 'admin' ? 'text-red-600' : role === 'owner' ? 'text-green-600' : 'text-blue-600'
+                    }`}>
+                      Please check your email <strong>{formData.email}</strong> for the reset code.
                     </p>
                   </div>
-                </>
-              )}
-              {otpVerified && (
-                <>
-                  {/* New Password Field */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      New Password <span className="text-red-500">*</span>
-                      <span className="text-xs text-gray-500 ml-2">
-                        (Minimum 8 characters)
-                      </span>
-                    </label>
-                    <div className="mt-1 relative">
-                      <input
-                        type={showNewPassword ? 'text' : 'password'}
-                        value={newPassword}
-                        onChange={e => setNewPassword(e.target.value)}
-                        minLength={8}
-                        className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
-                          newPassword && newPassword.length > 0
-                            ? passwordStrength.score <= 2
-                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                              : passwordStrength.score <= 4
-                              ? 'border-yellow-300 focus:ring-yellow-500 focus:border-yellow-500'
-                              : 'border-green-300 focus:ring-green-500 focus:border-green-500'
-                            : `border-gray-300 ${
-                                role === 'admin' 
-                                  ? 'focus:ring-red-500 focus:border-red-500' 
-                                  : role === 'owner' 
-                                  ? 'focus:ring-green-500 focus:border-green-500' 
-                                  : 'focus:ring-blue-500 focus:border-blue-500'
-                              }`
-                        }`}
-                        placeholder="Create a strong password"
-                        required
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                      >
-                        {showNewPassword ? (
-                          <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                        ) : (
-                          <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                        )}
-                      </button>
-                    </div>
-                    {/* Password strength indicator */}
-                    {newPassword && (
-                      <div className="mt-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full transition-all duration-500 ${
-                                passwordStrength.score <= 2 ? 'bg-red-500' :
-                                passwordStrength.score <= 4 ? 'bg-yellow-500' :
-                                passwordStrength.score <= 5 ? 'bg-green-500' : 'bg-green-600'
-                              }`}
-                              style={{ width: `${(passwordStrength.score / 6) * 100}%` }}
-                            ></div>
-                          </div>
-                          <span className={`text-xs font-medium ${
-                            passwordStrength.score <= 2 ? 'text-red-600' :
-                            passwordStrength.score <= 4 ? 'text-yellow-600' :
-                            'text-green-600'
-                          }`}>
-                            {passwordStrength.score <= 2 ? 'Weak' :
-                             passwordStrength.score <= 4 ? 'Medium' : 'Strong'}
-                          </span>
-                        </div>
-                        
-                        {/* Password Requirements Checklist with Tick Marks */}
-                        <div className="space-y-1">
-                          <div className="text-xs font-medium text-gray-700 mb-1">Password Requirements:</div>
-                          <div className="grid grid-cols-2 gap-1 text-xs">
-                            <div className={`flex items-center gap-1 ${passwordStrength.requirements?.length ? 'text-green-600' : 'text-gray-500'}`}>
-                              {passwordStrength.requirements?.length ? '✓' : '○'} 8+ characters
-                            </div>
-                            <div className={`flex items-center gap-1 ${passwordStrength.requirements?.uppercase ? 'text-green-600' : 'text-gray-500'}`}>
-                              {passwordStrength.requirements?.uppercase ? '✓' : '○'} Uppercase (A-Z)
-                            </div>
-                            <div className={`flex items-center gap-1 ${passwordStrength.requirements?.lowercase ? 'text-green-600' : 'text-gray-500'}`}>
-                              {passwordStrength.requirements?.lowercase ? '✓' : '○'} Lowercase (a-z)
-                            </div>
-                            <div className={`flex items-center gap-1 ${passwordStrength.requirements?.number ? 'text-green-600' : 'text-gray-500'}`}>
-                              {passwordStrength.requirements?.number ? '✓' : '○'} Number (0-9)
-                            </div>
-                            <div className={`flex items-center gap-1 ${passwordStrength.requirements?.special ? 'text-green-600' : 'text-gray-500'}`}>
-                              {passwordStrength.requirements?.special ? '✓' : '○'} Special (!@#$)
-                            </div>
-                            <div className={`flex items-center gap-1 ${newPassword.length >= 12 ? 'text-green-600' : 'text-gray-500'}`}>
-                              {newPassword.length >= 12 ? '✓' : '○'} 12+ chars (bonus)
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                </div>
+              </div>
 
-                  {/* Confirm Password Field */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Confirm Password <span className="text-red-500">*</span>
-                    </label>
-                    <div className="mt-1 relative">
-                      <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        value={confirmPassword}
-                        onChange={e => setConfirmPassword(e.target.value)}
-                        className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
-                          confirmPassword && newPassword
-                            ? newPassword === confirmPassword
-                              ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                              : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
-                            : `border-gray-300 ${
-                                role === 'admin' 
-                                  ? 'focus:ring-red-500 focus:border-red-500' 
-                                  : role === 'owner' 
-                                  ? 'focus:ring-green-500 focus:border-green-500' 
-                                  : 'focus:ring-blue-500 focus:border-blue-500'
-                              }`
-                        }`}
-                        placeholder="Re-enter your password"
-                        required
-                      />
-                      <div className="absolute inset-y-0 right-0 flex items-center">
-                        {confirmPassword && newPassword && (
-                          <div className="mr-10">
-                            {newPassword === confirmPassword ? (
-                              <FaCheckCircle className="h-4 w-4 text-green-500" />
-                            ) : (
-                              <FaExclamationCircle className="h-4 w-4 text-red-500" />
-                            )}
-                          </div>
-                        )}
-                        <button
-                          type="button"
-                          className="pr-3 flex items-center"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? (
-                            <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                          ) : (
-                            <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    {confirmPassword && newPassword === confirmPassword && (
-                      <p className="text-green-600 text-xs mt-1 flex items-center gap-1">
-                        <FaCheckCircle className="h-3 w-3" />
-                        Passwords match perfectly!
-                      </p>
-                    )}
-                    {confirmPassword && newPassword !== confirmPassword && (
-                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                        <FaExclamationCircle className="h-3 w-3" />
-                        Passwords do not match
-                      </p>
-                    )}
-                  </div>
-
+              {/* OTP Input with Individual Digits */}
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-gray-700">Enter Reset OTP</label>
+                <div className="flex justify-center space-x-2">
+                  {[...Array(6)].map((_, index) => (
+                    <input
+                      key={index}
+                      id={`otp-${index}`}
+                      type="text"
+                      maxLength="1"
+                      value={formData.otp[index] || ''}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      className={`w-12 h-12 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:outline-none transition-all duration-200 ${
+                        role === 'admin' 
+                          ? 'focus:border-red-500 focus:ring-2 focus:ring-red-200' 
+                          : role === 'owner' 
+                          ? 'focus:border-green-500 focus:ring-2 focus:ring-green-200' 
+                          : 'focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                      }`}
+                      placeholder="●"
+                    />
+                  ))}
+                </div>
+                
+                {/* OTP Timer and Resend */}
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Didn't receive the reset code?
+                  </p>
                   <button
                     type="button"
-                    disabled={loading || !newPassword || !confirmPassword || newPassword !== confirmPassword || passwordStrength.score <= 2}
-                    className={`w-full py-2 px-4 rounded font-semibold text-white ${colorClass} disabled:opacity-50 mt-4`}
-                    onClick={handleResetPassword}
+                    onClick={handleResendOtp}
+                    disabled={!canResend || loading}
+                    className={`text-sm font-medium underline ${
+                      canResend 
+                        ? `${
+                            role === 'admin' ? 'text-red-600 hover:text-red-800' : 
+                            role === 'owner' ? 'text-green-600 hover:text-green-800' : 
+                            'text-blue-600 hover:text-blue-800'
+                          } cursor-pointer` 
+                        : 'text-gray-400 cursor-not-allowed'
+                    }`}
                   >
-                    {loading ? 'Resetting...' : 'Reset Password'}
+                    {canResend ? 'Resend Reset OTP' : `Resend in ${resendTimer}s`}
                   </button>
-                </>
-              )}
+                </div>
+
+                {otpError && (
+                  <div className={`p-3 ${
+                    role === 'admin' ? 'bg-red-50 border-red-200' : 
+                    role === 'owner' ? 'bg-green-50 border-green-200' : 
+                    'bg-blue-50 border-blue-200'
+                  } border rounded-md`}>
+                    <p className="text-red-600 text-sm font-medium">{otpError}</p>
+                  </div>
+                )}
+                
+                {otpSuccess && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-green-600 text-sm font-medium">{otpSuccess}</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading || formData.otp.length !== 6}
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200 ${
+                    role === 'admin' 
+                      ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300' 
+                      : role === 'owner' 
+                      ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300' 
+                      : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300'
+                  } disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Verifying OTP...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <FaCheckCircle className="h-4 w-4" />
+                      <span>Verify Reset OTP</span>
+                    </div>
+                  )}
+                </button>
+              </div>
             </form>
-            <div className="mt-6 text-center">
-              <span className="text-sm text-gray-500">Remembered your password?</span>
+          )}
+
+          {/* Step 3: New Password */}
+          {currentStep === 3 && (
+            <form onSubmit={handleResetPassword} className="space-y-6">
+              <div>
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                  New Password <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="newPassword"
+                    name="newPassword"
+                    type={showNewPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    required
+                    value={formData.newPassword}
+                    onChange={(e) => {
+                      const newPasswordValue = e.target.value;
+                      setFormData(prev => ({ ...prev, newPassword: newPasswordValue }));
+                      // Password strength check for forgot password
+                      const strength = checkPasswordStrength(newPasswordValue);
+                      setForgotPasswordStrength(strength);
+                    }}
+                    minLength={8}
+                    className={`appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-${roleColor}-500 focus:border-${roleColor}-500 sm:text-sm`}
+                    placeholder="Enter new password (min 8 characters)"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? (
+                      <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
+                </div>
+                
+                {/* Password strength indicator for forgot password */}
+                {formData.newPassword && (
+                  <div className="mt-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-500 ${
+                            forgotPasswordStrength.score <= 2 ? 'bg-red-500' :
+                            forgotPasswordStrength.score <= 4 ? 'bg-yellow-500' :
+                            forgotPasswordStrength.score <= 5 ? 'bg-green-500' : 'bg-green-600'
+                          }`}
+                          style={{ width: `${(forgotPasswordStrength.score / 6) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className={`text-xs font-medium ${
+                        forgotPasswordStrength.score <= 2 ? 'text-red-600' :
+                        forgotPasswordStrength.score <= 4 ? 'text-yellow-600' :
+                        'text-green-600'
+                      }`}>
+                        {forgotPasswordStrength.score <= 2 ? 'Weak' :
+                         forgotPasswordStrength.score <= 4 ? 'Medium' : 'Strong'}
+                      </span>
+                    </div>
+                    
+                    {/* Password Requirements Checklist with Tick Marks */}
+                    <div className="space-y-1">
+                      <div className="text-xs font-medium text-gray-700 mb-1">Password Requirements:</div>
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        <div className={`flex items-center gap-1 ${forgotPasswordStrength.requirements?.length ? 'text-green-600' : 'text-gray-500'}`}>
+                          {forgotPasswordStrength.requirements?.length ? '✓' : '○'} 8+ characters
+                        </div>
+                        <div className={`flex items-center gap-1 ${forgotPasswordStrength.requirements?.uppercase ? 'text-green-600' : 'text-gray-500'}`}>
+                          {forgotPasswordStrength.requirements?.uppercase ? '✓' : '○'} Uppercase (A-Z)
+                        </div>
+                        <div className={`flex items-center gap-1 ${forgotPasswordStrength.requirements?.lowercase ? 'text-green-600' : 'text-gray-500'}`}>
+                          {forgotPasswordStrength.requirements?.lowercase ? '✓' : '○'} Lowercase (a-z)
+                        </div>
+                        <div className={`flex items-center gap-1 ${forgotPasswordStrength.requirements?.number ? 'text-green-600' : 'text-gray-500'}`}>
+                          {forgotPasswordStrength.requirements?.number ? '✓' : '○'} Number (0-9)
+                        </div>
+                        <div className={`flex items-center gap-1 ${forgotPasswordStrength.requirements?.special ? 'text-green-600' : 'text-gray-500'}`}>
+                          {forgotPasswordStrength.requirements?.special ? '✓' : '○'} Special (!@#$)
+                        </div>
+                        <div className={`flex items-center gap-1 ${formData.newPassword.length >= 12 ? 'text-green-600' : 'text-gray-500'}`}>
+                          {formData.newPassword.length >= 12 ? '✓' : '○'} 12+ chars (bonus)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                  Confirm New Password <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
+                      formData.confirmPassword && formData.newPassword
+                        ? formData.newPassword === formData.confirmPassword
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                          : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        : `border-gray-300 focus:ring-${roleColor}-500 focus:border-${roleColor}-500`
+                    }`}
+                    placeholder="Re-enter your new password"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center">
+                    {formData.confirmPassword && formData.newPassword && (
+                      <div className="mr-10">
+                        {formData.newPassword === formData.confirmPassword ? (
+                          <FaCheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <FaExclamationCircle className="h-4 w-4 text-red-500" />
+                        )}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      className="pr-3 flex items-center"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                {formData.confirmPassword && formData.newPassword === formData.confirmPassword && (
+                  <p className="text-green-600 text-xs mt-1 flex items-center gap-1">
+                    <FaCheckCircle className="h-3 w-3" />
+                    Passwords match perfectly!
+                  </p>
+                )}
+                {formData.confirmPassword && formData.newPassword !== formData.confirmPassword && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <FaExclamationCircle className="h-3 w-3" />
+                    Passwords do not match
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading || !formData.newPassword || !formData.confirmPassword || formData.newPassword !== formData.confirmPassword || formData.newPassword.length < 8 || forgotPasswordStrength.score <= 2}
+                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200 ${
+                    role === 'admin' 
+                      ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300' 
+                      : role === 'owner' 
+                      ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300' 
+                      : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300'
+                  } disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Updating Password...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <FaLock className="h-4 w-4" />
+                      <span>Update Password</span>
+                    </div>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Navigation Links */}
+          <div className="mt-6 space-y-4">
+            {/* Back to credentials for step 2 and 3 */}
+            {currentStep > 1 && (
+              <div className="text-center">
+                <button
+                  onClick={() => setCurrentStep(currentStep - 1)}
+                  className={`text-${roleColor}-600 hover:text-${roleColor}-800 text-sm font-medium flex items-center justify-center gap-1`}
+                >
+                  <FaArrowLeft className="h-3 w-3" />
+                  Back to {currentStep === 2 ? 'Email' : 'OTP Verification'}
+                </button>
+              </div>
+            )}
+            
+            {/* Login link */}
+            <div className="text-center">
+              <p className="text-gray-600">
+                Remember your password?{' '}
+                <a
+                  href={role === 'admin' ? '/admin/login' : role === 'owner' ? '/owner/login' : '/user/login'}
+                  className={`text-${roleColor}-600 hover:text-${roleColor}-800 font-medium`}
+                >
+                  {role.charAt(0).toUpperCase() + role.slice(1)} Login
+                </a>
+              </p>
+            </div>
+            
+            {/* Back to home link */}
+            <div className="text-center">
               <a
-                href={role === 'admin' ? '/admin/login' : role === 'owner' ? '/owner/login' : '/user/login'}
-                className={
-                  role === 'admin'
-                    ? 'text-red-600 hover:text-red-800 text-sm font-medium'
-                    : role === 'owner'
-                    ? 'text-green-600 hover:text-green-800 text-sm font-medium'
-                    : 'text-blue-600 hover:text-blue-800 text-sm font-medium'
-                }
+                href="/"
+                className="text-gray-500 hover:text-gray-700 text-sm flex items-center justify-center gap-1"
               >
-                Go to Login
+                <FaHome className="h-3 w-3" />
+                Back to Home
               </a>
             </div>
           </div>
         </div>
       </div>
-      <Toaster position="top-right" />
     </div>
   );
 };

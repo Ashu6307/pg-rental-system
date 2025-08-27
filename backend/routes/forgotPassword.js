@@ -1,15 +1,21 @@
 import express from 'express';
 import User from '../models/User.js';
+import Admin from '../models/Admin.js';
 import OTP from '../models/Otp.js';
 // Enhanced Email System Import
 import EmailManager from '../modules/email/EmailManager.js';
 const router = express.Router();
 
 // Forgot password endpoint - Send OTP
-router.post('/forgot-password', async (req, res) => {
+router.post('/', async (req, res) => {
   const { email, role } = req.body;
   try {
-    const user = await User.findOne({ email, role });
+    let user;
+    if (role === 'admin') {
+      user = await Admin.findOne({ email });
+    } else {
+      user = await User.findOne({ email, role });
+    }
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     
     // Generate OTP
@@ -53,7 +59,12 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   const { email, newPassword, otp, role } = req.body;
   try {
-    const user = await User.findOne({ email, role });
+    let user;
+    if (role === 'admin') {
+      user = await Admin.findOne({ email });
+    } else {
+      user = await User.findOne({ email, role });
+    }
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     
     // Find and verify OTP
@@ -63,7 +74,11 @@ router.post('/reset-password', async (req, res) => {
     
     // Update password
     const bcrypt = await import('bcryptjs');
-    user.password_hash = await bcrypt.default.hash(newPassword, 10);
+    if (role === 'admin') {
+      user.password = await bcrypt.default.hash(newPassword, 10);
+    } else {
+      user.password_hash = await bcrypt.default.hash(newPassword, 10);
+    }
     await user.save();
     
     // Mark OTP as verified and cleanup
