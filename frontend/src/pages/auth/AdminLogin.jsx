@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { AuthContext } from '../../context/AuthContext';
 import authService from '../../services/authService';
 import { FaUserShield, FaEnvelope, FaEye, FaEyeSlash, FaCheckCircle, FaExclamationCircle, FaLock, FaHome } from 'react-icons/fa';
+import { handleEmailChange, isValidEmail, generateEmailSuggestions } from '../../utils/emailValidation';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,9 @@ const AdminLogin = () => {
   const [otpSuccess, setOtpSuccess] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
+  
+  // Email validation state
+  const [emailError, setEmailError] = useState('');
   
   // Email suggestions
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
@@ -43,31 +47,20 @@ const AdminLogin = () => {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Email domain suggestions
-  const generateEmailSuggestions = (email) => {
-    const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'rediffmail.com'];
-    const emailParts = email.split('@');
-    
-    if (emailParts.length === 2 && emailParts[1].length > 0) {
-      const domain = emailParts[1].toLowerCase();
-      const suggestions = commonDomains
-        .filter(d => d.startsWith(domain) && d !== domain)
-        .slice(0, 3)
-        .map(d => `${emailParts[0]}@${d}`);
-      
-      setEmailSuggestions(suggestions);
-      setShowEmailSuggestions(suggestions.length > 0);
-    } else {
-      setShowEmailSuggestions(false);
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
     
     if (name === 'email') {
-      generateEmailSuggestions(value);
+      const processedValue = handleEmailChange(
+        value, 
+        (email) => setFormData(prev => ({ ...prev, email })), 
+        setEmailError,
+        setEmailSuggestions
+      );
+      // Show suggestions if there's an @ and partial domain typed
+      setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
@@ -76,6 +69,12 @@ const AdminLogin = () => {
     
     if (!formData.email || !formData.password) {
       toast.error('Please enter both email and password');
+      return;
+    }
+
+    // Validate email format
+    if (!isValidEmail(formData.email)) {
+      toast.error('Please enter a valid email address');
       return;
     }
 
@@ -200,7 +199,7 @@ const AdminLogin = () => {
               </div>
 
               <form onSubmit={handleSendOtp} className="space-y-6">
-                <div className="space-y-5">
+                <div className="space-y-3">
                   {/* Email Input */}
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -216,14 +215,20 @@ const AdminLogin = () => {
                         value={formData.email}
                         onChange={handleChange}
                         onFocus={() => setShowEmailSuggestions(false)}
-                        className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                        className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
+                          emailError
+                            ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                            : formData.email && isValidEmail(formData.email)
+                            ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
+                            : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
+                        }`}
                         placeholder="Enter admin email address"
                       />
                       
                       {/* Email validation icons */}
-                      {formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
+                      {emailError ? (
                         <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                      ) : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) ? (
+                      ) : formData.email && isValidEmail(formData.email) ? (
                         <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
                       ) : (
                         <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
@@ -240,6 +245,7 @@ const AdminLogin = () => {
                               onClick={() => {
                                 setFormData(prev => ({ ...prev, email: suggestion }));
                                 setShowEmailSuggestions(false);
+                                setEmailError(''); // Clear error when suggestion is selected
                               }}
                             >
                               <span className="flex items-center gap-2">
@@ -249,6 +255,13 @@ const AdminLogin = () => {
                             </button>
                           ))}
                         </div>
+                      )}
+                    </div>
+                    
+                    {/* Email Error Message - Fixed height container */}
+                    <div className="h-5 mt-1">
+                      {emailError && (
+                        <p className="text-xs text-red-600">{emailError}</p>
                       )}
                     </div>
                   </div>
@@ -349,7 +362,7 @@ const AdminLogin = () => {
               </div>
 
               <form onSubmit={handleVerifyOtp} className="space-y-6">
-                <div className="space-y-5">
+                <div className="space-y-3">
                   {/* OTP Sent Success Message */}
                   <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                     <div className="flex items-center">

@@ -94,9 +94,9 @@ export default function OwnerProfile() {
                 maxLength="20"
                 className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                   nameError 
-                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
                     : form.name && isValidName(form.name)
-                      ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                      ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                       : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                 }`}
                 required 
@@ -112,7 +112,7 @@ export default function OwnerProfile() {
               </div>
             </div>
             <div className="flex justify-between items-center mt-1">
-              <div className="h-5">
+              <div className="h-4">
                 {nameError && (
                   <p className="text-xs text-red-600">{nameError}</p>
                 )}
@@ -138,9 +138,9 @@ export default function OwnerProfile() {
                 placeholder="Email Address" 
                 className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                   emailError 
-                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
                     : form.email && isValidEmail(form.email)
-                      ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                      ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                       : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                 }`}
                 required 
@@ -156,12 +156,12 @@ export default function OwnerProfile() {
               )}
             </div>
             
-            {/* Email Error Message */}
-            {emailError && (
-              <div className="mt-1">
+            {/* Email Error Message - Fixed height container */}
+            <div className="h-5 mt-1">
+              {emailError && (
                 <p className="text-xs text-red-600">{emailError}</p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
           
           <div className="relative">
@@ -174,7 +174,7 @@ export default function OwnerProfile() {
               placeholder="Phone Number" 
               className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                 form.phone && isValidIndianMobile(form.phone)
-                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : form.phone && form.phone.length > 0 && !isValidIndianMobile(form.phone)
                   ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                   : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'

@@ -8,6 +8,8 @@ import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValida
 import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/nameValidation';
 import { handleEmailChange, isValidEmail, getEmailValidationError, generateEmailSuggestions } from '../../utils/emailValidation';
 
+
+
 const AuthForm = ({
   mode = 'login',
   role = 'user',
@@ -51,6 +53,16 @@ const AuthForm = ({
   const [emailError, setEmailError] = useState(''); // Email validation error
 
   const isLogin = mode === 'login';
+
+    // Scroll lock only for login page
+    useEffect(() => {
+      if (isLogin) {
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
+      } else {
+        document.body.style.overflow = '';
+      }
+    }, [isLogin]);
 
   // Load remembered email on component mount
   useEffect(() => {
@@ -780,13 +792,13 @@ const AuthForm = ({
         </div>
       )}
 
-    <div className={`min-h-screen flex flex-col justify-start sm:px-2 lg:px-4 ${bgColor}`}> {/* BG color by role */}
-      <div className={`sm:mx-auto sm:w-full ${role === 'owner' && !isLogin ? 'sm:max-w-3xl' : 'sm:max-w-md'} mb-16 mt-4`}>
+  <div className={`min-h-screen flex flex-col justify-start py-2 sm:px-2 lg:px-4 ${bgColor}`}> {/* BG color by role */}
+  <div className={`sm:mx-auto sm:w-full ${role === 'owner' && !isLogin ? 'sm:max-w-3xl' : isLogin ? 'sm:max-w-md' : 'sm:max-w-xl'} mb-4 mt-1`}>
         <div className="flex justify-center">
-          <div className="flex flex-col items-center space-y-2 w-full">
+          <div className="flex flex-col items-center space-y-1 w-full">
             <span className="relative group">
               <IconComponent
-                className={`h-16 w-16 ${iconColor} drop-shadow-lg`}
+                className={`h-12 w-12 ${iconColor} drop-shadow-lg`}
                 title={
                   role === 'admin'
                     ? 'Admin Login/Register'
@@ -810,18 +822,18 @@ const AuthForm = ({
                 ? 'Owner'
                 : 'User'}
             </div>
-            <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="text-center text-2xl font-extrabold text-gray-900">
               {role.charAt(0).toUpperCase() + role.slice(1)} {isLogin ? 'Login' : 'Registration'}
             </h2>
           </div>
         </div>
-        <p className="text-center text-sm text-gray-600 mb-6">
+        <p className="text-center text-sm text-gray-600 mb-2">
           {isLogin ? 'Login your account' : 'Create your account to get started'}
         </p>
         <div>
           <div
             className={
-              `p-8 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl ` +
+              `p-6 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl ` +
               (role === 'admin'
                 ? 'bg-gradient-to-br from-red-50 via-white to-red-100'
                 : role === 'owner'
@@ -829,12 +841,12 @@ const AuthForm = ({
                 : 'bg-gradient-to-br from-blue-50 via-white to-blue-100')
             }
           >
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-3" onSubmit={handleSubmit}>
               {/* Google login/register button at top with Google icon */}
               {!(role === 'admin' && isLogin) && (
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 mb-4 rounded-lg bg-white text-gray-900 font-semibold shadow-md border border-gray-300 hover:bg-gray-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 py-2 px-4 mb-2 rounded-lg bg-white text-gray-900 font-semibold shadow-md border border-gray-300 hover:bg-gray-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleGoogleAuth}
                   disabled={loading}
                 >
@@ -852,7 +864,7 @@ const AuthForm = ({
               
               {/* Divider */}
               {!(role === 'admin' && isLogin) && (
-                <div className="relative mb-6">
+                <div className="relative mb-3">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-300" />
                   </div>
@@ -885,9 +897,9 @@ const AuthForm = ({
                           maxLength="20"
                           className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                             nameError 
-                              ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                              ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
                               : formData.name && isValidName(formData.name)
-                                ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                                ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                                 : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                           }`}
                           placeholder="Enter your full name (4-20 chars)"
@@ -904,7 +916,7 @@ const AuthForm = ({
                         </div>
                       </div>
                       <div className="flex justify-between items-center mt-1">
-                        <div className="h-5">
+                        <div className="h-4">
                           {nameError && (
                             <p className="text-xs text-red-600">{nameError}</p>
                           )}
@@ -957,7 +969,7 @@ const AuthForm = ({
                             </div>
                           </div>
                           <div className="flex justify-between items-center mt-1">
-                            <div className="h-5">
+                            <div className="h-4">
                               {ownerNameError && (
                                 <p className="text-xs text-red-600">{ownerNameError}</p>
                               )}
@@ -989,36 +1001,417 @@ const AuthForm = ({
                 </>
               )}
               {/* Common fields for login/register */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
-                <div className="mt-1 relative" style={{ contain: 'layout', isolation: 'isolate' }}>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    autoFocus={false}
-                    required
-                    value={formData.email}
-                    onChange={(e) => {
-                      const processedValue = handleEmailChange(
-                        e.target.value, 
-                        (value) => setFormData({...formData, email: value}), 
-                        setEmailError,
-                        setEmailSuggestions
-                      );
-                      // Show suggestions only if there's an @ and no error
-                      setShowEmailSuggestions(processedValue.includes('@') && !emailError);
-                    }}
-                    onFocus={() => setShowEmailSuggestions(false)}
-                    readOnly={emailVerified} // Make email field read-only after verification
+              {/* Email and Phone in same row for Owner Registration */}
+              {(role === 'owner' && !isLogin) ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Email Field */}
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
+                    <div className="mt-1 relative" style={{ contain: 'layout', isolation: 'isolate' }}>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        autoFocus={false}
+                        required
+                        value={formData.email}
+                        onChange={(e) => {
+                          const processedValue = handleEmailChange(
+                            e.target.value, 
+                            (value) => setFormData({...formData, email: value}), 
+                            setEmailError,
+                            setEmailSuggestions
+                          );
+                          // Show suggestions if there's an @ and partial domain typed
+                          setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
+                        }}
+                        onFocus={() => setShowEmailSuggestions(false)}
+                        readOnly={emailVerified} // Make email field read-only after verification
+                        className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
+                          emailVerified 
+                            ? 'border-green-500 text-green-800 cursor-not-allowed' 
+                            : emailError
+                            ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                            : formData.email && isValidEmail(formData.email)
+                            ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
+                            : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
+                        }`}
+                        placeholder="Enter your email address"
+                      />
+                      {emailVerified ? (
+                        <div className="absolute right-3 top-2.5 flex items-center gap-1">
+                          <FaCheckCircle className="h-5 w-5 text-green-500" />
+                          <span className="text-xs text-green-600 font-medium">Verified</span>
+                        </div>
+                      ) : emailError ? (
+                        <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                      ) : formData.email && isValidEmail(formData.email) ? (
+                        <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                      ) : (
+                        <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                      )}
+                      
+                      {/* Email Suggestions Dropdown */}
+                      {showEmailSuggestions && emailSuggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
+                          {emailSuggestions.map((suggestion, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, email: suggestion }));
+                                setShowEmailSuggestions(false);
+                              }}
+                            >
+                              <span className="flex items-center gap-2">
+                                <FaEnvelope className="h-3 w-3 text-gray-400" />
+                                {suggestion}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Email Error Message and Verify Button in same row */}
+                    <div className="flex justify-between items-center mt-1">
+                      <div className="h-4">
+                        {emailError && (
+                          <p className="text-xs text-red-600">{emailError}</p>
+                        )}
+                      </div>
+                      
+                      {/* Verify Email Button for registration only (not for admin) - Right side */}
+                      {(!isLogin && role !== 'admin') && (
+                        <button
+                          type="button"
+                          className={`px-2 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${
+                            emailVerified 
+                              ? 'bg-green-500 text-white cursor-not-allowed'
+                              : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) 
+                                ? (role === 'admin' 
+                                  ? 'bg-red-500 text-white hover:bg-red-600' 
+                                  : role === 'owner' 
+                                  ? 'bg-green-500 text-white hover:bg-green-600' 
+                                  : 'bg-blue-500 text-white hover:bg-blue-600') 
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                          disabled={emailVerified || !(formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email))}
+                          onClick={async () => {
+                            if (emailVerified) return; // Prevent action if already verified
+                            
+                            // First check if email already exists
+                            try {
+                              const response = await fetch('http://localhost:5000/api/otp/check-email', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: formData.email, role })
+                              });
+                              const data = await response.json();
+                              
+                              if (!data.success && data.alreadyRegistered) {
+                                // Email already registered
+                                toast.error(data.message, {
+                                  duration: 5000,
+                                  icon: '⚠️'
+                                });
+                                // Optionally redirect to login page after 3 seconds
+                                setTimeout(() => {
+                                  const loginPath = role === 'user' ? '/user/login' : 
+                                                 role === 'owner' ? '/owner/login' : 
+                                                 role === 'admin' ? '/admin/login' : '/user/login';
+                                  toast('Redirecting to login page...', {
+                                    icon: '🔄',
+                                    duration: 2000
+                                  });
+                                  setTimeout(() => {
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    window.location.href = loginPath;
+                                  }, 1500);
+                                }, 3000);
+                                return;
+                              }
+                              
+                              // Email is available, proceed with OTP verification
+                              if (data.success && !data.exists) {
+                                setShowOtpModal(true);
+                                startOtpTimer(); // Start the timer when OTP modal opens
+                              }
+                            } catch (error) {
+                              console.error('Email check error:', error);
+                              toast.error('Error checking email availability');
+                            }
+                          }}
+                        >
+                          {emailVerified ? (
+                            <>
+                              <FaCheckCircle className="inline mr-1" />
+                              Verified
+                            </>
+                          ) : (
+                            'Verify Email'
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Phone Field */}
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <div className="mt-1 relative">
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        autoComplete="tel"
+                        required={!isLogin}
+                        value={formData.phone}
+                        onChange={handleChange}
+                        maxLength="10" // Support 10 digit Indian mobile numbers
+                        className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
+                          formData.phone && isValidIndianMobile(formData.phone)
+                            ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                            : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
+                            ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                            : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                        }`}
+                        placeholder="Enter phone number (e.g., 9876543210)"
+                      />
+                      <div className="absolute right-3 top-2.5">
+                        {formData.phone && isValidIndianMobile(formData.phone) ? (
+                          <FaCheckCircle className="h-5 w-5 text-green-500" />
+                        ) : formData.phone && formData.phone.length > 0 ? (
+                          <FaExclamationCircle className="h-5 w-5 text-red-500" />
+                        ) : (
+                          <FaPhone className="h-5 w-5 text-gray-400" />
+                        )}
+                      </div>
+                    </div>
+                    {/* Fixed height container for error message */}
+                    <div className="h-4">
+                      {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
+                        <p className="text-red-500 text-xs">
+                          📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Regular Email Field for User/Admin */}
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
+                    <div className="mt-1 relative" style={{ contain: 'layout', isolation: 'isolate' }}>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        autoFocus={false}
+                        required
+                        value={formData.email}
+                        onChange={(e) => {
+                          const processedValue = handleEmailChange(
+                            e.target.value, 
+                            (value) => setFormData({...formData, email: value}), 
+                            setEmailError,
+                            setEmailSuggestions
+                          );
+                          // Show suggestions if there's an @ and partial domain typed
+                          setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
+                        }}
+                        onFocus={() => setShowEmailSuggestions(false)}
+                        readOnly={emailVerified} // Make email field read-only after verification
+                        className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
+                          emailVerified 
+                            ? 'border-green-500 text-green-800 cursor-not-allowed' 
+                            : emailError
+                            ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                            : formData.email && isValidEmail(formData.email)
+                            ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
+                            : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
+                        }`}
+                        placeholder="Enter your email address"
+                      />
+                      {emailVerified ? (
+                        <div className="absolute right-3 top-2.5 flex items-center gap-1">
+                          <FaCheckCircle className="h-5 w-5 text-green-500" />
+                          <span className="text-xs text-green-600 font-medium">Verified</span>
+                        </div>
+                      ) : emailError ? (
+                        <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
+                      ) : formData.email && isValidEmail(formData.email) ? (
+                        <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
+                      ) : (
+                        <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
+                      )}
+                      
+                      {/* Email Suggestions Dropdown */}
+                      {showEmailSuggestions && emailSuggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
+                          {emailSuggestions.map((suggestion, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, email: suggestion }));
+                                setShowEmailSuggestions(false);
+                              }}
+                            >
+                              <span className="flex items-center gap-2">
+                                <FaEnvelope className="h-3 w-3 text-gray-400" />
+                                {suggestion}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Email Error Message and Verify Button in same row */}
+                    <div className="flex justify-between items-center mt-1">
+                      <div className="h-4">
+                        {emailError && (
+                          <p className="text-xs text-red-600">{emailError}</p>
+                        )}
+                      </div>
+                      
+                      {/* Verify Email Button for registration only (not for admin) - Right side */}
+                      {(!isLogin && role !== 'admin') && (
+                        <button
+                          type="button"
+                          className={`px-2 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${
+                            emailVerified 
+                              ? 'bg-green-500 text-white cursor-not-allowed'
+                              : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) 
+                                ? (role === 'admin' 
+                                  ? 'bg-red-500 text-white hover:bg-red-600' 
+                                  : role === 'owner' 
+                                  ? 'bg-green-500 text-white hover:bg-green-600' 
+                                  : 'bg-blue-500 text-white hover:bg-blue-600') 
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                          disabled={emailVerified || !(formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email))}
+                          onClick={async () => {
+                            if (emailVerified) return; // Prevent action if already verified
+                            
+                            // First check if email already exists
+                            try {
+                              const response = await fetch('http://localhost:5000/api/otp/check-email', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: formData.email, role })
+                              });
+                              const data = await response.json();
+                              
+                              if (!data.success && data.alreadyRegistered) {
+                                // Email already registered
+                                toast.error(data.message, {
+                                  duration: 5000,
+                                  icon: '⚠️'
+                                });
+                                // Optionally redirect to login page after 3 seconds
+                                setTimeout(() => {
+                                  const loginPath = role === 'user' ? '/user/login' : 
+                                                 role === 'owner' ? '/owner/login' : 
+                                                 role === 'admin' ? '/admin/login' : '/user/login';
+                                  toast('Redirecting to login page...', {
+                                    icon: '🔄',
+                                    duration: 2000
+                                  });
+                                  setTimeout(() => {
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    window.location.href = loginPath;
+                                  }, 1500);
+                                }, 3000);
+                                return;
+                              }
+                              
+                              // Email is available, proceed with OTP verification
+                              if (data.success && !data.exists) {
+                                setShowOtpModal(true);
+                                startOtpTimer(); // Start the timer when OTP modal opens
+                              }
+                            } catch (error) {
+                              console.error('Email check error:', error);
+                              toast.error('Error checking email availability');
+                            }
+                          }}
+                        >
+                          {emailVerified ? (
+                            <>
+                              <FaCheckCircle className="inline mr-1" />
+                              Verified
+                            </>
+                          ) : (
+                            'Verify Email'
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Regular Phone Field for User/Admin */}
+                  {!isLogin && (
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                        Phone Number <span className="text-red-500">*</span>
+                      </label>
+                      <div className="mt-1 relative">
+                        <input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          autoComplete="tel"
+                          required={!isLogin}
+                          value={formData.phone}
+                          onChange={handleChange}
+                          maxLength="10" // Support 10 digit Indian mobile numbers
+                          className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
+                            formData.phone && isValidIndianMobile(formData.phone)
+                              ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                              : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
+                              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                              : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                          }`}
+                          placeholder="Enter phone number (e.g., 9876543210)"
+                        />
+                        <div className="absolute right-3 top-2.5">
+                          {formData.phone && isValidIndianMobile(formData.phone) ? (
+                            <FaCheckCircle className="h-5 w-5 text-green-500" />
+                          ) : formData.phone && formData.phone.length > 0 ? (
+                            <FaExclamationCircle className="h-5 w-5 text-red-500" />
+                          ) : (
+                            <FaPhone className="h-5 w-5 text-gray-400" />
+                          )}
+                        </div>
+                      </div>
+                      {/* Fixed height container for error message */}
+                      <div className="h-4">
+                        {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
+                          <p className="text-red-500 text-xs">
+                            📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
                     className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                       emailVerified 
-                        ? 'border-green-500 bg-green-50 text-green-800 cursor-not-allowed' 
+                        ? 'border-green-500 text-green-800 cursor-not-allowed' 
                         : emailError
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
                         : formData.email && isValidEmail(formData.email)
-                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                         : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                     }`}
                     placeholder="Enter your email address"
@@ -1059,19 +1452,19 @@ const AuthForm = ({
                   )}
                 </div>
                 
-                {/* Email Error Message */}
-                {emailError && (
-                  <div className="mt-1">
-                    <p className="text-xs text-red-600">{emailError}</p>
+                {/* Email Error Message and Verify Button in same row */}
+                <div className="flex justify-between items-center mt-1">
+                  <div className="h-4">
+                    {emailError && (
+                      <p className="text-xs text-red-600">{emailError}</p>
+                    )}
                   </div>
-                )}
-                
-                {/* Verify Email Button for registration only (not for admin) */}
-                {(!isLogin && role !== 'admin') && (
-                  <div className="mt-2">
+                  
+                  {/* Verify Email Button for registration only (not for admin) - Right side */}
+                  {(!isLogin && role !== 'admin') && (
                     <button
                       type="button"
-                      className={`px-3 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${
+                      className={`px-2 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${
                         emailVerified 
                           ? 'bg-green-500 text-white cursor-not-allowed'
                           : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) 
@@ -1132,14 +1525,14 @@ const AuthForm = ({
                       {emailVerified ? (
                         <>
                           <FaCheckCircle className="inline mr-1" />
-                          Email Verified
+                          Verified
                         </>
                       ) : (
                         'Verify Email'
                       )}
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
               {!isLogin && (
                 <div>
@@ -1158,7 +1551,7 @@ const AuthForm = ({
                       maxLength="10" // Support 10 digit Indian mobile numbers
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                         formData.phone && isValidIndianMobile(formData.phone)
-                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                           : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
@@ -1176,7 +1569,7 @@ const AuthForm = ({
                     </div>
                   </div>
                   {/* Fixed height container for error message */}
-                  <div className="h-5 mt-1">
+                  <div className="h-4">
                     {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
                       <p className="text-red-500 text-xs">
                         📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
@@ -1229,8 +1622,8 @@ const AuthForm = ({
                 </div>
                 {/* Password strength indicator for registration */}
                 {!isLogin && formData.password && (
-                  <div className="mt-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="mt-1">
+                    <div className="flex items-center gap-2 mb-1">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full transition-all duration-500 ${
@@ -1324,8 +1717,8 @@ const AuthForm = ({
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                         formData.confirmPassword && formData.password
                           ? formData.password === formData.confirmPassword
-                            ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                            : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                            ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                            : 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                       }`}
                       placeholder="Re-enter your password"
@@ -1446,7 +1839,6 @@ const AuthForm = ({
               )}
 
               <div>
-              
                 <button
                   type="submit"
                   disabled={loading || !isFormReadyForSubmit()}
@@ -1590,7 +1982,7 @@ const AuthForm = ({
             </form>
             {/* Toggle login/register */}
             {role !== 'admin' && (
-              <div className="mt-6 text-center">
+              <div className="mt-3 text-center">
                 <p className="text-gray-600">
                   {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
                   <Link
@@ -1612,7 +2004,7 @@ const AuthForm = ({
             )}
             {/* Forgot password link (only for login) */}
             {isLogin && (
-              <div className="mt-4 text-center">
+              <div className="mt-2 text-center">
                 {role === 'user' && (
                   <a
                     href="/forgot-password"
@@ -1640,7 +2032,7 @@ const AuthForm = ({
               </div>
             )}
             {/* Back to home link */}
-            <div className="mt-4 text-center">
+            <div className="mt-2 text-center">
               <a
                 href={getHomePath()}
                 className="text-gray-500 hover:text-gray-700 text-sm inline-flex items-center gap-1"
@@ -1760,8 +2152,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
       setEmailError,
       setEmailSuggestions
     );
-    // Show suggestions only if there's an @ and no error
-    setShowEmailSuggestions(processedValue.includes('@') && !emailError);
+    // Show suggestions if there's an @ and partial domain typed
+    setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
   };
 
   const handleEmailSuggestionClick = (suggestion) => {
@@ -2018,8 +2410,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     : 'bg-blue-50';
 
   return (
-    <div className={`min-h-screen flex flex-col justify-start sm:px-2 lg:px-4 overflow-visible ${bgColor}`}>
-      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-16 mt-4 overflow-visible">
+    <div className={`min-h-screen flex flex-col justify-center py-4 sm:px-2 lg:px-4 overflow-visible ${bgColor}`}>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8 mt-2 overflow-visible">
         <div className="flex justify-center">
           <div className="flex flex-col items-center space-y-2 w-full">
             <span className="relative group">
@@ -2076,9 +2468,9 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     onFocus={() => setShowEmailSuggestions(false)}
                     className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                       emailError
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
                         : formData.email && isValidEmail(formData.email)
-                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                         : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                     }`}
                     placeholder={`Enter your ${role} email address`}
@@ -2111,12 +2503,12 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                   </div>
                 )}
                 
-                {/* Email Error Message */}
-                {emailError && (
-                  <div className="mt-1">
+                {/* Email Error Message - Fixed height container */}
+                <div className="h-4 mt-1">
+                  {emailError && (
                     <p className="text-xs text-red-600">{emailError}</p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <div>
@@ -2377,8 +2769,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                       formData.confirmPassword && formData.newPassword
                         ? formData.newPassword === formData.confirmPassword
-                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                          : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                          : 'border-red-300 focus:ring-red-500 focus:border-red-500'
                         : `border-gray-300 focus:ring-${roleColor}-500 focus:border-${roleColor}-500`
                     }`}
                     placeholder="Re-enter your new password"

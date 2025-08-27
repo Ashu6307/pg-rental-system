@@ -102,9 +102,9 @@ const PGBookingForm = ({ pg }) => {
               maxLength="20"
               className={`w-full border rounded px-3 py-2 pr-10 ${
                 nameError 
-                  ? 'border-red-500 bg-red-50' 
+                  ? 'border-red-500' 
                   : name && isValidName(name)
-                    ? 'border-green-500 bg-green-50'
+                    ? 'border-green-500'
                     : 'border-gray-300'
               }`}
               placeholder="Enter your full name (4-20 chars)"
@@ -121,7 +121,7 @@ const PGBookingForm = ({ pg }) => {
             </div>
           </div>
           <div className="flex justify-between items-center mt-1">
-            <div className="h-5">
+            <div className="h-4">
               {nameError && (
                 <p className="text-xs text-red-600">{nameError}</p>
               )}
@@ -141,7 +141,7 @@ const PGBookingForm = ({ pg }) => {
               maxLength="10"
               className={`appearance-none block w-full px-3 py-2 pr-10 border rounded placeholder-gray-400 focus:outline-none sm:text-sm ${
                 phone && isValidIndianMobile(phone)
-                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : phone && phone.length > 0 && !isValidIndianMobile(phone)
                   ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                   : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
@@ -183,9 +183,9 @@ const PGBookingForm = ({ pg }) => {
               }}
               className={`appearance-none block w-full px-3 py-2 pr-10 border rounded placeholder-gray-400 focus:outline-none ${
                 emailError 
-                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
                   : email && isValidEmail(email)
-                    ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                    ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                     : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
               }`}
               placeholder="Enter your email address"
@@ -202,12 +202,12 @@ const PGBookingForm = ({ pg }) => {
             )}
           </div>
           
-          {/* Email Error Message */}
-          {emailError && (
-            <div className="mt-1">
+          {/* Email Error Message - Fixed height container */}
+          <div className="h-5 mt-1">
+            {emailError && (
               <p className="text-xs text-red-600">{emailError}</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         <div>
           <label className="block font-semibold mb-1">Address</label>
@@ -239,9 +239,9 @@ const PGBookingForm = ({ pg }) => {
               maxLength="20"
               className={`w-full border rounded px-3 py-2 pr-10 ${
                 emergencyNameError 
-                  ? 'border-red-500 bg-red-50' 
+                  ? 'border-red-500' 
                   : emergencyName && isValidName(emergencyName)
-                    ? 'border-green-500 bg-green-50'
+                    ? 'border-green-500'
                     : 'border-gray-300'
               }`}
               placeholder="Emergency contact name (4-20 chars)"
@@ -257,7 +257,7 @@ const PGBookingForm = ({ pg }) => {
             </div>
           </div>
           <div className="flex justify-between items-center mt-1">
-            <div className="h-5">
+            <div className="h-4">
               {emergencyNameError && (
                 <p className="text-xs text-red-600">{emergencyNameError}</p>
               )}
@@ -277,7 +277,7 @@ const PGBookingForm = ({ pg }) => {
               maxLength="10"
               className={`appearance-none block w-full px-3 py-2 pr-10 border rounded placeholder-gray-400 focus:outline-none sm:text-sm ${
                 emergencyPhone && isValidIndianMobile(emergencyPhone)
-                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                  ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                   : emergencyPhone && emergencyPhone.length > 0 && !isValidIndianMobile(emergencyPhone)
                   ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                   : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'

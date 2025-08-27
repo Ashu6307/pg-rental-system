@@ -198,11 +198,11 @@ const Contact = () => {
                       required 
                       disabled={isSubmitting} 
                       maxLength="20"
-                      className={`w-full px-3 py-2 pr-10 border rounded-xl focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
+                      className={`w-full px-3 py-2 pr-12 border rounded-xl focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
                         nameError 
-                          ? 'border-red-500 focus:ring-red-400 focus:border-red-400 bg-red-50' 
+                          ? 'border-red-500 focus:ring-red-400 focus:border-red-400' 
                           : formData.name && isValidName(formData.name)
-                            ? 'border-green-500 focus:ring-green-400 focus:border-green-400 bg-green-50'
+                            ? 'border-green-500 focus:ring-green-400 focus:border-green-400'
                             : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
                       }`}
                       placeholder="Your full name (4-20 chars)" 
@@ -218,14 +218,18 @@ const Contact = () => {
                       )}
                     </div>
                   </div>
-                  <div className="flex justify-between items-center mt-1">
-                    <div className="h-5">
+                  <div className="mt-1">
+                    {/* Error message - full width */}
+                    <div className="h-4">
                       {nameError && (
                         <p className="text-xs text-red-600">{nameError}</p>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {formData.name.length}/20 characters
+                    {/* Character count - right aligned */}
+                    <div className="flex justify-end">
+                      <div className="text-xs text-gray-500">
+                        {formData.name.length}/20 characters
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -241,9 +245,9 @@ const Contact = () => {
                       maxLength="10"
                       required 
                       disabled={isSubmitting} 
-                      className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
+                      className={`appearance-none block w-full px-3 py-2 pr-12 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
                         formData.phone && isValidIndianMobile(formData.phone)
-                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                           : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
@@ -260,20 +264,27 @@ const Contact = () => {
                       )}
                     </div>
                   </div>
-                  {/* Fixed height container for error message to prevent layout shift */}
-                  <div className="h-5 mt-1">
-                    {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
-                      <p className="text-red-500 text-xs">
-                        📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
-                      </p>
-                    )}
+                  <div className="mt-1">
+                    {/* Error message - full width */}
+                    <div className="h-4">
+                      {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
+                        <p className="text-red-500 text-xs">
+                          📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+                        </p>
+                      )}
+                    </div>
+                    {/* Character count - right aligned */}
+                    <div className="flex justify-end">
+                      <div className="text-xs text-gray-500">
+                        {formData.phone.length}/10 digits
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
               <div>
                 <label htmlFor="email" className="block text-gray-700 text-base font-semibold mb-2">Email Address *</label>
                 <div>
-                  <label htmlFor="email" className="block text-gray-700 text-base font-semibold mb-2">Email Address *</label>
                   <div className="relative">
                     <input 
                       type="email" 
@@ -287,17 +298,17 @@ const Contact = () => {
                           setEmailError,
                           setEmailSuggestions
                         );
-                        // Show suggestions only if there's an @ and no error
-                        setShowEmailSuggestions(processedValue.includes('@') && !emailError);
+                        // Show suggestions if there's an @ and partial domain typed
+                        setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
                       }}
                       onFocus={() => setShowEmailSuggestions(false)}
                       required 
                       disabled={isSubmitting} 
-                      className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
+                      className={`appearance-none block w-full px-3 py-2 pr-12 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
                         emailError 
-                          ? 'border-red-500 focus:ring-red-400 focus:border-red-400 bg-red-50' 
+                          ? 'border-red-500 focus:ring-red-400 focus:border-red-400' 
                           : formData.email && isValidEmail(formData.email)
-                            ? 'border-green-500 focus:ring-green-400 focus:border-green-400 bg-green-50'
+                            ? 'border-green-500 focus:ring-green-400 focus:border-green-400'
                             : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
                       }`}
                       placeholder="Your email address" 
@@ -335,12 +346,12 @@ const Contact = () => {
                   )}
                   </div>
                   
-                  {/* Email Error Message */}
-                  {emailError && (
-                    <div className="mt-1">
+                  {/* Email Error Message - Fixed height container */}
+                  <div className="h-4 mt-1">
+                    {emailError && (
                       <p className="text-xs text-red-600">{emailError}</p>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
