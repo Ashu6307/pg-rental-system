@@ -1692,6 +1692,23 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState([]);
 
+  // Scroll lock effect
+  useEffect(() => {
+    // Lock body scroll when component mounts
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+    
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+    };
+  }, []);
+
   // Password strength checker for forgot password
   const checkPasswordStrength = (password) => {
     let score = 0;
@@ -1986,34 +2003,36 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     const themeColor = role === 'admin' ? 'red' : role === 'owner' ? 'green' : 'blue';
 
     return (
-      <div className="flex items-center justify-center space-x-2 mb-8">
-        {steps.map((step, index) => (
-          <React.Fragment key={step.number}>
-            <div className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                currentStep >= step.number 
-                  ? `bg-${themeColor}-600 text-white` 
-                  : 'bg-gray-300 text-gray-600'
-              }`}>
-                {step.number}
+      <div className="flex items-center justify-center space-x-2 mb-6 w-full">
+        <div className="flex items-center justify-center space-x-2">
+          {steps.map((step, index) => (
+            <React.Fragment key={step.number}>
+              <div className="flex items-center">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${
+                  currentStep >= step.number 
+                    ? `bg-${themeColor}-600 text-white` 
+                    : 'bg-gray-300 text-gray-600'
+                }`}>
+                  {step.number}
+                </div>
+                <span className={`ml-2 text-xs font-medium ${
+                  currentStep === step.number 
+                    ? `text-${themeColor}-600 font-bold` 
+                    : currentStep > step.number 
+                    ? 'text-gray-700' 
+                    : 'text-gray-500'
+                }`}>
+                  {step.label}
+                </span>
               </div>
-              <span className={`ml-2 text-sm font-medium ${
-                currentStep === step.number 
-                  ? `text-${themeColor}-600 font-bold` 
-                  : currentStep > step.number 
-                  ? 'text-gray-700' 
-                  : 'text-gray-500'
-              }`}>
-                {step.label}
-              </span>
-            </div>
-            {index < steps.length - 1 && (
-              <div className={`w-8 h-0.5 ${
-                currentStep > step.number ? `bg-${themeColor}-600` : 'bg-gray-300'
-              }`}></div>
-            )}
-          </React.Fragment>
-        ))}
+              {index < steps.length - 1 && (
+                <div className={`w-8 h-0.5 ${
+                  currentStep > step.number ? `bg-${themeColor}-600` : 'bg-gray-300'
+                }`}></div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
     );
   };
@@ -2029,34 +2048,34 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     : 'bg-blue-50';
 
   return (
-    <div className={`min-h-screen flex flex-col justify-center py-4 sm:px-2 lg:px-4 overflow-visible ${bgColor}`}>
-      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8 mt-2 overflow-visible">
+    <div className={`min-h-screen flex items-center justify-center py-2 px-4 overflow-hidden ${bgColor}`} style={{ overflow: 'hidden', height: '100vh' }}>
+      <div className="w-full max-w-md mx-auto overflow-visible" style={{ transform: 'translateY(-2rem)' }}>
         <div className="flex justify-center">
-          <div className="flex flex-col items-center space-y-2 w-full">
+          <div className="flex flex-col items-center space-y-1 w-full">
             <span className="relative group">
               <IconComponent
-                className={`h-16 w-16 ${iconColor} drop-shadow-lg`}
+                className={`h-12 w-12 ${iconColor} drop-shadow-lg`}
                 title={`${role.charAt(0).toUpperCase() + role.slice(1)} Password Reset`}
               />
               <span className="absolute left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                 {role.charAt(0).toUpperCase() + role.slice(1)} Password Reset
               </span>
             </span>
-            <div className="text-base font-semibold text-gray-700 mt-1">
+            <div className="text-sm font-semibold text-gray-700">
               {role.charAt(0).toUpperCase() + role.slice(1)}
             </div>
-            <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="text-center text-2xl font-extrabold text-gray-900">
               Reset {role.charAt(0).toUpperCase() + role.slice(1)} Password
             </h2>
           </div>
         </div>
-        <p className="text-center text-sm text-gray-600 mb-6">
+        <p className="text-center text-sm text-gray-600 mb-4">
           {currentStep === 1 && 'Enter your email to receive reset instructions'}
           {currentStep === 2 && 'Verify your identity with OTP'}
           {currentStep === 3 && 'Create your new secure password'}
         </p>
         
-        <div className={`p-8 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl overflow-visible ${
+        <div className={`p-6 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl overflow-visible ${
           role === 'admin'
             ? 'bg-gradient-to-br from-red-50 via-white to-red-100'
             : role === 'owner'
@@ -2160,26 +2179,26 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
 
           {/* Step 2: OTP Verification */}
           {currentStep === 2 && (
-            <form onSubmit={handleVerifyOtp} className="space-y-6">
+            <div className="space-y-4">
               {/* OTP Sent Success Message */}
-              <div className={`mb-4 p-4 ${
+              <div className={`p-3 ${
                 role === 'admin' 
                   ? 'bg-red-50 border-red-200' 
                   : role === 'owner' 
                   ? 'bg-green-50 border-green-200' 
                   : 'bg-blue-50 border-blue-200'
-              } border rounded-lg`}>
+              } border rounded-xl`}>
                 <div className="flex items-center">
                   <FaCheckCircle className={`h-5 w-5 ${
                     role === 'admin' ? 'text-red-500' : role === 'owner' ? 'text-green-500' : 'text-blue-500'
-                  } mr-2`} />
+                  } mr-3`} />
                   <div>
                     <p className={`text-sm font-medium ${
                       role === 'admin' ? 'text-red-800' : role === 'owner' ? 'text-green-800' : 'text-blue-800'
                     }`}>
                       Reset OTP sent successfully!
                     </p>
-                    <p className={`text-sm ${
+                    <p className={`text-sm mt-1 ${
                       role === 'admin' ? 'text-red-600' : role === 'owner' ? 'text-green-600' : 'text-blue-600'
                     }`}>
                       Please check your email <strong>{formData.email}</strong> for the reset code.
@@ -2188,102 +2207,98 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                 </div>
               </div>
 
-              {/* OTP Input with Individual Digits */}
-              <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700">Enter Reset OTP</label>
-                <div className="flex justify-center space-x-2">
-                  {[...Array(6)].map((_, index) => (
-                    <input
-                      key={index}
-                      id={`otp-${index}`}
-                      type="text"
-                      maxLength="1"
-                      value={formData.otp[index] || ''}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      className={`w-12 h-12 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:outline-none transition-all duration-200 ${
-                        role === 'admin' 
-                          ? 'focus:border-red-500 focus:ring-2 focus:ring-red-200' 
-                          : role === 'owner' 
-                          ? 'focus:border-green-500 focus:ring-2 focus:ring-green-200' 
-                          : 'focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                {/* OTP Input with Individual Digits */}
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700 text-center">Enter Reset OTP</label>
+                  <div className="flex justify-center space-x-2">
+                    {[...Array(6)].map((_, index) => (
+                      <input
+                        key={index}
+                        id={`otp-${index}`}
+                        type="text"
+                        maxLength="1"
+                        value={formData.otp[index] || ''}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        className={`w-12 h-12 text-center text-lg font-bold border-2 border-gray-300 rounded-xl focus:outline-none transition-all duration-200 shadow-sm ${
+                          role === 'admin' 
+                            ? 'focus:border-red-500 focus:ring-2 focus:ring-red-200' 
+                            : role === 'owner' 
+                            ? 'focus:border-green-500 focus:ring-2 focus:ring-green-200' 
+                            : 'focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                        }`}
+                        placeholder="●"
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* OTP Timer and Resend */}
+                  <div className="text-center space-y-1">
+                    <p className="text-sm text-gray-600">
+                      Didn't receive the reset code?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={!canResend || loading}
+                      className={`text-sm font-medium underline ${
+                        canResend 
+                          ? `${
+                              role === 'admin' ? 'text-red-600 hover:text-red-800' : 
+                              role === 'owner' ? 'text-green-600 hover:text-green-800' : 
+                              'text-blue-600 hover:text-blue-800'
+                            } cursor-pointer` 
+                          : 'text-gray-400 cursor-not-allowed'
                       }`}
-                      placeholder="●"
-                    />
-                  ))}
-                </div>
-                
-                {/* OTP Timer and Resend */}
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Didn't receive the reset code?
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    disabled={!canResend || loading}
-                    className={`text-sm font-medium underline ${
-                      canResend 
-                        ? `${
-                            role === 'admin' ? 'text-red-600 hover:text-red-800' : 
-                            role === 'owner' ? 'text-green-600 hover:text-green-800' : 
-                            'text-blue-600 hover:text-blue-800'
-                          } cursor-pointer` 
-                        : 'text-gray-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {canResend ? 'Resend Reset OTP' : `Resend in ${resendTimer}s`}
-                  </button>
-                </div>
-
-                {otpError && (
-                  <div className={`p-3 ${
-                    role === 'admin' ? 'bg-red-50 border-red-200' : 
-                    role === 'owner' ? 'bg-green-50 border-green-200' : 
-                    'bg-blue-50 border-blue-200'
-                  } border rounded-md`}>
-                    <p className="text-red-600 text-sm font-medium">{otpError}</p>
+                    >
+                      {canResend ? 'Resend Reset OTP' : `Resend in ${resendTimer}s`}
+                    </button>
                   </div>
-                )}
-                
-                {otpSuccess && (
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-green-600 text-sm font-medium">{otpSuccess}</p>
-                  </div>
-                )}
-              </div>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={loading || formData.otp.length !== 6}
-                  className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200 ${
-                    role === 'admin' 
-                      ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300' 
-                      : role === 'owner' 
-                      ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300' 
-                      : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300'
-                  } disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2`}
-                >
-                  {loading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Verifying OTP...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <FaCheckCircle className="h-4 w-4" />
-                      <span>Verify Reset OTP</span>
+                  {otpError && (
+                    <div className={`p-3 ${
+                      role === 'admin' ? 'bg-red-50 border-red-200' : 
+                      role === 'owner' ? 'bg-green-50 border-green-200' : 
+                      'bg-blue-50 border-blue-200'
+                    } border rounded-md`}>
+                      <p className="text-red-600 text-sm font-medium">{otpError}</p>
                     </div>
                   )}
-                </button>
-              </div>
-            </form>
+                </div>
+
+                <div className="pt-3">
+                  <button
+                    type="submit"
+                    disabled={loading || formData.otp.length !== 6}
+                    className={`w-full flex justify-center py-3 px-5 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white transition-all duration-200 transform hover:scale-105 ${
+                      role === 'admin' 
+                        ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300' 
+                        : role === 'owner' 
+                        ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300' 
+                        : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300'
+                    } disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                  >
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <span>Verifying OTP...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <FaCheckCircle className="h-4 w-4" />
+                        <span>Verify Reset OTP</span>
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           )}
 
           {/* Step 3: New Password */}
           {currentStep === 3 && (
-            <form onSubmit={handleResetPassword} className="space-y-6">
+            <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
                 <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
                   New Password <span className="text-red-500">*</span>
@@ -2322,8 +2337,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                 
                 {/* Password strength indicator for forgot password */}
                 {formData.newPassword && (
-                  <div className="mt-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="mt-2">
+                    <div className="flex items-center gap-2 mb-1">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full transition-all duration-500 ${
@@ -2460,27 +2475,40 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           )}
 
           {/* Navigation Links */}
-          <div className="mt-6 space-y-4">
+          <div className="mt-4 space-y-3">
             {/* Back to credentials for step 2 and 3 */}
             {currentStep > 1 && (
               <div className="text-center">
-                <button
-                  onClick={() => setCurrentStep(currentStep - 1)}
-                  className={`text-${roleColor}-600 hover:text-${roleColor}-800 text-sm font-medium flex items-center justify-center gap-1`}
-                >
-                  <FaArrowLeft className="h-3 w-3" />
-                  Back to {currentStep === 2 ? 'Email' : 'OTP Verification'}
-                </button>
+                {currentStep === 2 ? (
+                  <p className="text-sm text-gray-600">
+                    Wrong email?{' '}
+                    <button
+                      onClick={() => setCurrentStep(1)}
+                      className={`text-${roleColor}-600 hover:text-${roleColor}-800 font-medium underline transition-colors duration-200`}
+                    >
+                      Edit Email
+                    </button>
+                    {' '}and correct
+                  </p>
+                ) : (
+                  <button
+                    onClick={() => setCurrentStep(currentStep - 1)}
+                    className={`text-${roleColor}-600 hover:text-${roleColor}-800 text-sm font-medium flex items-center justify-center gap-2 mx-auto transition-colors duration-200`}
+                  >
+                    <FaArrowLeft className="h-3 w-3" />
+                    Back to OTP Verification
+                  </button>
+                )}
               </div>
             )}
             
             {/* Login link */}
             <div className="text-center">
-              <p className="text-gray-600">
+              <p className="text-sm text-gray-600">
                 Remember your password?{' '}
                 <a
                   href={role === 'admin' ? '/admin/login' : role === 'owner' ? '/owner/login' : '/user/login'}
-                  className={`text-${roleColor}-600 hover:text-${roleColor}-800 font-medium`}
+                  className={`text-${roleColor}-600 hover:text-${roleColor}-800 font-medium underline transition-colors duration-200`}
                 >
                   {role.charAt(0).toUpperCase() + role.slice(1)} Login
                 </a>
