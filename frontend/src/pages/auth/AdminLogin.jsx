@@ -397,10 +397,10 @@ const AdminLogin = () => {
                       <FaCheckCircle className="h-4 w-4 text-red-500 mr-2 flex-shrink-0" />
                       <div>
                         <p className="text-xs font-medium text-red-800">
-                          Admin OTP sent successfully!
+                          Admin Login OTP sent successfully!
                         </p>
                         <p className="text-xs text-red-600">
-                          Check email <strong>{formData.email}</strong> for code.
+                          Check email <strong>{formData.email}</strong> for OTP.
                         </p>
                       </div>
                     </div>
@@ -408,7 +408,7 @@ const AdminLogin = () => {
 
                   {/* OTP Input with Individual Digits */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Enter Admin OTP</label>
+                    <label className="block text-sm font-medium text-gray-700 text-center">Enter Admin OTP</label>
                     <div className="flex justify-center space-x-2">
                       {[...Array(6)].map((_, index) => (
                         <input
@@ -487,8 +487,8 @@ const AdminLogin = () => {
                       </button>
                     </div>
 
-                    {/* OTP Error Display - Fixed height container */}
-                    <div className="h-16 mt-2">
+                    {/* OTP Error Display - Fixed height container to prevent UI movement */}
+                    <div className="h-12 mt-2">
                       {otpError && (
                         <div className="p-2 bg-red-50 border border-red-200 rounded-md">
                           <p className="text-red-600 text-xs font-medium text-center">{otpError}</p>
@@ -504,7 +504,7 @@ const AdminLogin = () => {
                   </div>
                 </div>
 
-                <div className="space-y-3 mt-6">
+                <div className="space-y-3 mt-3">
                   <button
                     type="submit"
                     disabled={loading || otp.length !== 6}

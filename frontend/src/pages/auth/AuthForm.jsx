@@ -2250,12 +2250,12 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     <p className={`text-xs font-medium ${
                       role === 'admin' ? 'text-red-800' : role === 'owner' ? 'text-green-800' : 'text-blue-800'
                     }`}>
-                      Reset OTP sent successfully!
+                      Password reset OTP sent successfully!
                     </p>
                     <p className={`text-xs ${
                       role === 'admin' ? 'text-red-600' : role === 'owner' ? 'text-green-600' : 'text-blue-600'
                     }`}>
-                      Check email <strong>{formData.email}</strong> for code.
+                      Check email <strong>{formData.email}</strong> for OTP.
                     </p>
                   </div>
                 </div>
