@@ -8,6 +8,8 @@ import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValida
 import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/nameValidation';
 import { handleEmailChange, isValidEmail, getEmailValidationError, generateEmailSuggestions } from '../../utils/emailValidation';
 
+
+
 const AuthForm = ({
   mode = 'login',
   role = 'user',
@@ -51,6 +53,16 @@ const AuthForm = ({
   const [emailError, setEmailError] = useState(''); // Email validation error
 
   const isLogin = mode === 'login';
+
+    // Scroll lock only for login page
+    useEffect(() => {
+      if (isLogin) {
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
+      } else {
+        document.body.style.overflow = '';
+      }
+    }, [isLogin]);
 
   // Load remembered email on component mount
   useEffect(() => {
@@ -780,13 +792,13 @@ const AuthForm = ({
         </div>
       )}
 
-    <div className={`min-h-screen flex flex-col justify-start sm:px-2 lg:px-4 ${bgColor}`}> {/* BG color by role */}
-      <div className={`sm:mx-auto sm:w-full ${role === 'owner' && !isLogin ? 'sm:max-w-3xl' : 'sm:max-w-md'} mb-16 mt-4`}>
+  <div className={`min-h-screen flex flex-col justify-start py-2 sm:px-2 lg:px-4 ${bgColor}`}> {/* BG color by role */}
+  <div className={`sm:mx-auto sm:w-full ${role === 'owner' && !isLogin ? 'sm:max-w-3xl' : isLogin ? 'sm:max-w-md' : 'sm:max-w-xl'} mb-4 mt-1`}>
         <div className="flex justify-center">
-          <div className="flex flex-col items-center space-y-2 w-full">
+          <div className="flex flex-col items-center space-y-1 w-full">
             <span className="relative group">
               <IconComponent
-                className={`h-16 w-16 ${iconColor} drop-shadow-lg`}
+                className={`h-12 w-12 ${iconColor} drop-shadow-lg`}
                 title={
                   role === 'admin'
                     ? 'Admin Login/Register'
@@ -810,18 +822,18 @@ const AuthForm = ({
                 ? 'Owner'
                 : 'User'}
             </div>
-            <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="text-center text-2xl font-extrabold text-gray-900">
               {role.charAt(0).toUpperCase() + role.slice(1)} {isLogin ? 'Login' : 'Registration'}
             </h2>
           </div>
         </div>
-        <p className="text-center text-sm text-gray-600 mb-6">
+        <p className="text-center text-sm text-gray-600 mb-2">
           {isLogin ? 'Login your account' : 'Create your account to get started'}
         </p>
         <div>
           <div
             className={
-              `p-8 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl ` +
+              `p-6 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl ` +
               (role === 'admin'
                 ? 'bg-gradient-to-br from-red-50 via-white to-red-100'
                 : role === 'owner'
@@ -829,12 +841,12 @@ const AuthForm = ({
                 : 'bg-gradient-to-br from-blue-50 via-white to-blue-100')
             }
           >
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-3" onSubmit={handleSubmit}>
               {/* Google login/register button at top with Google icon */}
               {!(role === 'admin' && isLogin) && (
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 mb-4 rounded-lg bg-white text-gray-900 font-semibold shadow-md border border-gray-300 hover:bg-gray-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 py-2 px-4 mb-2 rounded-lg bg-white text-gray-900 font-semibold shadow-md border border-gray-300 hover:bg-gray-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleGoogleAuth}
                   disabled={loading}
                 >
@@ -852,7 +864,7 @@ const AuthForm = ({
               
               {/* Divider */}
               {!(role === 'admin' && isLogin) && (
-                <div className="relative mb-6">
+                <div className="relative mb-3">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-300" />
                   </div>
@@ -885,9 +897,9 @@ const AuthForm = ({
                           maxLength="20"
                           className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                             nameError 
-                              ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
+                              ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
                               : formData.name && isValidName(formData.name)
-                                ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                                ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                                 : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                           }`}
                           placeholder="Enter your full name (4-20 chars)"
@@ -904,7 +916,7 @@ const AuthForm = ({
                         </div>
                       </div>
                       <div className="flex justify-between items-center mt-1">
-                        <div className="h-5">
+                        <div className="h-4">
                           {nameError && (
                             <p className="text-xs text-red-600">{nameError}</p>
                           )}
@@ -957,7 +969,7 @@ const AuthForm = ({
                             </div>
                           </div>
                           <div className="flex justify-between items-center mt-1">
-                            <div className="h-5">
+                            <div className="h-4">
                               {ownerNameError && (
                                 <p className="text-xs text-red-600">{ownerNameError}</p>
                               )}
@@ -1007,18 +1019,18 @@ const AuthForm = ({
                         setEmailError,
                         setEmailSuggestions
                       );
-                      // Show suggestions only if there's an @ and no error
-                      setShowEmailSuggestions(processedValue.includes('@') && !emailError);
+                      // Show suggestions if there's an @ and partial domain typed
+                      setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
                     }}
                     onFocus={() => setShowEmailSuggestions(false)}
                     readOnly={emailVerified} // Make email field read-only after verification
                     className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                       emailVerified 
-                        ? 'border-green-500 bg-green-50 text-green-800 cursor-not-allowed' 
+                        ? 'border-green-500 text-green-800 cursor-not-allowed' 
                         : emailError
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
                         : formData.email && isValidEmail(formData.email)
-                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                         : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                     }`}
                     placeholder="Enter your email address"
@@ -1059,19 +1071,19 @@ const AuthForm = ({
                   )}
                 </div>
                 
-                {/* Email Error Message */}
-                {emailError && (
-                  <div className="mt-1">
-                    <p className="text-xs text-red-600">{emailError}</p>
+                {/* Email Error Message and Verify Button in same row */}
+                <div className="flex justify-between items-center mt-1">
+                  <div className="h-4">
+                    {emailError && (
+                      <p className="text-xs text-red-600">{emailError}</p>
+                    )}
                   </div>
-                )}
-                
-                {/* Verify Email Button for registration only (not for admin) */}
-                {(!isLogin && role !== 'admin') && (
-                  <div className="mt-2">
+                  
+                  {/* Verify Email Button for registration only (not for admin) - Right side */}
+                  {(!isLogin && role !== 'admin') && (
                     <button
                       type="button"
-                      className={`px-3 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${
+                      className={`px-2 py-1 text-xs rounded font-semibold transition-colors duration-150 focus:outline-none ${
                         emailVerified 
                           ? 'bg-green-500 text-white cursor-not-allowed'
                           : formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email) 
@@ -1132,14 +1144,14 @@ const AuthForm = ({
                       {emailVerified ? (
                         <>
                           <FaCheckCircle className="inline mr-1" />
-                          Email Verified
+                          Verified
                         </>
                       ) : (
                         'Verify Email'
                       )}
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
               {!isLogin && (
                 <div>
@@ -1158,7 +1170,7 @@ const AuthForm = ({
                       maxLength="10" // Support 10 digit Indian mobile numbers
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                         formData.phone && isValidIndianMobile(formData.phone)
-                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
                           : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
@@ -1176,7 +1188,7 @@ const AuthForm = ({
                     </div>
                   </div>
                   {/* Fixed height container for error message */}
-                  <div className="h-5 mt-1">
+                  <div className="h-4">
                     {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
                       <p className="text-red-500 text-xs">
                         📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
@@ -1229,8 +1241,8 @@ const AuthForm = ({
                 </div>
                 {/* Password strength indicator for registration */}
                 {!isLogin && formData.password && (
-                  <div className="mt-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="mt-1">
+                    <div className="flex items-center gap-2 mb-1">
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
                         <div 
                           className={`h-2 rounded-full transition-all duration-500 ${
@@ -1324,8 +1336,8 @@ const AuthForm = ({
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                         formData.confirmPassword && formData.password
                           ? formData.password === formData.confirmPassword
-                            ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                            : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                            ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                            : 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
                       }`}
                       placeholder="Re-enter your password"
@@ -1446,7 +1458,6 @@ const AuthForm = ({
               )}
 
               <div>
-              
                 <button
                   type="submit"
                   disabled={loading || !isFormReadyForSubmit()}
@@ -1590,7 +1601,7 @@ const AuthForm = ({
             </form>
             {/* Toggle login/register */}
             {role !== 'admin' && (
-              <div className="mt-6 text-center">
+              <div className="mt-3 text-center">
                 <p className="text-gray-600">
                   {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
                   <Link
@@ -1612,7 +1623,7 @@ const AuthForm = ({
             )}
             {/* Forgot password link (only for login) */}
             {isLogin && (
-              <div className="mt-4 text-center">
+              <div className="mt-2 text-center">
                 {role === 'user' && (
                   <a
                     href="/forgot-password"
@@ -1640,7 +1651,7 @@ const AuthForm = ({
               </div>
             )}
             {/* Back to home link */}
-            <div className="mt-4 text-center">
+            <div className="mt-2 text-center">
               <a
                 href={getHomePath()}
                 className="text-gray-500 hover:text-gray-700 text-sm inline-flex items-center gap-1"
@@ -1760,8 +1771,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
       setEmailError,
       setEmailSuggestions
     );
-    // Show suggestions only if there's an @ and no error
-    setShowEmailSuggestions(processedValue.includes('@') && !emailError);
+    // Show suggestions if there's an @ and partial domain typed
+    setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
   };
 
   const handleEmailSuggestionClick = (suggestion) => {
@@ -2018,8 +2029,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     : 'bg-blue-50';
 
   return (
-    <div className={`min-h-screen flex flex-col justify-start sm:px-2 lg:px-4 overflow-visible ${bgColor}`}>
-      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-16 mt-4 overflow-visible">
+    <div className={`min-h-screen flex flex-col justify-center py-4 sm:px-2 lg:px-4 overflow-visible ${bgColor}`}>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md mb-8 mt-2 overflow-visible">
         <div className="flex justify-center">
           <div className="flex flex-col items-center space-y-2 w-full">
             <span className="relative group">
@@ -2076,9 +2087,9 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     onFocus={() => setShowEmailSuggestions(false)}
                     className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                       emailError
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
                         : formData.email && isValidEmail(formData.email)
-                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
                         : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
                     }`}
                     placeholder={`Enter your ${role} email address`}
@@ -2111,12 +2122,12 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                   </div>
                 )}
                 
-                {/* Email Error Message */}
-                {emailError && (
-                  <div className="mt-1">
+                {/* Email Error Message - Fixed height container */}
+                <div className="h-4 mt-1">
+                  {emailError && (
                     <p className="text-xs text-red-600">{emailError}</p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <div>
@@ -2377,8 +2388,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
                       formData.confirmPassword && formData.newPassword
                         ? formData.newPassword === formData.confirmPassword
-                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                          : 'border-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
+                          : 'border-red-300 focus:ring-red-500 focus:border-red-500'
                         : `border-gray-300 focus:ring-${roleColor}-500 focus:border-${roleColor}-500`
                     }`}
                     placeholder="Re-enter your new password"
