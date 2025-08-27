@@ -14,15 +14,26 @@ import { Parser } from 'json2csv';
 
 const router = express.Router();
 
-// Admin OTP Send
+// Admin OTP Send (with password verification)
 router.post('/send-otp', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body;
+    
+    // Input validation
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    }
     
     // Check if admin exists
     const admin = await Admin.findOne({ email });
     if (!admin) {
-      return res.status(400).json({ success: false, message: 'Admin not found' });
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // Verify password before sending OTP
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
     }
 
     // Rate limiting for admin (10 OTPs per hour)
@@ -80,16 +91,37 @@ router.post('/verify-otp', async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    // Verify OTP
-    const otpRecord = await Otp.findOne({ 
+    // Input validation
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: 'Email and OTP are required' });
+    }
+
+    // Validate OTP format (6 digits)
+    if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP format. Must be 6 digits.' });
+    }
+
+    // Check if OTP exists first (regardless of expiry)
+    const existingOtp = await Otp.findOne({ 
       email, 
       otp, 
-      role: 'admin',
-      expiresAt: { $gt: new Date() } 
+      role: 'admin'
     });
 
-    if (!otpRecord) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+    if (!existingOtp) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP' });
+    }
+
+    // Check if OTP is expired
+    if (existingOtp.expiresAt <= new Date()) {
+      // Clean up expired OTP
+      await Otp.deleteOne({ _id: existingOtp._id });
+      return res.status(400).json({ success: false, message: 'OTP has expired' });
+    }
+
+    // Check if OTP was already used (if you have a 'used' field)
+    if (existingOtp.used) {
+      return res.status(400).json({ success: false, message: 'OTP already used' });
     }
 
     // Get admin details
@@ -102,8 +134,8 @@ router.post('/verify-otp', async (req, res) => {
     admin.lastLogin = new Date();
     await admin.save();
 
-    // Delete used OTP
-    await Otp.deleteOne({ _id: otpRecord._id });
+    // Mark OTP as used and delete it
+    await Otp.deleteOne({ _id: existingOtp._id });
 
     // Generate JWT token (Extended expiry for admin)
     const token = jwt.sign(

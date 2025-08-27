@@ -82,8 +82,8 @@ const AdminLogin = () => {
     setOtpError('');
     
     try {
-      // Send OTP for admin login
-      const result = await authService.sendOtp(formData.email, 'admin');
+      // Send OTP for admin login with password verification
+      const result = await authService.sendOtp(formData.email, 'admin', formData.password);
       
       if (result.success) {
         setOtpSent(true);
@@ -99,11 +99,44 @@ const AdminLogin = () => {
     }
   };
 
+  // OTP Error handling functions
+  const getOtpErrorMessage = (error) => {
+    const message = error.toLowerCase();
+    if (message.includes('invalid')) return 'Invalid OTP entered';
+    if (message.includes('expired')) return 'OTP has expired';
+    if (message.includes('used')) return 'OTP already used';
+    return 'OTP verification failed';
+  };
+
+  const getOtpErrorIcon = (error) => {
+    const message = error.toLowerCase();
+    if (message.includes('expired')) return '⏰';
+    if (message.includes('used')) return '✓';
+    return '❌';
+  };
+
+  const handleOtpError = (error) => {
+    const errorMessage = getOtpErrorMessage(error);
+    const errorIcon = getOtpErrorIcon(error);
+    setOtpError(`${errorIcon} ${errorMessage}`);
+    
+    // Clear OTP on certain errors
+    if (error.toLowerCase().includes('invalid') || error.toLowerCase().includes('used')) {
+      setOtp('');
+    }
+  };
+
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     
     if (!otp || otp.length !== 6) {
-      setOtpError('Please enter valid 6-digit OTP');
+      setOtpError('❌ Please enter complete 6-digit OTP');
+      return;
+    }
+
+    // Validate OTP contains only digits
+    if (!/^\d{6}$/.test(otp)) {
+      setOtpError('❌ OTP must contain only numbers');
       return;
     }
 
@@ -111,13 +144,8 @@ const AdminLogin = () => {
     setOtpError('');
     
     try {
-      // Verify OTP and complete login
-      const loginResult = await authService.login({
-        email: formData.email,
-        password: formData.password,
-        otp: otp,
-        userType: 'admin'
-      });
+      // Use the correct OTP verification endpoint for admin
+      const loginResult = await authService.verifyOtp(formData.email, otp, 'admin');
       
       if (loginResult.token && loginResult.user) {
         await login(loginResult.token, loginResult.user);
@@ -127,7 +155,7 @@ const AdminLogin = () => {
         sessionStorage.setItem('admin_login_time', Date.now().toString());
         localStorage.removeItem('auth_session_expired');
         
-        setOtpSuccess('Login successful!');
+        setOtpSuccess('✅ Login successful!');
         toast.success('🎉 Admin login successful! Welcome back.', {
           duration: 3000,
           icon: '👑'
@@ -136,7 +164,7 @@ const AdminLogin = () => {
         navigate('/admin', { replace: true });
       }
     } catch (error) {
-      setOtpError(error.message || 'Failed to verify OTP');
+      handleOtpError(error.message || 'Failed to verify OTP');
       toast.error(error.message || 'Failed to verify OTP');
     } finally {
       setLoading(false);
@@ -148,7 +176,7 @@ const AdminLogin = () => {
     
     setLoading(true);
     try {
-      await authService.sendOtp(formData.email, 'admin');
+      await authService.sendOtp(formData.email, 'admin', formData.password);
       setCanResend(false);
       setResendTimer(60);
       toast.success('Admin OTP resent successfully!');
@@ -389,12 +417,24 @@ const AdminLogin = () => {
                           maxLength="1"
                           value={otp[index] || ''}
                           onChange={(e) => {
+                            const value = e.target.value;
+                            
+                            // Allow only digits
+                            if (value !== '' && !/^[0-9]$/.test(value)) {
+                              return;
+                            }
+                            
                             const newOtp = otp.split('');
-                            newOtp[index] = e.target.value;
+                            newOtp[index] = value;
                             setOtp(newOtp.join(''));
                             
+                            // Clear any previous error when user starts typing
+                            if (otpError) {
+                              setOtpError('');
+                            }
+                            
                             // Auto-focus next input
-                            if (e.target.value && index < 5) {
+                            if (value && index < 5) {
                               const nextInput = e.target.parentElement.children[index + 1];
                               if (nextInput) nextInput.focus();
                             }
@@ -404,6 +444,22 @@ const AdminLogin = () => {
                             if (e.key === 'Backspace' && !otp[index] && index > 0) {
                               const prevInput = e.target.parentElement.children[index - 1];
                               if (prevInput) prevInput.focus();
+                            }
+                          }}
+                          onPaste={(e) => {
+                            e.preventDefault();
+                            const pastedData = e.clipboardData.getData('text');
+                            
+                            // Allow only digits and limit to 6 characters
+                            const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+                            
+                            if (digits.length > 0) {
+                              setOtp(digits.padEnd(6, ''));
+                              
+                              // Focus the next empty input or the last one
+                              const nextIndex = Math.min(digits.length, 5);
+                              const targetInput = e.target.parentElement.children[nextIndex];
+                              if (targetInput) targetInput.focus();
                             }
                           }}
                           className="w-10 h-10 text-center text-lg font-bold border-2 border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all duration-200"
@@ -431,17 +487,20 @@ const AdminLogin = () => {
                       </button>
                     </div>
 
-                    {otpError && (
-                      <div className="p-2 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-red-600 text-xs font-medium">{otpError}</p>
-                      </div>
-                    )}
-                    
-                    {otpSuccess && (
-                      <div className="p-2 bg-green-50 border border-green-200 rounded-md">
-                        <p className="text-green-600 text-xs font-medium">{otpSuccess}</p>
-                      </div>
-                    )}
+                    {/* OTP Error Display - Fixed positioning */}
+                    <div className="h-8 mt-2">
+                      {otpError && (
+                        <div className="p-2 bg-red-50 border border-red-200 rounded-md">
+                          <p className="text-red-600 text-xs font-medium text-center">{otpError}</p>
+                        </div>
+                      )}
+                      
+                      {otpSuccess && (
+                        <div className="p-2 bg-green-50 border border-green-200 rounded-md">
+                          <p className="text-green-600 text-xs font-medium text-center">{otpSuccess}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

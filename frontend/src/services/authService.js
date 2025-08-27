@@ -18,9 +18,10 @@ export const authService = {
   },
 
   // OTP Operations
-  async sendOtp(email, role = 'user') {
+  async sendOtp(email, role = 'user', password = null) {
     const endpoint = role === 'admin' ? '/api/admin/send-otp' : '/api/otp/send-otp';
-    return await apiService.post(endpoint, { email, role });
+    const payload = role === 'admin' && password ? { email, role, password } : { email, role };
+    return await apiService.post(endpoint, payload);
   },
 
   async verifyOtp(email, otp, role = 'user') {

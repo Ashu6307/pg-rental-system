@@ -1838,11 +1838,62 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     }
   };
 
+  // OTP Error Handling Functions
+  const getOtpErrorMessage = (errorMessage) => {
+    if (!errorMessage) return '';
+    
+    const message = errorMessage.toLowerCase();
+    
+    if (message.includes('invalid')) {
+      return 'Invalid OTP - Please check and enter the correct 6-digit code';
+    } else if (message.includes('expired')) {
+      return 'OTP Expired - Please request a new OTP to continue';
+    } else if (message.includes('used') || message.includes('already')) {
+      return 'OTP Already Used - Please request a new OTP';
+    } else if (message.includes('network')) {
+      return 'Network Error - Please check your connection and try again';
+    } else {
+      return errorMessage;
+    }
+  };
+
+  const getOtpErrorIcon = (errorMessage) => {
+    if (!errorMessage) return '❌';
+    
+    const message = errorMessage.toLowerCase();
+    
+    if (message.includes('invalid')) {
+      return '🚫';
+    } else if (message.includes('expired')) {
+      return '⏰';
+    } else if (message.includes('used') || message.includes('already')) {
+      return '🔄';
+    } else if (message.includes('network')) {
+      return '📡';
+    } else {
+      return '❌';
+    }
+  };
+
+  const handleOtpError = (errorMessage, showToast = true) => {
+    const formattedMessage = getOtpErrorMessage(errorMessage);
+    const errorIcon = getOtpErrorIcon(errorMessage);
+    
+    setOtpError(formattedMessage);
+    
+    if (showToast) {
+      toast.error(formattedMessage, {
+        icon: errorIcon,
+        duration: 4000
+      });
+    }
+  };
+
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     
     if (!formData.otp || formData.otp.length !== 6) {
-      setOtpError('Please enter valid 6-digit OTP');
+      handleOtpError('Please enter valid 6-digit OTP', false); // No toast for forgot password
       return;
     }
 
@@ -1860,19 +1911,14 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
       
       if (data.success) {
         setOtpSuccess('OTP verified successfully!');
-        toast.success('✅ OTP verified! Please set your new password.', {
-          duration: 3000,
-          icon: '🔓'
-        });
+        // No toast for forgot password - clean inline experience
         
         setCurrentStep(3);
       } else {
-        setOtpError(data.message || 'Invalid OTP');
-        toast.error(data.message || 'Invalid OTP');
+        handleOtpError(data.message || 'Invalid OTP', false); // No toast for forgot password
       }
     } catch (error) {
-      setOtpError('Network error. Please try again.');
-      toast.error('Network error. Please try again.');
+      handleOtpError('Network error. Please try again.', false); // No toast for forgot password
     } finally {
       setLoading(false);
     }
@@ -1953,17 +1999,15 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
       
       if (data.success) {
         setOtpSuccess('OTP resent successfully!');
-        toast.success(`📧 ${role.charAt(0).toUpperCase() + role.slice(1)} reset OTP resent successfully!`);
+        // No toast for forgot password - message shows inline
         
         setResendTimer(60);
         setCanResend(false);
       } else {
-        setOtpError(data.message || 'Failed to resend OTP');
-        toast.error(data.message || 'Failed to resend OTP');
+        handleOtpError(data.message || 'Failed to resend OTP', false); // No toast for forgot password
       }
     } catch (error) {
-      setOtpError('Network error. Please try again.');
-      toast.error('Network error. Please try again.');
+      handleOtpError('Network error. Please try again.', false); // No toast for forgot password
     } finally {
       setLoading(false);
     }
@@ -2286,17 +2330,17 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                   </div>
                 </div>
 
-                <div className="pt-3">
+                <div>
                   <button
                     type="submit"
                     disabled={loading || formData.otp.length !== 6}
-                    className={`w-full flex justify-center py-3 px-5 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white transition-all duration-200 transform hover:scale-105 ${
+                    className={`w-full flex justify-center py-3 px-5 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white transition-colors duration-200 ${
                       role === 'admin' 
                         ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 disabled:bg-red-300' 
                         : role === 'owner' 
                         ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500 disabled:bg-green-300' 
                         : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300'
-                    } disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-2 focus:ring-offset-2`}
+                    } disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2`}
                   >
                     {loading ? (
                       <div className="flex items-center gap-2">
