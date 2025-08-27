@@ -103,8 +103,8 @@ export default function OwnerProfile() {
               value={form.phone} 
               onChange={handleChange} 
               type="tel"
-              maxLength="10"
-              placeholder="Phone Number" 
+              maxLength="13"
+              placeholder="Phone: 9876543210 or +919876543210" 
               className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
                 form.phone && isValidIndianMobile(form.phone)
                   ? 'border-green-300 focus:ring-green-500 focus:border-green-500 bg-green-50'
@@ -123,11 +123,14 @@ export default function OwnerProfile() {
               )}
             </div>
           </div>
-          {form.phone && form.phone.length > 0 && !isValidIndianMobile(form.phone) && (
-            <p className="text-red-500 text-xs mt-1">
-              📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
-            </p>
-          )}
+          {/* Fixed height container for error message */}
+          <div className="h-5 mt-1">
+            {form.phone && form.phone.length > 0 && !isValidIndianMobile(form.phone) && (
+              <p className="text-red-500 text-xs">
+                📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+              </p>
+            )}
+          </div>
           
           <input name="address" value={form.address} onChange={handleChange} placeholder="Address" className="input" />
           <label className="flex items-center">

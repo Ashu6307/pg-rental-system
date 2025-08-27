@@ -164,14 +164,14 @@ const Contact = () => {
       <section className="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
         <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Form */}
-          <div className="bg-gradient-to-br from-white via-blue-100 to-purple-100 p-6 rounded-2xl shadow-2xl border border-blue-100 max-w-xl mx-auto mt-4">
+          <div className="bg-gradient-to-br from-white via-blue-100 to-purple-100 p-6 rounded-2xl shadow-2xl border border-blue-100 w-full max-w-xl mx-auto mt-4">
             <h2 className="text-2xl font-extrabold mb-4 text-blue-700 tracking-tight drop-shadow">{content?.hero?.subtitle || 'Get in Touch'}</h2>
             {submitMessage && (
               <div className={`mb-6 p-4 rounded-lg shadow ${submitMessage.includes('error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`} role="alert" aria-live="polite">
                 {submitMessage.replace('error:', '')}
               </div>
             )}
-            <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-lg mx-auto" autoComplete="off" aria-label="Contact form">
+            <form onSubmit={handleSubmit} className="space-y-4 w-full" autoComplete="off" aria-label="Contact form">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="name" className="block text-gray-700 text-base font-semibold mb-2">Full Name *</label>
@@ -186,7 +186,7 @@ const Contact = () => {
                       name="phone" 
                       value={formData.phone} 
                       onChange={handleChange} 
-                      maxLength="10"
+                      maxLength="13"
                       required 
                       disabled={isSubmitting} 
                       className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
@@ -196,7 +196,7 @@ const Contact = () => {
                           ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
                       }`}
-                      placeholder="Enter mobile number (e.g., 9876543210)" 
+                      placeholder="Enter mobile: 9876543210 or +919876543210" 
                     />
                     <div className="absolute right-3 top-2.5">
                       {formData.phone && isValidIndianMobile(formData.phone) ? (
@@ -208,11 +208,14 @@ const Contact = () => {
                       )}
                     </div>
                   </div>
-                  {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
-                    <p className="text-red-500 text-xs mt-1">
-                      📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
-                    </p>
-                  )}
+                  {/* Fixed height container for error message to prevent layout shift */}
+                  <div className="h-5 mt-1">
+                    {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
+                      <p className="text-red-500 text-xs">
+                        📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
               <div>

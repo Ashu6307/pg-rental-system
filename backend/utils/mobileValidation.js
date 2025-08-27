@@ -1,43 +1,23 @@
-// Indian Mobile Number Validation Utility for Backend
+// Simple Indian Mobile Number Validation Utility for Backend (10 digits only)
 export const validateIndianMobile = (mobile) => {
   if (!mobile) return false;
   
-  // Remove all spaces, dashes, and special characters
-  const cleaned = mobile.replace(/[\s\-\(\)]/g, '');
-  
-  // Check different formats
-  const patterns = [
-    /^[6-9]\d{9}$/,           // 1234567890
-    /^\+91[6-9]\d{9}$/,       // +911234567890
-    /^91[6-9]\d{9}$/,         // 911234567890
-    /^0[6-9]\d{9}$/           // 01234567890
-  ];
-  
-  return patterns.some(pattern => pattern.test(cleaned));
+  // Simple 10-digit validation starting with 6-9
+  return /^[6-9]\d{9}$/.test(mobile);
 };
 
-// Get normalized mobile number (10 digits only)
+// Get normalized mobile number (same as input for 10-digit)
 export const getNormalizedMobile = (mobile) => {
   if (!mobile) return '';
   
-  const cleaned = mobile.replace(/[\s\-\(\)]/g, '');
-  
-  // Extract 10-digit number
-  if (cleaned.startsWith('+91')) {
-    return cleaned.slice(3);
-  } else if (cleaned.startsWith('91') && cleaned.length === 12) {
-    return cleaned.slice(2);
-  } else if (cleaned.startsWith('0') && cleaned.length === 11) {
-    return cleaned.slice(1);
-  } else if (cleaned.length === 10) {
-    return cleaned;
-  }
-  
-  return cleaned;
+  // Return only digits, max 10
+  const digits = mobile.replace(/\D/g, '');
+  return digits.slice(0, 10);
 };
 
-// Check if mobile number is valid Indian format
+// Check if mobile number is valid Indian format (10 digits, starts with 6-9)
 export const isValidIndianMobile = (mobile) => {
-  const normalized = getNormalizedMobile(mobile);
-  return /^[6-9]\d{9}$/.test(normalized);
+  if (!mobile) return false;
+  const cleaned = mobile.replace(/\D/g, '');
+  return cleaned.length === 10 && /^[6-9]/.test(cleaned);
 };

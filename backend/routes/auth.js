@@ -93,8 +93,8 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Please enter a valid Indian mobile number (10 digits, starting with 6-9).' });
     }
 
-    // Normalize phone number for storage
-    const normalizedPhone = phone ? getNormalizedMobile(phone) : null;
+    // Store phone number as is (already 10 digits)
+    const normalizedPhone = phone ? phone.replace(/\D/g, '') : null;
     
     const password_hash = await hashPassword(password);
     let user;
