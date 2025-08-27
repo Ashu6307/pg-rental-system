@@ -2245,7 +2245,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                 <div className="flex items-center">
                   <FaCheckCircle className={`h-4 w-4 ${
                     role === 'admin' ? 'text-red-500' : role === 'owner' ? 'text-green-500' : 'text-blue-500'
-                  } mr-2`} />
+                  } mr-2 flex-shrink-0`} />
                   <div>
                     <p className={`text-xs font-medium ${
                       role === 'admin' ? 'text-red-800' : role === 'owner' ? 'text-green-800' : 'text-blue-800'
