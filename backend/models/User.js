@@ -25,6 +25,10 @@ const UserSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
   },
+  loginCount: {
+    type: Number,
+    default: 0
+  },
   profilePhoto: {
     type: String
   },

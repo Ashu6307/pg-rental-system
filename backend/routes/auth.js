@@ -7,8 +7,21 @@ import OwnerProfile from '../models/OwnerProfile.js';
 import { blacklistToken, logSuspiciousActivity } from '../middleware/security.js';
 // Enhanced Email System Import
 import EmailManager from '../modules/email/EmailManager.js';
+import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
+
+// Rate limiting for login attempts
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  message: {
+    error: 'Too many login attempts. Please try again after 15 minutes.',
+    retryAfter: '15 minutes'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Register with Email Verification
 
@@ -144,17 +157,90 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ error: 'No account found with this email address' });
+    }
+
+    // Check if user account is active
+    if (user.status === 'blocked') {
+      return res.status(403).json({ 
+        error: 'Your account has been blocked. Please contact support.',
+        supportEmail: 'support@pgbike.com'
+      });
+    }
+
+    if (user.status === 'pending') {
+      return res.status(403).json({ 
+        error: 'Your account is pending verification. Please verify your email.',
+        action: 'resend_verification'
+      });
+    }
+
     const valid = await comparePassword(password, user.password_hash);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token, user });
+    if (!valid) {
+      // Log failed login attempt for security
+      console.log(`Failed login attempt for email: ${email} at ${new Date().toISOString()}`);
+      return res.status(401).json({ 
+        error: 'Incorrect password. Please try again.',
+        hint: 'Forgot your password? You can reset it.'
+      });
+    }
+
+    // Update last login timestamp
+    await User.updateOne(
+      { _id: user._id },
+      { 
+        lastLogin: new Date(),
+        $inc: { loginCount: 1 }
+      }
+    );
+
+    const token = jwt.sign(
+      { 
+        id: user._id, 
+        role: user.role,
+        email: user.email 
+      }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '24h' }
+    );
+
+    // Don't send password hash in response
+    const userResponse = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      profilePhoto: user.profilePhoto,
+      lastLogin: new Date()
+    };
+
+    res.json({ 
+      success: true,
+      message: 'Login successful',
+      token, 
+      user: userResponse 
+    });
+
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Login failed. Please try again later.' });
   }
 });
 
