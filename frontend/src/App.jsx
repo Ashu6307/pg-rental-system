@@ -38,6 +38,7 @@ import Bike from './pages/Bike.jsx';
 import PG from './pages/PG.jsx';
 import Contact from './pages/Contact.jsx';
 import Footer from './components/Footer';
+import PGDetails from './pages/PGDetails.jsx';
 import UserLogin from '../src/pages/auth/UserLogin.jsx';
 import UserRegistration from './pages/auth/UserRegistration.jsx';
 import OwnerLogin from './pages/auth/OwnerLogin.jsx';
@@ -154,7 +155,9 @@ const MainApp = () => {
         <Route path="/about" element={<PublicRoute><About /></PublicRoute>} />
         <Route path="/bikes" element={<PublicRoute><Bike /></PublicRoute>} />
         <Route path="/pg" element={<PublicRoute><PG /></PublicRoute>} />
+  <Route path="/pg/:id" element={<PublicRoute><PGDetails /></PublicRoute>} />
         <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
+        
         
         {/* Session Management */}
         <Route path="/session-expired" element={<SessionExpiredPage />} />

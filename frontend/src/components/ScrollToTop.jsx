@@ -172,7 +172,7 @@ const ScrollToTop = ({
       {/* Floating Scroll to Top Button */}
       {showButton && showScrollTop && (
         <button
-          onClick={advancedScrollToTop}
+          onClick={() => window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })}
           className={buttonClassName || defaultButtonClass}
           style={buttonStyle}
           aria-label="Scroll to top"

@@ -1,3 +1,41 @@
+// ...existing code...
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { AuthContext } from '../../context/AuthContext';
+import authService from '../../services/authService';
+import { FaUserShield, FaEnvelope, FaEye, FaEyeSlash, FaCheckCircle, FaExclamationCircle, FaLock } from 'react-icons/fa';
+
+const AdminLogin = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [otpSuccess, setOtpSuccess] = useState('');
+  const [resendTimer, setResendTimer] = useState(0);
+  const [canResend, setCanResend] = useState(true);
+  
+  // Email suggestions
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
+  const [emailSuggestions, setEmailSuggestions] = useState([]);
+  
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+
+  // OTP Timer countdown
+  useEffect(() => {
+    let interval = null;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer(timer => {
+          if (timer <= 1) {
+            setCanResend(true);
+// ...existing code...
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -484,6 +522,7 @@ const AdminLogin = () => {
         </div>
       </div>
     </div>
+// ...existing code...
   );
 };
 

@@ -25,11 +25,14 @@ import {
 } from 'react-icons/fa';
 import apiService from '../services/api';
 import AutoImageCarousel from '../components/AutoImageCarousel';
+import Modal from '../components/Modal';
 import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
 
 const PG = () => {
   const [pgs, setPgs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPG, setSelectedPG] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const searchInputRef = useRef(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -122,10 +125,7 @@ const PG = () => {
   };
 
   const handlePGClick = (pg) => {
-    // Track view
-    apiService.post(`/api/pgs/public/${pg._id}/inquiry`).catch(console.error);
-    scrollToTop();
-    navigate('/user/login', { state: { redirectTo: `/pg/${pg._id}` } });
+  navigate(`/pg/${pg._id}`, { state: { pg } });
   };
 
   const renderStars = (rating) => {
@@ -218,6 +218,29 @@ const PG = () => {
 
   return (
     <>
+      {/* PG Details Modal */}
+      {selectedPG && (
+        <Modal onClose={() => setSelectedPG(null)}>
+          {detailsLoading ? (
+            <div className="min-h-[300px] flex items-center justify-center">Loading...</div>
+          ) : (
+            <div className="max-w-2xl mx-auto p-6">
+              <h2 className="text-2xl font-bold mb-2">{selectedPG.name}</h2>
+              <div className="mb-4">
+                <AutoImageCarousel images={selectedPG.images || []} alt={selectedPG.name} className="h-56 rounded-xl" showControls showDots type="pg" />
+              </div>
+              <div className="mb-2 text-gray-700"><strong>Address:</strong> {selectedPG.address}, {selectedPG.city}, {selectedPG.state}</div>
+              <div className="mb-2 text-gray-700"><strong>Price:</strong> ₹{selectedPG.price?.toLocaleString() || (selectedPG.priceRange?.min?.toLocaleString() + ' - ' + selectedPG.priceRange?.max?.toLocaleString())} /month</div>
+              <div className="mb-2 text-gray-700"><strong>Available Rooms:</strong> {selectedPG.availableRooms}</div>
+              <div className="mb-2 text-gray-700"><strong>Amenities:</strong> {selectedPG.amenities?.join(', ')}</div>
+              <div className="mb-2 text-gray-700"><strong>Highlights:</strong> {selectedPG.highlights?.join(', ')}</div>
+              <div className="mb-2 text-gray-700"><strong>Nearby:</strong> {selectedPG.nearby?.map(n => `${n.name} (${n.distance})`).join(', ')}</div>
+              <div className="mb-2 text-gray-700"><strong>Rating:</strong> {selectedPG.rating?.overall?.toFixed(1) || 'N/A'} / 5</div>
+              <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg" onClick={() => setSelectedPG(null)}>Close</button>
+            </div>
+          )}
+        </Modal>
+      )}
       {/* ScrollToTop handles both auto-scroll and floating button */}
       <ScrollToTop 
         scrollOnMount={true} 
