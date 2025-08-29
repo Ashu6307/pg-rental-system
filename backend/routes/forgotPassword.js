@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
     const otpRecord = new OTP({
       email,
       otp,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
       verified: false
     });
     await otpRecord.save();

@@ -53,7 +53,7 @@ router.post('/send-otp', async (req, res) => {
 
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes (already correct)
 
     // Delete any existing OTPs for this email
     await Otp.deleteMany({ email, role: 'admin' });

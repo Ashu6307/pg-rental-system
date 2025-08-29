@@ -82,7 +82,7 @@ const emailTemplates = {
     <div class="otp-code">${otp}</div>
     
     <div class="text">
-        ⏰ <strong>Important:</strong> This OTP is valid for <span class="warning">10 minutes</span> only.
+    ⏰ <strong>Important:</strong> This OTP is valid for <span class="warning">5 minutes</span> only.
     </div>
     
     <div class="text">
@@ -114,7 +114,7 @@ const emailTemplates = {
     <div class="otp-code">${otp}</div>
     
     <div class="text">
-        ⏰ This OTP expires in <span class="warning">10 minutes</span> for security reasons.
+    ⏰ This OTP expires in <span class="warning">5 minutes</span> for security reasons.
     </div>
     
     <div class="text">
