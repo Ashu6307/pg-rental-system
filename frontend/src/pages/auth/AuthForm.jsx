@@ -4,9 +4,14 @@ import { FcGoogle } from 'react-icons/fc';
 import { toast, Toaster } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import authService from '../../services/authService';
-import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
-import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/nameValidation';
-import { handleEmailChange, isValidEmail, getEmailValidationError, generateEmailSuggestions } from '../../utils/emailValidation';
+import MobileValidationInput from '../../components/validation/MobileValidationInput';
+import EmailValidationInput from '../../components/validation/EmailValidationInput';
+import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/validation/nameValidation';
+import NameValidationInput from '../../components/validation/NameValidationInput';
+import { isValidEmail } from '../../utils/validation/emailValidation';
+import { isValidIndianMobile } from '../../utils/validation/mobileValidation';
+import { isValidOtp, isOtpExpired, getOtpValidationError, getOtpTimeRemaining, formatOtpTime } from '../../utils/validation/otpValidation';
+import OtpInput from '../../components/validation/OtpInput';
 
 
 
@@ -18,6 +23,8 @@ const AuthForm = ({
   setLoading
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  // Phone validation error state for MobileValidationInput
+  const [phoneError, setPhoneError] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, message: '', color: '' });
@@ -880,47 +887,19 @@ const AuthForm = ({
                   {role === 'user' && (
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name <span className="text-red-500">*</span></label>
-                      <div className="mt-1 relative">
-                        <input
-                          id="name"
-                          name="name"
-                          type="text"
-                          autoComplete="name"
-                          required={!isLogin}
+                      <div className="mt-1">
+                        <NameValidationInput
                           value={formData.name}
-                          onChange={(e) => {
-                            const processedValue = handleNameChange(e.target.value, 
-                              (value) => setFormData({...formData, name: value}), 
-                              setNameError
-                            );
-                          }}
-                          maxLength="20"
-                          className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
-                            nameError 
-                              ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-                              : formData.name && isValidName(formData.name)
-                                ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
-                                : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                          }`}
+                          onChange={val => setFormData({ ...formData, name: val })}
+                          error={nameError}
+                          setError={setNameError}
+                          required={!isLogin}
+                          disabled={loading}
                           placeholder="Enter your full name (4-20 chars)"
                         />
-                        <div className="absolute right-3 top-2.5 flex items-center space-x-1">
-                          {formData.name && (
-                            isValidName(formData.name) ? (
-                              <FaCheckCircle className="h-4 w-4 text-green-500" />
-                            ) : (
-                              <FaExclamationCircle className="h-4 w-4 text-red-500" />
-                            )
-                          )}
-                          <FaUser className="h-4 w-4 text-gray-400" />
-                        </div>
                       </div>
                       <div className="flex justify-between items-center mt-1">
-                        <div className="h-4">
-                          {nameError && (
-                            <p className="text-xs text-red-600">{nameError}</p>
-                          )}
-                        </div>
+                        <div className="h-4"></div>
                         <div className="text-xs text-gray-500">
                           {formData.name.length}/20 characters
                         </div>
@@ -934,46 +913,19 @@ const AuthForm = ({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700">Owner Name <span className="text-red-500">*</span></label>
-                          <div className="relative">
-                            <input
-                              id="ownerName"
-                              name="ownerName"
-                              type="text"
-                              required
+                          <div className="mt-1">
+                            <NameValidationInput
                               value={formData.ownerName}
-                              onChange={(e) => {
-                                const processedValue = handleNameChange(e.target.value, 
-                                  (value) => setFormData({...formData, ownerName: value}), 
-                                  setOwnerNameError
-                                );
-                              }}
-                              maxLength="20"
-                              className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
-                                ownerNameError 
-                                  ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50' 
-                                  : formData.ownerName && isValidName(formData.ownerName)
-                                    ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
-                                    : 'border-gray-300 focus:ring-green-500 focus:border-green-500'
-                              }`}
+                              onChange={val => setFormData({ ...formData, ownerName: val })}
+                              error={ownerNameError}
+                              setError={setOwnerNameError}
+                              required
+                              disabled={loading}
                               placeholder="Enter owner name (4-20 chars)"
                             />
-                            <div className="absolute right-3 top-2.5 flex items-center space-x-1">
-                              {formData.ownerName && (
-                                isValidName(formData.ownerName) ? (
-                                  <FaCheckCircle className="h-4 w-4 text-green-500" />
-                                ) : (
-                                  <FaExclamationCircle className="h-4 w-4 text-red-500" />
-                                )
-                              )}
-                              <FaUserTie className="h-4 w-4 text-gray-400" />
-                            </div>
                           </div>
                           <div className="flex justify-between items-center mt-1">
-                            <div className="h-4">
-                              {ownerNameError && (
-                                <p className="text-xs text-red-600">{ownerNameError}</p>
-                              )}
-                            </div>
+                            <div className="h-4"></div>
                             <div className="text-xs text-gray-500">
                               {formData.ownerName.length}/20 characters
                             </div>
@@ -1003,83 +955,20 @@ const AuthForm = ({
               {/* Common fields for login/register */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address <span className="text-red-500">*</span></label>
-                <div className="mt-1 relative" style={{ contain: 'layout', isolation: 'isolate' }}>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    autoFocus={false}
-                    required
-                    value={formData.email}
-                    onChange={(e) => {
-                      const processedValue = handleEmailChange(
-                        e.target.value, 
-                        (value) => setFormData({...formData, email: value}), 
-                        setEmailError,
-                        setEmailSuggestions
-                      );
-                      // Show suggestions if there's an @ and partial domain typed
-                      setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
-                    }}
-                    onFocus={() => setShowEmailSuggestions(false)}
-                    readOnly={emailVerified} // Make email field read-only after verification
-                    className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
-                      emailVerified 
-                        ? 'border-green-500 text-green-800 cursor-not-allowed' 
-                        : emailError
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                        : formData.email && isValidEmail(formData.email)
-                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
-                        : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
-                    }`}
-                    placeholder="Enter your email address"
-                  />
-                  {emailVerified ? (
-                    <div className="absolute right-3 top-2.5 flex items-center gap-1">
-                      <FaCheckCircle className="h-5 w-5 text-green-500" />
-                      <span className="text-xs text-green-600 font-medium">Verified</span>
-                    </div>
-                  ) : emailError ? (
-                    <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                  ) : formData.email && isValidEmail(formData.email) ? (
-                    <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-                  ) : (
-                    <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
-                  )}
-                  
-                  {/* Email Suggestions Dropdown */}
-                  {showEmailSuggestions && emailSuggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
-                      {emailSuggestions.map((suggestion, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, email: suggestion }));
-                            setShowEmailSuggestions(false);
-                          }}
-                        >
-                          <span className="flex items-center gap-2">
-                            <FaEnvelope className="h-3 w-3 text-gray-400" />
-                            {suggestion}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Email Error Message and Verify Button in same row */}
-                <div className="flex justify-between items-center mt-1">
-                  <div className="h-4">
-                    {emailError && (
-                      <p className="text-xs text-red-600">{emailError}</p>
-                    )}
-                  </div>
-                  
-                  {/* Verify Email Button for registration only (not for admin) - Right side */}
+                <EmailValidationInput
+                  value={formData.email}
+                  onChange={val => setFormData({ ...formData, email: val })}
+                  error={emailError}
+                  setError={setEmailError}
+                  suggestions={emailSuggestions}
+                  setSuggestions={setEmailSuggestions}
+                  required
+                  readOnly={emailVerified}
+                  disabled={loading}
+                  className={emailVerified ? 'border-green-500 text-green-800 cursor-not-allowed' : ''}
+                />
+                {/* Verify Email Button for registration only (not for admin) - Right side */}
+                <div className="flex justify-end mt-1">
                   {(!isLogin && role !== 'admin') && (
                     <button
                       type="button"
@@ -1097,7 +986,6 @@ const AuthForm = ({
                       disabled={emailVerified || !(formData.email && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email))}
                       onClick={async () => {
                         if (emailVerified) return; // Prevent action if already verified
-                        
                         // First check if email already exists
                         try {
                           const response = await fetch('http://localhost:5000/api/otp/check-email', {
@@ -1106,14 +994,11 @@ const AuthForm = ({
                             body: JSON.stringify({ email: formData.email, role })
                           });
                           const data = await response.json();
-                          
                           if (!data.success && data.alreadyRegistered) {
-                            // Email already registered
                             toast.error(data.message, {
                               duration: 5000,
                               icon: '⚠️'
                             });
-                            // Optionally redirect to login page after 3 seconds
                             setTimeout(() => {
                               const loginPath = role === 'user' ? '/user/login' : 
                                              role === 'owner' ? '/owner/login' : 
@@ -1129,7 +1014,6 @@ const AuthForm = ({
                             }, 3000);
                             return;
                           }
-                          
                           // Email is available, proceed with OTP verification
                           if (data.success && !data.exists) {
                             setShowOtpModal(true);
@@ -1158,42 +1042,16 @@ const AuthForm = ({
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                     Phone Number <span className="text-red-500">*</span>
                   </label>
-                  <div className="mt-1 relative">
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      autoComplete="tel"
-                      required={!isLogin}
+                  <div className="mt-1">
+                    <MobileValidationInput
                       value={formData.phone}
-                      onChange={handleChange}
-                      maxLength="10" // Support 10 digit Indian mobile numbers
-                      className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm ${
-                        formData.phone && isValidIndianMobile(formData.phone)
-                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
-                          : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
-                          ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                          : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                      }`}
-                      placeholder="Enter phone number (e.g., 9876543210)"
+                      onChange={val => setFormData({ ...formData, phone: val })}
+                      error={phoneError}
+                      setError={setPhoneError}
+                      // placeholder="Enter phone number (e.g., 9876543210)"
+                      required={!isLogin}
+                      disabled={loading}
                     />
-                    <div className="absolute right-3 top-2.5">
-                      {formData.phone && isValidIndianMobile(formData.phone) ? (
-                        <FaCheckCircle className="h-5 w-5 text-green-500" />
-                      ) : formData.phone && formData.phone.length > 0 ? (
-                        <FaExclamationCircle className="h-5 w-5 text-red-500" />
-                      ) : (
-                        <FaPhone className="h-5 w-5 text-gray-400" />
-                      )}
-                    </div>
-                  </div>
-                  {/* Fixed height container for error message */}
-                  <div className="h-4">
-                    {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
-                      <p className="text-red-500 text-xs">
-                        📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
-                      </p>
-                    )}
                   </div>
                 </div>
               )}
@@ -1670,6 +1528,7 @@ const AuthForm = ({
 };
 
 // Reusable ForgotPasswordForm component styled same as login form
+
 export const ForgotPasswordForm = ({ role = 'user' }) => {
   const [currentStep, setCurrentStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
   const [formData, setFormData] = useState({
@@ -1683,9 +1542,14 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
   const [forgotPasswordStrength, setForgotPasswordStrength] = useState({ score: 0, message: '', color: '', requirements: {} });
   const [loading, setLoading] = useState(false);
   const [otpError, setOtpError] = useState('');
+  const [showOtpError, setShowOtpError] = useState(false); // Controls error/timer display
   const [otpSuccess, setOtpSuccess] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
+  const [otpCreatedAt, setOtpCreatedAt] = useState(null);
+  const [otpAttempts, setOtpAttempts] = useState(0);
+  // OTP expiry timer for UI
+  const otpTimeLeft = otpCreatedAt ? getOtpTimeRemaining(otpCreatedAt, 300) : 0;
   const [emailError, setEmailError] = useState(''); // Email validation error
   
   // Email suggestions
@@ -1822,10 +1686,11 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
           duration: 4000,
           icon: '📧'
         });
-        
         setCurrentStep(2);
         setResendTimer(60);
         setCanResend(false);
+        setOtpCreatedAt(Date.now());
+        setOtpAttempts(0);
       } else {
         setOtpError(data.message || 'Failed to send OTP');
         toast.error(data.message || 'Failed to send reset OTP');
@@ -1878,22 +1743,25 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
   const handleOtpError = (errorMessage, showToast = true) => {
     const formattedMessage = getOtpErrorMessage(errorMessage);
     const errorIcon = getOtpErrorIcon(errorMessage);
-    
     setOtpError(formattedMessage);
-    
+    setShowOtpError(true);
     if (showToast) {
       toast.error(formattedMessage, {
         icon: errorIcon,
         duration: 4000
       });
     }
+    // Hide error after 5 seconds, show timer again
+    setTimeout(() => {
+      setShowOtpError(false);
+    }, 5000);
   };
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     
-    if (!formData.otp || formData.otp.length !== 6) {
-      handleOtpError('Please enter valid 6-digit OTP', false); // No toast for forgot password
+    if (!isValidOtp(formData.otp, 6)) {
+      setOtpError(getOtpValidationError(formData.otp, { length: 6 }));
       return;
     }
 
@@ -1911,11 +1779,24 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
       
       if (data.success) {
         setOtpSuccess('OTP verified successfully!');
-        // No toast for forgot password - clean inline experience
-        
         setCurrentStep(3);
       } else {
-        handleOtpError(data.message || 'Invalid OTP', false); // No toast for forgot password
+        setOtpAttempts(a => a + 1);
+        setOtpError(getOtpValidationError(
+          formData.otp,
+          {
+            createdAt: otpCreatedAt,
+            expirySeconds: 300,
+            used: false,
+            length: 6,
+            attempts: otpAttempts + 1,
+            maxAttempts: 5,
+            customMessages: {
+              expired: 'OTP expired (valid for 5 minutes)',
+              attempts: 'Too many invalid attempts. Please request a new OTP.'
+            }
+          }
+        ) || (data.message || 'Invalid OTP'));
       }
     } catch (error) {
       handleOtpError('Network error. Please try again.', false); // No toast for forgot password
@@ -1999,12 +1880,12 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
       
       if (data.success) {
         setOtpSuccess('OTP resent successfully!');
-        // No toast for forgot password - message shows inline
-        
         setResendTimer(60);
         setCanResend(false);
+        setOtpCreatedAt(Date.now());
+        setOtpAttempts(0);
       } else {
-        handleOtpError(data.message || 'Failed to resend OTP', false); // No toast for forgot password
+        setOtpError(data.message || 'Failed to resend OTP');
       }
     } catch (error) {
       handleOtpError('Network error. Please try again.', false); // No toast for forgot password
@@ -2147,60 +2028,19 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   {role.charAt(0).toUpperCase() + role.slice(1)} Email Address <span className="text-red-500">*</span>
                 </label>
-                <div className="mt-1 relative" style={{ contain: 'layout', isolation: 'isolate' }}>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    autoFocus={false}
-                    required
-                    value={formData.email}
-                    onChange={handleEmailInput}
-                    onFocus={() => setShowEmailSuggestions(false)}
-                    className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
-                      emailError
-                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                        : formData.email && isValidEmail(formData.email)
-                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500'
-                        : 'border-gray-300 focus:ring-red-500 focus:border-red-500'
-                    }`}
-                    placeholder={`Enter your ${role} email address`}
-                  />
-                  {emailError ? (
-                    <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                  ) : formData.email && isValidEmail(formData.email) ? (
-                    <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-                  ) : (
-                    <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
-                  )}
-                </div>
-                
-                {/* Email Suggestions Dropdown */}
-                {showEmailSuggestions && emailSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
-                    {emailSuggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
-                        onClick={() => handleEmailSuggestionClick(suggestion)}
-                      >
-                        <span className="flex items-center gap-2">
-                          <FaEnvelope className="h-3 w-3 text-gray-400" />
-                          {suggestion}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Email Error Message - Fixed height container */}
-                <div className="h-4 mt-1">
-                  {emailError && (
-                    <p className="text-xs text-red-600">{emailError}</p>
-                  )}
-                </div>
+                <EmailValidationInput
+                  value={formData.email}
+                  onChange={val => setFormData(prev => ({ ...prev, email: val }))}
+                  error={emailError}
+                  setError={setEmailError}
+                  suggestions={emailSuggestions}
+                  setSuggestions={setEmailSuggestions}
+                  required
+                  disabled={loading}
+                  className={emailError ? 'border-red-500' : ''}
+                  placeholder={`Enter your ${role} email address`}
+                />
+                {/* Error message is now handled only by EmailValidationInput */}
               </div>
 
               <div>
@@ -2265,34 +2105,31 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                 {/* OTP Input with Individual Digits */}
                 <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700 text-center">Enter Reset OTP</label>
-                  <div className="flex justify-center space-x-2">
-                    {[...Array(6)].map((_, index) => (
-                      <input
-                        key={index}
-                        id={`otp-${index}`}
-                        type="text"
-                        maxLength="1"
-                        value={formData.otp[index] || ''}
-                        onChange={(e) => handleOtpChange(index, e.target.value)}
-                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        autoComplete="off"
-                        autoCorrect="off"
-                        autoCapitalize="off"
-                        spellCheck="false"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        className={`w-12 h-12 text-center text-lg font-bold border-2 border-gray-300 rounded-xl focus:outline-none transition-all duration-200 shadow-sm ${
-                          role === 'admin' 
-                            ? 'focus:border-red-500 focus:ring-2 focus:ring-red-200' 
-                            : role === 'owner' 
-                            ? 'focus:border-green-500 focus:ring-2 focus:ring-green-200' 
-                            : 'focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
-                        }`}
-                        placeholder="●"
-                      />
-                    ))}
-                  </div>
-                  
+                  <OtpInput
+                    value={formData.otp}
+                    onChange={otp => setFormData(prev => ({ ...prev, otp }))}
+                    length={6}
+                    error={!!otpError}
+                    success={!!otpSuccess}
+                    loading={loading}
+                    statusMessage={
+                      showOtpError && otpError
+                        ? otpError
+                        : (otpCreatedAt ? `OTP will expire in ${formatOtpTime(otpTimeLeft)}` : '')
+                    }
+                    statusType={
+                      showOtpError && otpError
+                        ? 'error'
+                        : (otpCreatedAt ? 'timer' : '')
+                    }
+                    statusBoxColor={
+                      role === 'admin'
+                        ? { bg: 'bg-red-50', border: 'border border-red-200', text: 'text-red-600' }
+                        : role === 'owner'
+                        ? { bg: 'bg-green-50', border: 'border border-green-200', text: 'text-green-600' }
+                        : { bg: 'bg-blue-50', border: 'border border-blue-200', text: 'text-blue-600' }
+                    }
+                  />
                   {/* OTP Timer and Resend */}
                   <div className="text-center space-y-1">
                     <p className="text-sm text-gray-600">

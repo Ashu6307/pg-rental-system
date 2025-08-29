@@ -1,5 +1,12 @@
 import React, { useState, useContext, useEffect } from "react";
-import OtpInput from '../../components/OtpInput';
+import OtpInput from '../../components/validation/OtpInput';
+import {
+  isValidOtp,
+  isOtpExpired,
+  getOtpValidationError,
+  getOtpTimeRemaining,
+  formatOtpTime,
+} from "../../utils/validation/otpValidation";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { AuthContext } from "../../context/AuthContext";
@@ -10,15 +17,9 @@ import {
   FaEye,
   FaEyeSlash,
   FaCheckCircle,
-  FaExclamationCircle,
-  FaLock,
   FaHome,
 } from "react-icons/fa";
-import {
-  handleEmailChange,
-  isValidEmail,
-  generateEmailSuggestions,
-} from "../../utils/emailValidation";
+import EmailValidationInput from '../../components/validation/EmailValidationInput';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -30,21 +31,23 @@ const AdminLogin = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [showOtpError, setShowOtpError] = useState(false); // Controls error/timer display
   const [otpSuccess, setOtpSuccess] = useState("");
   const [focusedOtpIndex, setFocusedOtpIndex] = useState(-1);
   const [resendTimer, setResendTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
 
-  // State to make all OTP boxes red on error
+  // State to make all OTP boxes red/green on error/success
   const [otpAllRed, setOtpAllRed] = useState(false);
   const [otpAllGreen, setOtpAllGreen] = useState(false);
 
   // Email validation state
   const [emailError, setEmailError] = useState("");
-
-  // Email suggestions
-  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState([]);
+
+  // OTP expiry and attempt tracking state
+  const [otpCreatedAt, setOtpCreatedAt] = useState(null); // When OTP was sent
+  const [otpAttempts, setOtpAttempts] = useState(0);      // How many times user tried
 
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
@@ -66,56 +69,39 @@ const AdminLogin = () => {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
+  // Only handle password change now
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === "email") {
-      const processedValue = handleEmailChange(
-        value,
-        (email) => setFormData((prev) => ({ ...prev, email })),
-        setEmailError,
-        setEmailSuggestions
-      );
-      // Show suggestions if there's an @ and partial domain typed
-      setShowEmailSuggestions(
-        processedValue.includes("@") &&
-          processedValue.split("@")[1] &&
-          processedValue.split("@")[1].length > 0
-      );
-    } else {
+    if (name === "password") {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  // Send OTP and set OTP created time for expiry logic
   const handleSendOtp = async (e) => {
     e.preventDefault();
-
     if (!formData.email || !formData.password) {
       toast.error("Please enter both email and password");
       return;
     }
-
-    // Validate email format
-    if (!isValidEmail(formData.email)) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-
     setLoading(true);
     setOtpError("");
-
     try {
-      // Send OTP for admin login with password verification
       const result = await authService.sendOtp(
         formData.email,
         "admin",
         formData.password
       );
-
       if (result.success) {
         setOtpSent(true);
         setCanResend(false);
         setResendTimer(60);
+        setOtpCreatedAt(Date.now()); // Set OTP sent time for expiry
+        setOtpAttempts(0); // Reset attempts
+        setOtp("");
+        setOtpError("");
+        setOtpAllRed(false);
+        setOtpAllGreen(false);
         toast.success("Admin OTP sent to your email!");
       }
     } catch (error) {
@@ -126,98 +112,101 @@ const AdminLogin = () => {
     }
   };
 
-  // OTP Error handling functions
-  const getOtpErrorMessage = (error) => {
-    const message = error.toLowerCase();
-    if (message.includes("invalid")) return "Invalid OTP entered";
-    if (message.includes("expired")) return "OTP has expired";
-    if (message.includes("used")) return "OTP already used";
-    return "OTP verification failed";
-  };
-
-  const getOtpErrorIcon = (error) => {
-    const message = error.toLowerCase();
-    if (message.includes("expired")) return "⏰";
-    if (message.includes("used")) return "✓";
-    return "❌";
-  };
-
-  const handleOtpError = (error) => {
-    const errorMessage = getOtpErrorMessage(error);
-    const errorIcon = getOtpErrorIcon(error);
-    setOtpError(`${errorIcon} ${errorMessage}`);
-
-    // Turn all OTP boxes red on error
-    setOtpAllRed(true);
-
-    // Clear OTP on certain errors
-    if (
-      error.toLowerCase().includes("invalid") ||
-      error.toLowerCase().includes("used")
-    ) {
+  // Centralized OTP error handling using otpValidation.js (now with correct arguments)
+  const handleOtpError = (errorType) => {
+    // Prepare options for error context
+    const options = {
+      createdAt: otpCreatedAt,
+      expirySeconds: 300, // 5 min
+      attempts: otpAttempts,
+      maxAttempts: 5,
+      used: errorType === "used",
+      length: 6
+    };
+    setOtpError(getOtpValidationError(otp, options) || "Invalid OTP");
+    setShowOtpError(true);
+  setOtpAllRed(true);
+  setOtpAllGreen(false);
+    // No direct DOM focus here; handled by OtpInput
+    if (errorType === "invalid" || errorType === "used") {
       setOtp("");
     }
-    // Remove red after a short delay (optional UX, or keep until user types)
-    // setTimeout(() => setOtpAllRed(false), 1200);
+    setTimeout(() => {
+      setShowOtpError(false);
+    }, 5000);
   };
 
+  // OTP verify handler using centralized validation
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-
+    // Validate OTP input
     if (!otp || otp.length !== 6) {
-      setOtpError("❌ Please enter complete 6-digit OTP");
+      setOtpError(getOtpValidationError("incomplete"));
+      setOtpAllRed(true);
       return;
     }
-
-    // Validate OTP contains only digits
-    if (!/^\d{6}$/.test(otp)) {
-      setOtpError("❌ OTP must contain only numbers");
+    if (!isValidOtp(otp)) {
+      setOtpError(getOtpValidationError("invalid"));
+      setOtpAllRed(true);
+      setOtp("");
+      setOtpAttempts((prev) => prev + 1);
       return;
     }
-
+    // Check expiry (5 min)
+    if (isOtpExpired(otpCreatedAt, 300)) {
+      setOtpError(getOtpValidationError("expired"));
+      setOtpAllRed(true);
+      setOtp("");
+      return;
+    }
     setLoading(true);
     setOtpError("");
-
     try {
-      // Use the correct OTP verification endpoint for admin
       const loginResult = await authService.verifyOtp(
         formData.email,
         otp,
         "admin"
       );
-
       if (loginResult.token && loginResult.user) {
         await login(loginResult.token, loginResult.user);
-
-        // Enhanced session management
         sessionStorage.setItem("auth_last_activity", Date.now().toString());
         sessionStorage.setItem("admin_login_time", Date.now().toString());
         localStorage.removeItem("auth_session_expired");
-
         setOtpSuccess("✅ Login successful!");
+        setOtpAllGreen(true);
         toast.success("🎉 Admin login successful! Welcome back.", {
           duration: 3000,
           icon: "👑",
         });
-
         navigate("/admin", { replace: true });
       }
     } catch (error) {
-      handleOtpError(error.message || "Failed to verify OTP");
+      // Use error message to determine type
+      let errorType = "invalid";
+      if (error.message && error.message.toLowerCase().includes("expired")) errorType = "expired";
+      else if (error.message && error.message.toLowerCase().includes("used")) errorType = "used";
+      setOtpAttempts((prev) => prev + 1);
+      handleOtpError(errorType);
       toast.error(error.message || "Failed to verify OTP");
     } finally {
       setLoading(false);
     }
   };
 
+  // Resend OTP and reset expiry/attempts
   const handleResendOtp = async () => {
     if (!canResend) return;
-
     setLoading(true);
     try {
       await authService.sendOtp(formData.email, "admin", formData.password);
       setCanResend(false);
       setResendTimer(60);
+      setOtpCreatedAt(Date.now());
+      setOtpAttempts(0);
+      setOtp("");
+      setOtpError("");
+      setOtpAllRed(false);
+      setOtpAllGreen(false);
       toast.success("Admin OTP resent successfully!");
     } catch (error) {
       toast.error("Failed to resend OTP");
@@ -226,9 +215,16 @@ const AdminLogin = () => {
     }
   };
 
-  // Real-time OTP verification
+  // Real-time OTP verification (auto-submit on 6 digits, with expiry/attempts)
   useEffect(() => {
-    if (otpSent && otp.length === 6 && /^\d{6}$/.test(otp)) {
+    if (otpSent && otp.length === 6 && isValidOtp(otp)) {
+      // Check expiry before auto-verify
+      if (isOtpExpired(otpCreatedAt, 300)) {
+        setOtpError(getOtpValidationError(otp, { createdAt: otpCreatedAt, expirySeconds: 300 }));
+        setOtpAllRed(true);
+        setOtp("");
+        return;
+      }
       // Auto verify OTP
       (async () => {
         setLoading(true);
@@ -240,24 +236,29 @@ const AdminLogin = () => {
             "admin"
           );
           if (loginResult.token && loginResult.user) {
-            // Show all green before login
             setOtpAllGreen(true);
             setOtpSuccess("✅ Login successful!");
             toast.success("🎉 Admin login successful! Welcome back.", {
               duration: 3000,
               icon: "👑",
             });
-            // Wait 700ms for green effect, then login
             setTimeout(async () => {
               await login(loginResult.token, loginResult.user);
-              sessionStorage.setItem("auth_last_activity", Date.now().toString());
+              sessionStorage.setItem(
+                "auth_last_activity",
+                Date.now().toString()
+              );
               sessionStorage.setItem("admin_login_time", Date.now().toString());
               localStorage.removeItem("auth_session_expired");
               navigate("/admin", { replace: true });
             }, 700);
           }
         } catch (error) {
-          handleOtpError(error.message || "Failed to verify OTP");
+          let errorType = "invalid";
+          if (error.message && error.message.toLowerCase().includes("expired")) errorType = "expired";
+          else if (error.message && error.message.toLowerCase().includes("used")) errorType = "used";
+          setOtpAttempts((prev) => prev + 1);
+          handleOtpError(errorType);
           toast.error(error.message || "Failed to verify OTP");
         } finally {
           setLoading(false);
@@ -320,66 +321,15 @@ const AdminLogin = () => {
                       Admin Email <span className="text-red-500">*</span>
                     </label>
                     <div className="mt-1 relative">
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
+                      <EmailValidationInput
                         value={formData.email}
-                        onChange={handleChange}
-                        onFocus={() => setShowEmailSuggestions(false)}
-                        className={`appearance-none block w-full px-3 py-2 pr-10 border rounded-md placeholder-gray-400 focus:outline-none sm:text-sm transition-all duration-200 ${
-                          emailError
-                            ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                            : formData.email && isValidEmail(formData.email)
-                            ? "border-green-500 focus:ring-green-500 focus:border-green-500"
-                            : "border-gray-300 focus:ring-red-500 focus:border-red-500"
-                        }`}
+                        onChange={email => setFormData(prev => ({ ...prev, email }))}
+                        error={emailError}
+                        setError={setEmailError}
+                        suggestions={emailSuggestions}
+                        setSuggestions={setEmailSuggestions}
                         placeholder="Enter admin email address"
                       />
-
-                      {/* Email validation icons */}
-                      {emailError ? (
-                        <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                      ) : formData.email && isValidEmail(formData.email) ? (
-                        <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-                      ) : (
-                        <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
-                      )}
-
-                      {/* Email Suggestions Dropdown */}
-                      {showEmailSuggestions && emailSuggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
-                          {emailSuggestions.map((suggestion, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
-                              onClick={() => {
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  email: suggestion,
-                                }));
-                                setShowEmailSuggestions(false);
-                                setEmailError(""); // Clear error when suggestion is selected
-                              }}
-                            >
-                              <span className="flex items-center gap-2">
-                                <FaEnvelope className="h-3 w-3 text-gray-400" />
-                                {suggestion}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Email Error Message - Fixed height container */}
-                    <div className="h-5 mt-1">
-                      {emailError && (
-                        <p className="text-xs text-red-600">{emailError}</p>
-                      )}
                     </div>
                   </div>
 
@@ -421,7 +371,12 @@ const AdminLogin = () => {
                 <div className="space-y-3 mt-6">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={
+                      loading ||
+                      !formData.email ||
+                      !formData.password ||
+                      !!emailError
+                    }
                     className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {loading ? (
@@ -513,9 +468,45 @@ const AdminLogin = () => {
                       error={otpAllRed}
                       success={otpAllGreen}
                       loading={loading}
+                      focusOnErrorTrigger={otpAllRed && showOtpError ? Date.now() : undefined}
+                      errorHighlightDuration={1200}
                     />
 
-                    {/* OTP Timer and Resend */}
+                    {/* OTP Error/Timer Box - single location, minimal space */}
+                    <div className="h-8 mt-2 relative">
+                      {showOtpError && otpError ? (
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-red-50 border border-red-200 rounded-md z-10 shadow-sm flex items-center justify-center"
+                          style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260, padding: '0.25rem 1.25rem' }}>
+                          <p className="text-red-600 text-xs font-medium text-center whitespace-nowrap px-2">
+                            {otpError}
+                          </p>
+                        </div>
+                      ) : otpSuccess ? (
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-green-50 border border-green-200 rounded-md z-10 shadow-sm flex items-center justify-center"
+                          style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260, padding: '0.25rem 1.25rem' }}>
+                          <p className="text-green-600 text-xs font-medium text-center whitespace-nowrap px-2">
+                            {otpSuccess}
+                          </p>
+                        </div>
+                      ) : (
+                        otpCreatedAt && !isOtpExpired(otpCreatedAt, 300) ? (
+                          <div className="absolute top-0 left-0 w-full p-2 bg-transparent z-0">
+                            <p className="text-xs text-gray-500 text-center">
+                              OTP will expire in <span className="font-semibold">{formatOtpTime(getOtpTimeRemaining(otpCreatedAt, 300))}</span>
+                            </p>
+                          </div>
+                        ) : (
+                          otpCreatedAt && isOtpExpired(otpCreatedAt, 300) && !showOtpError && (
+                            <div className="absolute top-0 left-0 w-full p-2 bg-red-50 border border-red-200 rounded-md z-10">
+                              <p className="text-red-600 text-xs font-medium text-center">
+                                OTP expired. Please resend.
+                              </p>
+                            </div>
+                          )
+                        )
+                      )}
+                    </div>
+                    {/* OTP Timer, Expiry, and Resend */}
                     <div className="text-center">
                       <p className="text-xs text-gray-600 mb-2">
                         Didn't receive the OTP?
@@ -534,25 +525,6 @@ const AdminLogin = () => {
                           ? "Resend Login OTP"
                           : `Resend in ${resendTimer}s`}
                       </button>
-                    </div>
-
-                    {/* OTP Error Display - Fixed height container to prevent UI movement */}
-                    <div className="h-12 mt-2">
-                      {otpError && (
-                        <div className="p-2 bg-red-50 border border-red-200 rounded-md">
-                          <p className="text-red-600 text-xs font-medium text-center">
-                            {otpError}
-                          </p>
-                        </div>
-                      )}
-
-                      {otpSuccess && (
-                        <div className="p-2 bg-green-50 border border-green-200 rounded-md">
-                          <p className="text-green-600 text-xs font-medium text-center">
-                            {otpSuccess}
-                          </p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

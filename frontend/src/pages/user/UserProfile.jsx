@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
+import MobileValidationInput from '../../components/validation/MobileValidationInput';
 import UserNavbar from '../../components/UserNavbar';
 import UserHeader from '../../components/UserHeader';
 import UserFooter from '../../components/UserFooter';
@@ -50,6 +51,7 @@ const UserProfile = () => {
     reader.readAsDataURL(file);
   };
 
+  const [phoneError, setPhoneError] = useState("");
   const handleSave = (e) => {
     e.preventDefault();
     // Strict validation: No field blank, valid phone, email, dob, gender
@@ -60,9 +62,8 @@ const UserProfile = () => {
         return;
       }
     }
-    // Phone validation
-    if (!/^([6-9][0-9]{9})$/.test(form.phone)) {
-      showError('Please enter a valid 10-digit phone number starting with 6-9.');
+    if (phoneError) {
+      showError(phoneError);
       return;
     }
     // Email validation
@@ -149,7 +150,14 @@ const UserProfile = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Phone</label>
-              <input type="text" name="phone" value={form.phone} onChange={handleChange} disabled={!editMode} className="w-full px-3 py-2 border rounded focus:outline-none" />
+              <MobileValidationInput
+                value={form.phone}
+                onChange={val => setForm({ ...form, phone: val })}
+                error={phoneError}
+                setError={setPhoneError}
+                required
+                disabled={!editMode}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Address</label>

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaEnvelope, FaCheckCircle, FaExclamationCircle, FaPhone } from 'react-icons/fa';
 import FileUpload from '../../components/FileUpload.jsx';
-import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
-import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/nameValidation';
-import { handleEmailChange, isValidEmail, getEmailValidationError } from '../../utils/emailValidation';
+import { formatPhoneNumber, isValidIndianMobile } from '../../utils/validation/mobileValidation';
+import { handleNameChange, isValidName, getNameValidationError, formatName } from '../../utils/validation/nameValidation';
+import { handleEmailChange, isValidEmail, getEmailValidationError } from '../../utils/validation/emailValidation';
 
 export default function OwnerProfile() {
   const [profile, setProfile] = useState(null);

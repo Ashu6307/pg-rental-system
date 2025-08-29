@@ -18,7 +18,7 @@ import {
   FaPhone
 } from 'react-icons/fa';
 import FileUpload from '../../components/FileUpload.jsx';
-import { formatPhoneNumber, isValidIndianMobile } from '../../utils/mobileValidation';
+import { formatPhoneNumber, isValidIndianMobile } from '../../utils/validation/mobileValidation';
 
 const PG_TYPE_OPTIONS = ['Single', 'Double', 'Triple', 'Four'];
 const GENDER_OPTIONS = [

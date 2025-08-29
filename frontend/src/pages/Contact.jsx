@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane, FaWhatsapp, FaBuilding, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import apiService from '../services/api';
 import ScrollToTop, { useScrollToTop } from '../components/ScrollToTop';
-import { formatPhoneNumber, isValidIndianMobile } from '../utils/mobileValidation';
-import { handleNameChange, isValidName, getNameValidationError, formatName } from '../utils/nameValidation';
-import { handleEmailChange, isValidEmail, getEmailValidationError, generateEmailSuggestions } from '../utils/emailValidation';
+import MobileValidationInput from '../components/validation/MobileValidationInput';
+import NameValidationInput from '../components/validation/NameValidationInput';
+import EmailValidationInput from '../components/validation/EmailValidationInput';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -21,11 +21,12 @@ const Contact = () => {
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState([]);
   
-  // Name validation state
+  // Name validation state handled by NameValidationInput
   const [nameError, setNameError] = useState('');
-  
-  // Email validation state
+  // Email validation state handled by EmailValidationInput
   const [emailError, setEmailError] = useState('');
+  // Mobile validation state
+  const [mobileError, setMobileError] = useState('');
 
   // Use the new ScrollManager hook
   const scrollToTop = useScrollToTop({ behavior: 'smooth', enableMultiTiming: true });
@@ -72,9 +73,8 @@ const Contact = () => {
     if (name === 'attachments') {
       setFormData({ ...formData, attachments: files });
     } else if (name === 'phone') {
-      // Format phone number
-      const formatted = formatPhoneNumber(value);
-      setFormData({ ...formData, phone: formatted });
+      // Only allow digits, formatting handled by MobileValidationInput
+      setFormData({ ...formData, phone: value.replace(/[^0-9]/g, '') });
     } else {
       setFormData({ ...formData, [name]: value });
       
@@ -183,176 +183,44 @@ const Contact = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="name" className="block text-gray-700 text-base font-semibold mb-2">Full Name *</label>
-                  <div className="relative">
-                    <input 
-                      type="text" 
-                      id="name" 
-                      name="name" 
-                      value={formData.name} 
-                      onChange={(e) => {
-                        const processedValue = handleNameChange(e.target.value, 
-                          (value) => setFormData({...formData, name: value}), 
-                          setNameError
-                        );
-                      }}
-                      required 
-                      disabled={isSubmitting} 
-                      maxLength="20"
-                      className={`w-full px-3 py-2 pr-12 border rounded-xl focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
-                        nameError 
-                          ? 'border-red-500 focus:ring-red-400 focus:border-red-400' 
-                          : formData.name && isValidName(formData.name)
-                            ? 'border-green-500 focus:ring-green-400 focus:border-green-400'
-                            : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
-                      }`}
-                      placeholder="Your full name (4-20 chars)" 
-                      autoFocus 
-                    />
-                    <div className="absolute right-3 top-2.5 flex items-center space-x-1">
-                      {formData.name && (
-                        isValidName(formData.name) ? (
-                          <FaCheckCircle className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <FaExclamationCircle className="h-4 w-4 text-red-500" />
-                        )
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-1">
-                    {/* Error message - full width */}
-                    <div className="h-4">
-                      {nameError && (
-                        <p className="text-xs text-red-600">{nameError}</p>
-                      )}
-                    </div>
-                    {/* Character count - right aligned */}
-                    <div className="flex justify-end">
-                      <div className="text-xs text-gray-500">
-                        {formData.name.length}/20 characters
-                      </div>
-                    </div>
-                  </div>
+                  <NameValidationInput
+                    value={formData.name}
+                    onChange={val => setFormData({ ...formData, name: val })}
+                    error={nameError}
+                    setError={setNameError}
+                    // placeholder="Your full name"
+                    required
+                    disabled={isSubmitting}
+                    maxLength={30}
+                  />
+                  {/* <div className="flex justify-end mt-1">
+                    <div className="text-xs text-gray-500">{formData.name.length}/30 characters</div>
+                  </div> */}
                 </div>
                 <div>
                   <label htmlFor="phone" className="block text-gray-700 text-base font-semibold mb-2">Phone Number *</label>
-                  <div className="relative">
-                    <input 
-                      type="tel" 
-                      id="phone" 
-                      name="phone" 
-                      value={formData.phone} 
-                      onChange={handleChange} 
-                      maxLength="10"
-                      required 
-                      disabled={isSubmitting} 
-                      className={`appearance-none block w-full px-3 py-2 pr-12 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
-                        formData.phone && isValidIndianMobile(formData.phone)
-                          ? 'border-green-300 focus:ring-green-500 focus:border-green-500'
-                          : formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone)
-                          ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                          : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
-                      }`}
-                      placeholder="Enter mobile number (e.g., 9876543210)" 
-                    />
-                    <div className="absolute right-3 top-2.5">
-                      {formData.phone && isValidIndianMobile(formData.phone) ? (
-                        <FaCheckCircle className="h-5 w-5 text-green-500" />
-                      ) : formData.phone && formData.phone.length > 0 ? (
-                        <FaExclamationCircle className="h-5 w-5 text-red-500" />
-                      ) : (
-                        <FaPhone className="h-5 w-5 text-gray-400" />
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-1">
-                    {/* Error message - full width */}
-                    <div className="h-4">
-                      {formData.phone && formData.phone.length > 0 && !isValidIndianMobile(formData.phone) && (
-                        <p className="text-red-500 text-xs">
-                          📱 Please enter a valid Indian mobile number (10 digits, starting with 6-9)
-                        </p>
-                      )}
-                    </div>
-                    {/* Character count - right aligned */}
-                    <div className="flex justify-end">
-                      <div className="text-xs text-gray-500">
-                        {formData.phone.length}/10 digits
-                      </div>
-                    </div>
-                  </div>
+                  <MobileValidationInput
+                    value={formData.phone}
+                    onChange={val => setFormData({ ...formData, phone: val })}
+                    error={mobileError}
+                    setError={setMobileError}
+                    // placeholder="Enter mobile number (e.g., 9876543210)"
+                    required
+                    disabled={isSubmitting}
+                  />
                 </div>
               </div>
               <div>
                 <label htmlFor="email" className="block text-gray-700 text-base font-semibold mb-2">Email Address *</label>
-                <div>
-                  <div className="relative">
-                    <input 
-                      type="email" 
-                      id="email" 
-                      name="email" 
-                      value={formData.email} 
-                      onChange={(e) => {
-                        const processedValue = handleEmailChange(
-                          e.target.value, 
-                          (value) => setFormData({...formData, email: value}), 
-                          setEmailError,
-                          setEmailSuggestions
-                        );
-                        // Show suggestions if there's an @ and partial domain typed
-                        setShowEmailSuggestions(processedValue.includes('@') && processedValue.split('@')[1] && processedValue.split('@')[1].length > 0);
-                      }}
-                      onFocus={() => setShowEmailSuggestions(false)}
-                      required 
-                      disabled={isSubmitting} 
-                      className={`appearance-none block w-full px-3 py-2 pr-12 border rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 transition disabled:bg-gray-100 shadow-sm text-sm ${
-                        emailError 
-                          ? 'border-red-500 focus:ring-red-400 focus:border-red-400' 
-                          : formData.email && isValidEmail(formData.email)
-                            ? 'border-green-500 focus:ring-green-400 focus:border-green-400'
-                            : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'
-                      }`}
-                      placeholder="Your email address" 
-                    />
-                    
-                    {/* Email validation icons */}
-                    {emailError ? (
-                      <FaExclamationCircle className="absolute right-3 top-2.5 h-5 w-5 text-red-500" />
-                    ) : formData.email && isValidEmail(formData.email) ? (
-                      <FaCheckCircle className="absolute right-3 top-2.5 h-5 w-5 text-green-500" />
-                    ) : (
-                      <FaEnvelope className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 pointer-events-none" />
-                    )}
-                    
-                    {/* Email Suggestions Dropdown */}
-                    {showEmailSuggestions && emailSuggestions.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-50 mt-1">
-                      {emailSuggestions.map((suggestion, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          className="w-full text-left px-3 py-2 hover:bg-red-50 hover:text-red-700 text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, email: suggestion }));
-                            setShowEmailSuggestions(false);
-                          }}
-                        >
-                          <span className="flex items-center gap-2">
-                            <FaEnvelope className="h-3 w-3 text-gray-400" />
-                            {suggestion}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  </div>
-                  
-                  {/* Email Error Message - Fixed height container */}
-                  <div className="h-4 mt-1">
-                    {emailError && (
-                      <p className="text-xs text-red-600">{emailError}</p>
-                    )}
-                  </div>
-                </div>
+                <EmailValidationInput
+                  value={formData.email}
+                  onChange={val => setFormData({ ...formData, email: val })}
+                  error={emailError}
+                  setError={setEmailError}
+                  required
+                  disabled={isSubmitting}
+                  placeholder="Your email address"
+                />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>

@@ -4,7 +4,7 @@ import {
   FaBars, FaTimes, FaUser, FaMotorcycle, FaBuilding, FaHome, FaPhone, FaInfoCircle, FaSignOutAlt, FaCrown, FaUserTie, FaChevronDown 
 } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
-
+import StayWheelsLogo from './StayWheelsLogo';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -71,9 +71,10 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to={isLoggedIn && currentUser ? (currentUser.role === 'admin' ? '/admin/dashboard' : currentUser.role === 'owner' ? '/owner/dashboard' : '/') : '/'} onClick={scrollToTop} className="flex items-center space-x-2">
-              <FaHome className="h-8 w-8 text-blue-600" />
-              <span className="font-bold text-xl text-gray-900">PG & Bike Rental</span>
+            <Link to={isLoggedIn && currentUser ? (currentUser.role === 'admin' ? '/admin/dashboard' : currentUser.role === 'owner' ? '/owner/dashboard' : '/') : '/'} onClick={scrollToTop} className="flex items-center h-16">
+              <div style={{ display: 'flex', alignItems: 'center', height: '48px' }}>
+                <StayWheelsLogo />
+              </div>
             </Link>
           </div>
           <div className="hidden md:flex items-center space-x-8">

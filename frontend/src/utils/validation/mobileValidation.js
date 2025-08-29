@@ -9,10 +9,13 @@ export const validateIndianMobile = (mobile) => {
 // Format phone number for display (only digits, max 10)
 export const formatPhoneNumber = (value) => {
   if (!value) return '';
-  
-  // Remove all non-digits and limit to 10
+  // Remove all non-digits
   const digits = value.replace(/\D/g, '');
-  return digits.slice(0, 10);
+  // If more than 10 digits, take last 10 (to handle country code, etc)
+  if (digits.length > 10) {
+    return digits.slice(-10);
+  }
+  return digits;
 };
 
 // Get normalized mobile number (same as input for 10-digit)
