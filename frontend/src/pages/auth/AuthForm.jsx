@@ -358,50 +358,50 @@ const AuthForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Admin login requires OTP (security measure)
-    if (role === 'admin' && isLogin) {
-      if (!showOtp) {
-        // Step 1: Send OTP to admin email
-        setLoading(true);
-        try {
-          const data = await authService.sendOtp(formData.email, 'admin');
-          
-          if (data.success) {
-            setShowOtp(true);
-            setOtpSent(true);
-            toast.success('OTP sent to your email for security verification');
-          } else {
-            toast.error(data.message || 'Failed to send OTP');
-          }
-        } catch (err) {
-          console.error('Admin OTP send error:', err);
-          toast.error('Network error while sending OTP');
-        } finally {
-          setLoading(false);
-        }
-        return;
-      } else {
-        // Step 2: Verify OTP and login
-        setLoading(true);
-        try {
-          const data = await authService.verifyOtp(formData.email, otp, 'admin');
-          
-          if (data.success) {
-            if (onAuthSuccess) {
-              onAuthSuccess(data, formData);
-            }
-          } else {
-            setOtpError(data.message || 'Invalid OTP');
-          }
-        } catch (err) {
-          console.error('Admin OTP verify error:', err);
-          setOtpError('Network error while verifying OTP');
-        } finally {
-          setLoading(false);
-        }
-        return;
-      }
-    }
+  // Admin login requires OTP (security measure)
+  // if (role === 'admin' && isLogin) {
+  //   if (!showOtp) {
+  //     // Step 1: Send OTP to admin email
+  //     setLoading(true);
+  //     try {
+  //       const data = await authService.sendOtp(formData.email, 'admin');
+  //       
+  //       if (data.success) {
+  //         setShowOtp(true);
+  //         setOtpSent(true);
+  //         toast.success('OTP sent to your email for security verification');
+  //       } else {
+  //         toast.error(data.message || 'Failed to send OTP');
+  //       }
+  //     } catch (err) {
+  //       console.error('Admin OTP send error:', err);
+  //       toast.error('Network error while sending OTP');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //     return;
+  //   } else {
+  //     // Step 2: Verify OTP and login
+  //     setLoading(true);
+  //     try {
+  //       const data = await authService.verifyOtp(formData.email, otp, 'admin');
+  //       
+  //       if (data.success) {
+  //         if (onAuthSuccess) {
+  //           onAuthSuccess(data, formData);
+  //         }
+  //       } else {
+  //         setOtpError(data.message || 'Invalid OTP');
+  //       }
+  //     } catch (err) {
+  //       console.error('Admin OTP verify error:', err);
+  //       setOtpError('Network error while verifying OTP');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //     return;
+  //   }
+  // }
     
     // Regular login/registration flow for non-admin users
     setLoading(true);
@@ -453,19 +453,19 @@ const AuthForm = ({
         ? await authService.login(payload)
         : await authService.register(payload);
       
-      // Handle admin login requiring OTP
-      if (role === 'admin' && isLogin && data.requiresOTP) {
-        // Backend returned that OTP is required
-        const otpData = await authService.sendOtp(formData.email, 'admin');
-        if (otpData.success) {
-          setShowOtp(true);
-          setOtpSent(true);
-          toast.success('OTP sent to your email for security');
-        } else {
-          toast.error(otpData.message || 'Failed to send OTP');
-        }
-        return;
-      }
+  // Handle admin login requiring OTP
+  // if (role === 'admin' && isLogin && data.requiresOTP) {
+  //   // Backend returned that OTP is required
+  //   const otpData = await authService.sendOtp(formData.email, 'admin');
+  //   if (otpData.success) {
+  //     setShowOtp(true);
+  //     setOtpSent(true);
+  //     toast.success('OTP sent to your email for security');
+  //   } else {
+  //     toast.error(otpData.message || 'Failed to send OTP');
+  //   }
+  //   return;
+  // }
       
       if (data.success || data.token || data.user) {
         // Handle Remember Me functionality
@@ -509,24 +509,24 @@ const AuthForm = ({
     } catch (error) {
       console.error('Auth error:', error);
       
-      // For admin login, if password-only login fails, try OTP flow
-      if (role === 'admin' && isLogin && !showOtp) {
-        try {
-          toast.success('Admin login requires OTP verification');
-          const otpData = await authService.sendOtp(formData.email, 'admin');
-          if (otpData.success) {
-            setShowOtp(true);
-            setOtpSent(true);
-            toast.success('OTP sent to your email');
-          } else {
-            toast.error('Failed to send OTP');
-          }
-        } catch (otpError) {
-          toast.error('Authentication failed');
-        }
-      } else {
-        toast.error('Network error. Please try again.');
-      }
+  // For admin login, if password-only login fails, try OTP flow
+  // if (role === 'admin' && isLogin && !showOtp) {
+  //   try {
+  //     toast.success('Admin login requires OTP verification');
+  //     const otpData = await authService.sendOtp(formData.email, 'admin');
+  //     if (otpData.success) {
+  //       setShowOtp(true);
+  //       setOtpSent(true);
+  //       toast.success('OTP sent to your email');
+  //     } else {
+  //       toast.error('Failed to send OTP');
+  //     }
+  //   } catch (otpError) {
+  //     toast.error('Authentication failed');
+  //   }
+  // } else {
+  //   toast.error('Network error. Please try again.');
+  // }
     } finally {
       setLoading(false);
     }
@@ -1537,6 +1537,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [lastVerifiedOtp, setLastVerifiedOtp] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [forgotPasswordStrength, setForgotPasswordStrength] = useState({ score: 0, message: '', color: '', requirements: {} });
@@ -1671,7 +1672,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
 
     setLoading(true);
     setOtpError('');
-    
+    setOtpSuccess('');
+    setFormData(prev => ({ ...prev, otp: '' }));
     try {
       const res = await fetch(`http://localhost:5000/api/forgot-password`, {
         method: 'POST',
@@ -1757,33 +1759,33 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     }, 5000);
   };
 
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    
-    if (!isValidOtp(formData.otp, 6)) {
-      setOtpError(getOtpValidationError(formData.otp, { length: 6 }));
+  const handleVerifyOtp = async (e, otpOverride) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const otpToCheck = otpOverride || formData.otp;
+    if (!isValidOtp(otpToCheck, 6)) {
+      setOtpError(getOtpValidationError(otpToCheck, { length: 6 }));
+      setShowOtpError(true);
       return;
     }
 
     setLoading(true);
     setOtpError('');
-    
+    setShowOtpError(false);
     try {
-      const cleanOtp = formData.otp.replace(/\s/g, '');
+      const cleanOtp = otpToCheck.replace(/\s/g, '');
       const res = await fetch(`http://localhost:5000/api/otp/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, otp: cleanOtp, role })
       });
       const data = await res.json();
-      
       if (data.success) {
         setOtpSuccess('OTP verified successfully!');
         setCurrentStep(3);
       } else {
         setOtpAttempts(a => a + 1);
         setOtpError(getOtpValidationError(
-          formData.otp,
+          otpToCheck,
           {
             createdAt: otpCreatedAt,
             expirySeconds: 300,
@@ -1797,6 +1799,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
             }
           }
         ) || (data.message || 'Invalid OTP'));
+        setShowOtpError(true);
+        setTimeout(() => setShowOtpError(false), 5000);
       }
     } catch (error) {
       handleOtpError('Network error. Please try again.', false); // No toast for forgot password
@@ -1869,7 +1873,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
     
     setLoading(true);
     setOtpError('');
-    
+    setOtpSuccess('');
+    setFormData(prev => ({ ...prev, otp: '' }));
     try {
       const res = await fetch(`http://localhost:5000/api/forgot-password`, {
         method: 'POST',
@@ -2102,26 +2107,54 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
               </div>
 
               <form onSubmit={handleVerifyOtp} className="space-y-4">
-                {/* OTP Input with Individual Digits */}
                 <div className="space-y-3">
                   <label className="block text-sm font-medium text-gray-700 text-center">Enter Reset OTP</label>
                   <OtpInput
                     value={formData.otp}
-                    onChange={otp => setFormData(prev => ({ ...prev, otp }))}
+                    onChange={otp => {
+                      setOtpSuccess('');
+                      setFormData(prev => ({ ...prev, otp }));
+                      setShowOtpError(false);
+                    }}
                     length={6}
-                    error={!!otpError}
+                    error={!!(showOtpError && otpError)}
                     success={!!otpSuccess}
                     loading={loading}
+                    onComplete={otpValue => {
+                      if (
+                        otpValue.length === 6 &&
+                        !loading &&
+                        otpValue !== lastVerifiedOtp
+                      ) {
+                        setLastVerifiedOtp(otpValue);
+                        setOtpSuccess('');
+                        handleVerifyOtp({ preventDefault: () => {} }, otpValue);
+                      }
+                    }}
                     statusMessage={
                       showOtpError && otpError
                         ? otpError
-                        : (otpCreatedAt ? `OTP will expire in ${formatOtpTime(otpTimeLeft)}` : '')
+                        : otpSuccess
+                        ? otpSuccess
+                        : otpCreatedAt && isOtpExpired(otpCreatedAt, 300) && !showOtpError
+                        ? 'OTP expired. Please resend.'
+                        : otpCreatedAt
+                        ? `OTP will expire in ${formatOtpTime(otpTimeLeft)}`
+                        : ''
                     }
                     statusType={
                       showOtpError && otpError
                         ? 'error'
-                        : (otpCreatedAt ? 'timer' : '')
+                        : otpSuccess
+                        ? 'success'
+                        : otpCreatedAt && isOtpExpired(otpCreatedAt, 300) && !showOtpError
+                        ? 'error'
+                        : otpCreatedAt
+                        ? 'timer'
+                        : ''
                     }
+                    otpCreatedAt={otpCreatedAt}
+                    expirySeconds={300}
                     statusBoxColor={
                       role === 'admin'
                         ? { bg: 'bg-red-50', border: 'border border-red-200', text: 'text-red-600' }
@@ -2129,8 +2162,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                         ? { bg: 'bg-green-50', border: 'border border-green-200', text: 'text-green-600' }
                         : { bg: 'bg-blue-50', border: 'border border-blue-200', text: 'text-blue-600' }
                     }
+                    // errorHighlightDuration={5000}
                   />
-                  {/* OTP Timer and Resend */}
                   <div className="text-center space-y-1">
                     <p className="text-sm text-gray-600">
                       Didn't receive the reset code?
@@ -2152,21 +2185,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                       {canResend ? 'Resend Reset OTP' : `Resend in ${resendTimer}s`}
                     </button>
                   </div>
-
-                  {/* OTP Error Message - Fixed Position */}
-                  <div className="relative h-8">
-                    {otpError && (
-                      <div className={`absolute top-0 left-0 w-full p-2 ${
-                        role === 'admin' ? 'bg-red-50 border-red-200' : 
-                        role === 'owner' ? 'bg-green-50 border-green-200' : 
-                        'bg-blue-50 border-blue-200'
-                      } border rounded-md shadow-sm z-10`}>
-                        <p className="text-red-600 text-xs font-medium text-center">{otpError}</p>
-                      </div>
-                    )}
-                  </div>
                 </div>
-
                 <div>
                   <button
                     type="submit"

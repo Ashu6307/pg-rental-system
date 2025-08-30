@@ -30,6 +30,7 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
+  const [lastVerifiedOtp, setLastVerifiedOtp] = useState("");
   const [otpError, setOtpError] = useState("");
   const [showOtpError, setShowOtpError] = useState(false); // Controls error/timer display
   const [otpSuccess, setOtpSuccess] = useState("");
@@ -38,8 +39,7 @@ const AdminLogin = () => {
   const [canResend, setCanResend] = useState(true);
 
   // State to make all OTP boxes red/green on error/success
-  const [otpAllRed, setOtpAllRed] = useState(false);
-  const [otpAllGreen, setOtpAllGreen] = useState(false);
+  // Removed: otpAllRed/otpAllGreen, now handled by OtpInput
 
   // Email validation state
   const [emailError, setEmailError] = useState("");
@@ -125,12 +125,7 @@ const AdminLogin = () => {
     };
     setOtpError(getOtpValidationError(otp, options) || "Invalid OTP");
     setShowOtpError(true);
-  setOtpAllRed(true);
-  setOtpAllGreen(false);
-    // No direct DOM focus here; handled by OtpInput
-    if (errorType === "invalid" || errorType === "used") {
-      setOtp("");
-    }
+    // OtpInput will auto-clear and red highlight
     setTimeout(() => {
       setShowOtpError(false);
     }, 5000);
@@ -142,21 +137,19 @@ const AdminLogin = () => {
     // Validate OTP input
     if (!otp || otp.length !== 6) {
       setOtpError(getOtpValidationError("incomplete"));
-      setOtpAllRed(true);
+      setShowOtpError(true);
       return;
     }
     if (!isValidOtp(otp)) {
       setOtpError(getOtpValidationError("invalid"));
-      setOtpAllRed(true);
-      setOtp("");
+      setShowOtpError(true);
       setOtpAttempts((prev) => prev + 1);
       return;
     }
     // Check expiry (5 min)
     if (isOtpExpired(otpCreatedAt, 300)) {
       setOtpError(getOtpValidationError("expired"));
-      setOtpAllRed(true);
-      setOtp("");
+      setShowOtpError(true);
       return;
     }
     setLoading(true);
@@ -172,8 +165,7 @@ const AdminLogin = () => {
         sessionStorage.setItem("auth_last_activity", Date.now().toString());
         sessionStorage.setItem("admin_login_time", Date.now().toString());
         localStorage.removeItem("auth_session_expired");
-        setOtpSuccess("✅ Login successful!");
-        setOtpAllGreen(true);
+  setOtpSuccess("✅ Login successful!");
         toast.success("🎉 Admin login successful! Welcome back.", {
           duration: 3000,
           icon: "👑",
@@ -215,58 +207,7 @@ const AdminLogin = () => {
     }
   };
 
-  // Real-time OTP verification (auto-submit on 6 digits, with expiry/attempts)
-  useEffect(() => {
-    if (otpSent && otp.length === 6 && isValidOtp(otp)) {
-      // Check expiry before auto-verify
-      if (isOtpExpired(otpCreatedAt, 300)) {
-        setOtpError(getOtpValidationError(otp, { createdAt: otpCreatedAt, expirySeconds: 300 }));
-        setOtpAllRed(true);
-        setOtp("");
-        return;
-      }
-      // Auto verify OTP
-      (async () => {
-        setLoading(true);
-        setOtpError("");
-        try {
-          const loginResult = await authService.verifyOtp(
-            formData.email,
-            otp,
-            "admin"
-          );
-          if (loginResult.token && loginResult.user) {
-            setOtpAllGreen(true);
-            setOtpSuccess("✅ Login successful!");
-            toast.success("🎉 Admin login successful! Welcome back.", {
-              duration: 3000,
-              icon: "👑",
-            });
-            setTimeout(async () => {
-              await login(loginResult.token, loginResult.user);
-              sessionStorage.setItem(
-                "auth_last_activity",
-                Date.now().toString()
-              );
-              sessionStorage.setItem("admin_login_time", Date.now().toString());
-              localStorage.removeItem("auth_session_expired");
-              navigate("/admin", { replace: true });
-            }, 700);
-          }
-        } catch (error) {
-          let errorType = "invalid";
-          if (error.message && error.message.toLowerCase().includes("expired")) errorType = "expired";
-          else if (error.message && error.message.toLowerCase().includes("used")) errorType = "used";
-          setOtpAttempts((prev) => prev + 1);
-          handleOtpError(errorType);
-          toast.error(error.message || "Failed to verify OTP");
-        } finally {
-          setLoading(false);
-        }
-      })();
-    }
-    // eslint-disable-next-line
-  }, [otp]);
+
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-8 sm:px-6 lg:px-8 bg-gradient-to-br from-red-50 via-white to-red-100">
@@ -465,47 +406,46 @@ const AdminLogin = () => {
                     <OtpInput
                       value={otp}
                       onChange={setOtp}
-                      error={otpAllRed}
-                      success={otpAllGreen}
+                      error={!!(showOtpError && otpError)}
+                      success={!!otpSuccess}
                       loading={loading}
-                      focusOnErrorTrigger={otpAllRed && showOtpError ? Date.now() : undefined}
-                      errorHighlightDuration={1200}
+                      onComplete={otpValue => {
+                        // Prevent duplicate API calls: only call if not loading and OTP changed
+                        if (
+                          otpValue.length === 6 &&
+                          !loading &&
+                          otpValue !== lastVerifiedOtp
+                        ) {
+                          setLastVerifiedOtp(otpValue);
+                          handleVerifyOtp({ preventDefault: () => {} }, otpValue);
+                        }
+                      }}
+                      statusMessage={
+                        showOtpError && otpError
+                          ? otpError
+                          : otpSuccess
+                          ? otpSuccess
+                          : otpCreatedAt && isOtpExpired(otpCreatedAt, 300) && !showOtpError
+                          ? 'OTP expired. Please resend.'
+                          : ''
+                      }
+                      statusType={
+                        showOtpError && otpError
+                          ? 'error'
+                          : otpSuccess
+                          ? 'success'
+                          : otpCreatedAt && isOtpExpired(otpCreatedAt, 300) && !showOtpError
+                          ? 'error'
+                          : ''
+                      }
+                      otpCreatedAt={otpCreatedAt}
+                      expirySeconds={300}
+                      statusBoxColor={{
+                        bg: 'bg-red-50',
+                        border: 'border border-red-200',
+                        text: 'text-red-600',
+                      }}
                     />
-
-                    {/* OTP Error/Timer Box - single location, minimal space */}
-                    <div className="h-8 mt-2 relative">
-                      {showOtpError && otpError ? (
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-red-50 border border-red-200 rounded-md z-10 shadow-sm flex items-center justify-center"
-                          style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260, padding: '0.25rem 1.25rem' }}>
-                          <p className="text-red-600 text-xs font-medium text-center whitespace-nowrap px-2">
-                            {otpError}
-                          </p>
-                        </div>
-                      ) : otpSuccess ? (
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-green-50 border border-green-200 rounded-md z-10 shadow-sm flex items-center justify-center"
-                          style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260, padding: '0.25rem 1.25rem' }}>
-                          <p className="text-green-600 text-xs font-medium text-center whitespace-nowrap px-2">
-                            {otpSuccess}
-                          </p>
-                        </div>
-                      ) : (
-                        otpCreatedAt && !isOtpExpired(otpCreatedAt, 300) ? (
-                          <div className="absolute top-0 left-0 w-full p-2 bg-transparent z-0">
-                            <p className="text-xs text-gray-500 text-center">
-                              OTP will expire in <span className="font-semibold">{formatOtpTime(getOtpTimeRemaining(otpCreatedAt, 300))}</span>
-                            </p>
-                          </div>
-                        ) : (
-                          otpCreatedAt && isOtpExpired(otpCreatedAt, 300) && !showOtpError && (
-                            <div className="absolute top-0 left-0 w-full p-2 bg-red-50 border border-red-200 rounded-md z-10">
-                              <p className="text-red-600 text-xs font-medium text-center">
-                                OTP expired. Please resend.
-                              </p>
-                            </div>
-                          )
-                        )
-                      )}
-                    </div>
                     {/* OTP Timer, Expiry, and Resend */}
                     <div className="text-center">
                       <p className="text-xs text-gray-600 mb-2">

@@ -43,25 +43,103 @@ const OtpInput = ({
   focusOnErrorTrigger,
   allowAlphanumeric = false,
   placeholder = '●',
-  locked = false,
+  locked: lockedProp = false,
   autoSubmitOnComplete = false,
   onAutoSubmit,
   direction = 'ltr',
   i18n = {}, // { invalid: '', expired: '', ... }
+  otpCreatedAt = null, // new: OTP sent time (timestamp)
+  expirySeconds = 300, // new: OTP expiry in seconds (default 5 min)
+  autoClearOnError = true, // new: auto clear input on error
 }) => {
+  // Local state for error display duration and timer
+  const [showLocalError, setShowLocalError] = useState(false);
+  const [localErrorMsg, setLocalErrorMsg] = useState('');
+  const [timerMessage, setTimerMessage] = useState('');
+  const errorTimeoutRef = useRef();
+  const timerIntervalRef = useRef();
+
+  // Timer calculation logic
+  useEffect(() => {
+    if (!otpCreatedAt || !expirySeconds) {
+      setTimerMessage('');
+      return;
+    }
+    function getTimeLeft() {
+      const now = Date.now();
+      const expiry = Number(otpCreatedAt) + expirySeconds * 1000;
+      const diff = Math.max(0, Math.floor((expiry - now) / 1000));
+      return diff;
+    }
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+    // Update timer every second
+    if (otpCreatedAt && expirySeconds) {
+      const update = () => {
+        const left = getTimeLeft();
+        if (left > 0) setTimerMessage(`OTP will expire in ${formatTime(left)}`);
+        else setTimerMessage('');
+      };
+      update();
+      timerIntervalRef.current = setInterval(update, 1000);
+      return () => clearInterval(timerIntervalRef.current);
+    }
+  }, [otpCreatedAt, expirySeconds]);
+
+  // Whenever error statusMessage/statusType comes, show error for 5s, then show timer
+  useEffect(() => {
+    if (statusType === 'error' && statusMessage) {
+      setShowLocalError(true);
+      setLocalErrorMsg(statusMessage);
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = setTimeout(() => {
+        setShowLocalError(false);
+      }, 5000);
+    } else if (statusType !== 'error') {
+      setShowLocalError(false);
+      setLocalErrorMsg('');
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+    }
+    // eslint-disable-next-line
+  }, [statusType, statusMessage]);
+
+  useEffect(() => () => { if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); }, []);
   const inputRefs = useRef([]);
+  // On resend OTP (otpCreatedAt change), focus first box
+  useEffect(() => {
+    if (otpCreatedAt) {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [otpCreatedAt]);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   // Local state to auto-reset error/success on change
   const [localError, setLocalError] = useState(false);
   const [localSuccess, setLocalSuccess] = useState(false);
-  // Red highlight timer
+
+  // Red highlight timer + auto-focus first box on error + auto-clear input
   useEffect(() => {
-    if (error) {
+    if ((error || statusType === 'error') && autoClearOnError) {
       setLocalError(true);
+      // Clear input after short delay (if not already empty)
+      if (value && value.length > 0) {
+        setTimeout(() => {
+          onChange('');
+        }, 100);
+      }
+      // Focus first input after short delay
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 120);
+      // Reset red highlight after errorHighlightDuration (default 1.2s)
       const t = setTimeout(() => setLocalError(false), errorHighlightDuration);
       return () => clearTimeout(t);
     }
-  }, [error, errorHighlightDuration]);
+  }, [error, statusType, errorHighlightDuration, autoClearOnError, value, onChange]);
 
   // Focus first input when focusOnErrorTrigger changes (used for error highlight/focus)
   useEffect(() => {
@@ -152,42 +230,60 @@ const OtpInput = ({
     e.target.select();
   };
 
+  // Determine if OTP is expired
+  const isOtpExpired = otpCreatedAt && expirySeconds && (Date.now() > Number(otpCreatedAt) + expirySeconds * 1000);
+
+  const locked = lockedProp || isOtpExpired;
+
+  // Tooltip message logic
+  let tooltipMsg = '';
+  if (locked) tooltipMsg = 'OTP expired. Please resend.';
+  else if (loading) tooltipMsg = 'Please wait...';
+  else tooltipMsg = 'Enter OTP';
+
   return (
     <div className={`flex flex-col items-center relative ${className}`} dir={direction}>
       <div className={`flex justify-center space-x-2 w-full ${pasteAnim ? 'animate-shake' : ''}`}>
         {[...Array(length)].map((_, i) => (
-          <input
-            key={i}
-            ref={el => (inputRefs.current[i] = el)}
-            type={allowAlphanumeric ? 'text' : 'tel'}
-            maxLength={1}
-            value={value[i] || ''}
-            onFocus={e => handleFocus(i, e)}
-            onBlur={() => setFocusedIndex(-1)}
-            onChange={e => handleInputChange(i, e.target.value)}
-            onKeyDown={e => handleKeyDown(i, e)}
-            onPaste={i === 0 ? handlePaste : undefined}
-            autoComplete="one-time-code"
-            inputMode={allowAlphanumeric ? 'text' : 'numeric'}
-            pattern={allowAlphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*'}
-            aria-label={`OTP digit ${i + 1}`}
-            className={`w-10 h-10 text-center text-lg font-bold border-2 rounded-lg focus:outline-none transition-all duration-200
-              ${locked ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' :
-                localSuccess || success
-                ? 'border-green-500 bg-green-50'
-                : localError || error
-                ? 'border-red-500 bg-red-50'
-                : value[i]
-                ? 'border-green-500 bg-green-50'
-                : focusedIndex === i
-                ? 'border-red-500 bg-red-50'
-                : 'border-gray-300'}
-            `}
-            placeholder={placeholder}
-            disabled={loading || locked}
-            autoCapitalize="off"
-            spellCheck={false}
-          />
+          <div key={i} className="relative group">
+            <input
+              ref={el => (inputRefs.current[i] = el)}
+              type={allowAlphanumeric ? 'text' : 'tel'}
+              maxLength={1}
+              value={value[i] || ''}
+              onFocus={e => handleFocus(i, e)}
+              onBlur={() => setFocusedIndex(-1)}
+              onChange={e => handleInputChange(i, e.target.value)}
+              onKeyDown={e => handleKeyDown(i, e)}
+              onPaste={i === 0 ? handlePaste : undefined}
+              autoComplete="one-time-code"
+              inputMode={allowAlphanumeric ? 'text' : 'numeric'}
+              pattern={allowAlphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*'}
+              aria-label={`OTP digit ${i + 1}`}
+              className={`w-10 h-10 text-center text-lg font-bold border-2 rounded-lg focus:outline-none transition-all duration-200
+                ${locked ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' :
+                  localSuccess || success
+                  ? 'border-green-500 bg-green-50'
+                  : localError || error
+                  ? 'border-red-500 bg-red-50'
+                  : value[i]
+                  ? 'border-green-500 bg-green-50'
+                  : focusedIndex === i
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-300'}
+              `}
+              placeholder={placeholder}
+              disabled={loading || locked}
+              autoCapitalize="off"
+              spellCheck={false}
+            />
+            {/* Tooltip on hover */}
+            <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-20 hidden group-hover:block pointer-events-none">
+              <span className="bg-gray-900 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap opacity-90">
+                {tooltipMsg}
+              </span>
+            </div>
+          </div>
         ))}
         {loading && (
           <div className="absolute flex items-center justify-center w-full h-full pointer-events-none top-0 left-0">
@@ -195,35 +291,60 @@ const OtpInput = ({
           </div>
         )}
       </div>
-      {/* Status Message Box (error/success/timer/info) */}
-      {statusMessage && (
-        <div
-          className={`absolute top-0 left-1/2 -translate-x-1/2 z-10 shadow-sm flex items-center justify-center
-            rounded-md
-            ${statusBoxColor.bg ? statusBoxColor.bg :
-              statusType === 'error' ? 'bg-red-50' :
-              statusType === 'success' ? 'bg-green-50' :
-              statusType === 'timer' ? 'bg-blue-50' :
-              'bg-gray-50'}
-            ${statusBoxColor.border ? statusBoxColor.border :
-              statusType === 'error' ? 'border border-red-200' :
-              statusType === 'success' ? 'border border-green-200' :
-              statusType === 'timer' ? 'border border-blue-200' :
-              'border border-gray-200'}
-          `}
-          style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260, padding: '0.25rem 1.25rem' }}
-        >
-          <p className={`text-xs font-medium text-center whitespace-nowrap px-2
-            ${statusBoxColor.text ? statusBoxColor.text :
-              statusType === 'error' ? 'text-red-600' :
-              statusType === 'success' ? 'text-green-600' :
-              statusType === 'timer' ? 'text-blue-600' :
-              'text-gray-600'}
-          `}>
-            {statusMessage}
-          </p>
+      {/* Status Message Box (error/success/timer/info) - always below input, centered, no overlap */}
+      {(showLocalError && localErrorMsg) ? (
+        <div className="mt-2 flex items-center justify-center w-full relative" style={{ minHeight: 32 }}>
+          <div
+            className={`shadow-sm flex items-center justify-center rounded-md
+              ${statusBoxColor.bg ? statusBoxColor.bg : 'bg-red-50'}
+              ${statusBoxColor.border ? statusBoxColor.border : 'border border-red-200'}
+            `}
+            style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260, padding: '0.25rem 1.25rem' }}
+            aria-live="polite"
+          >
+            <p className={`text-xs font-medium text-center whitespace-nowrap px-2
+              ${statusBoxColor.text ? statusBoxColor.text : 'text-red-600'}
+            `}>
+              {localErrorMsg}
+            </p>
+          </div>
         </div>
-      )}
+      ) : (!showLocalError && (timerMessage || (otpCreatedAt && expirySeconds && timerMessage === ''))) ? (
+        <div className="mt-2 flex items-center justify-center w-full relative" style={{ minHeight: 32 }}>
+          {timerMessage ? (
+            <p className="text-xs font-medium text-center whitespace-nowrap px-2 text-gray-500" style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260 }} aria-live="polite">
+              {timerMessage}
+            </p>
+          ) : (
+            <p className="text-xs font-medium text-center whitespace-nowrap px-2 text-red-600" style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260 }} aria-live="polite">
+              OTP expired. Please resend.
+            </p>
+          )}
+        </div>
+      ) : (statusMessage && statusType !== 'error') ? (
+        <div className="mt-2 flex items-center justify-center w-full relative" style={{ minHeight: 32 }}>
+          <div
+            className={`shadow-sm flex items-center justify-center rounded-md
+              ${statusBoxColor.bg ? statusBoxColor.bg :
+                statusType === 'success' ? 'bg-green-50' :
+                'bg-gray-50'}
+              ${statusBoxColor.border ? statusBoxColor.border :
+                statusType === 'success' ? 'border border-green-200' :
+                'border border-gray-200'}
+            `}
+            style={{ width: 'max-content', minWidth: 'auto', maxWidth: 260, padding: '0.25rem 1.25rem' }}
+            aria-live="polite"
+          >
+            <p className={`text-xs font-medium text-center whitespace-nowrap px-2
+              ${statusBoxColor.text ? statusBoxColor.text :
+                statusType === 'success' ? 'text-green-600' :
+                'text-gray-600'}
+            `}>
+              {statusMessage}
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -254,6 +375,7 @@ OtpInput.propTypes = {
   onAutoSubmit: PropTypes.func,
   direction: PropTypes.oneOf(['ltr', 'rtl']),
   i18n: PropTypes.object,
+  autoClearOnError: PropTypes.bool,
 };
 // Paste shake animation
 // Add this to your global CSS or Tailwind config:
