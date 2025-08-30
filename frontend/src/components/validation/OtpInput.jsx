@@ -30,7 +30,8 @@ const OtpInput = ({
   statusMessage = '',
   statusType = '', // 'error' | 'success' | 'timer' | 'info'
   statusBoxColor = {}, // { bg: '', border: '', text: '' }
-  errorHighlightDuration = 1200, // ms
+  errorHighlightDuration = 1200, // ms (input box red duration)
+  errorMessageDuration = 5000, // ms (error message box duration)
   value = '',
   onChange,
   onVerify,
@@ -51,6 +52,8 @@ const OtpInput = ({
   otpCreatedAt = null, // new: OTP sent time (timestamp)
   expirySeconds = 300, // new: OTP expiry in seconds (default 5 min)
   autoClearOnError = true, // new: auto clear input on error
+  disableOnError = true, // new: disable boxes during error message
+  hideDigitsOnError = true, // new: hide digits during error message
 }) => {
   // Local state for error display duration and timer
   const [showLocalError, setShowLocalError] = useState(false);
@@ -90,21 +93,20 @@ const OtpInput = ({
   }, [otpCreatedAt, expirySeconds]);
 
   // Whenever error statusMessage/statusType comes, show error for 5s, then show timer
+  const prevErrorStateRef = useRef(false);
   useEffect(() => {
-    if (statusType === 'error' && statusMessage) {
+    // Only show error message box for full errorMessageDuration when error prop transitions from false to true
+    if ((error || statusType === 'error') && !prevErrorStateRef.current && statusMessage) {
       setShowLocalError(true);
       setLocalErrorMsg(statusMessage);
       if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
       errorTimeoutRef.current = setTimeout(() => {
         setShowLocalError(false);
-      }, 5000);
-    } else if (statusType !== 'error') {
-      setShowLocalError(false);
-      setLocalErrorMsg('');
-      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      }, errorMessageDuration);
     }
+    prevErrorStateRef.current = error || statusType === 'error';
     // eslint-disable-next-line
-  }, [statusType, statusMessage]);
+  }, [error, statusType, statusMessage, errorMessageDuration]);
 
   useEffect(() => () => { if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current); if (timerIntervalRef.current) clearInterval(timerIntervalRef.current); }, []);
   const inputRefs = useRef([]);
@@ -122,11 +124,13 @@ const OtpInput = ({
   const [localSuccess, setLocalSuccess] = useState(false);
 
   // Red highlight timer + auto-focus first box on error + auto-clear input
+  const prevErrorRef = useRef(false);
   useEffect(() => {
-    if ((error || statusType === 'error') && autoClearOnError) {
+    // Only trigger red highlight when error transitions from false to true
+    if ((error || statusType === 'error') && !prevErrorRef.current) {
       setLocalError(true);
-      // Clear input after short delay (if not already empty)
-      if (value && value.length > 0) {
+      // Only clear input if autoClearOnError is true
+      if (autoClearOnError && value && value.length > 0) {
         setTimeout(() => {
           onChange('');
         }, 100);
@@ -139,7 +143,10 @@ const OtpInput = ({
       const t = setTimeout(() => setLocalError(false), errorHighlightDuration);
       return () => clearTimeout(t);
     }
+    prevErrorRef.current = error || statusType === 'error';
   }, [error, statusType, errorHighlightDuration, autoClearOnError, value, onChange]);
+
+  // Decouple localError from error prop duration: always reset after errorHighlightDuration
 
   // Focus first input when focusOnErrorTrigger changes (used for error highlight/focus)
   useEffect(() => {
@@ -244,47 +251,55 @@ const OtpInput = ({
   return (
     <div className={`flex flex-col items-center relative ${className}`} dir={direction}>
       <div className={`flex justify-center space-x-2 w-full ${pasteAnim ? 'animate-shake' : ''}`}>
-        {[...Array(length)].map((_, i) => (
-          <div key={i} className="relative group">
-            <input
-              ref={el => (inputRefs.current[i] = el)}
-              type={allowAlphanumeric ? 'text' : 'tel'}
-              maxLength={1}
-              value={value[i] || ''}
-              onFocus={e => handleFocus(i, e)}
-              onBlur={() => setFocusedIndex(-1)}
-              onChange={e => handleInputChange(i, e.target.value)}
-              onKeyDown={e => handleKeyDown(i, e)}
-              onPaste={i === 0 ? handlePaste : undefined}
-              autoComplete="one-time-code"
-              inputMode={allowAlphanumeric ? 'text' : 'numeric'}
-              pattern={allowAlphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*'}
-              aria-label={`OTP digit ${i + 1}`}
-              className={`w-10 h-10 text-center text-lg font-bold border-2 rounded-lg focus:outline-none transition-all duration-200
-                ${locked ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' :
-                  localSuccess || success
-                  ? 'border-green-500 bg-green-50'
-                  : localError || error
-                  ? 'border-red-500 bg-red-50'
-                  : value[i]
-                  ? 'border-green-500 bg-green-50'
-                  : focusedIndex === i
-                  ? 'border-red-500 bg-red-50'
-                  : 'border-gray-300'}
-              `}
-              placeholder={placeholder}
-              disabled={loading || locked}
-              autoCapitalize="off"
-              spellCheck={false}
-            />
-            {/* Tooltip on hover */}
-            <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-20 hidden group-hover:block pointer-events-none">
-              <span className="bg-gray-900 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap opacity-90">
-                {tooltipMsg}
-              </span>
+        {[...Array(length)].map((_, i) => {
+          // Only disable/hide digits if error message is 'OTP expired. Please resend.'
+          const isExpiredError = showLocalError && localErrorMsg === 'OTP expired. Please resend.';
+          return (
+            <div key={i} className="relative group">
+              <input
+                ref={el => (inputRefs.current[i] = el)}
+                type={allowAlphanumeric ? 'text' : 'tel'}
+                maxLength={1}
+                value={
+                  isExpiredError
+                    ? ''
+                    : value[i] || ''
+                }
+                onFocus={e => handleFocus(i, e)}
+                onBlur={() => setFocusedIndex(-1)}
+                onChange={e => handleInputChange(i, e.target.value)}
+                onKeyDown={e => handleKeyDown(i, e)}
+                onPaste={i === 0 ? handlePaste : undefined}
+                autoComplete="one-time-code"
+                inputMode={allowAlphanumeric ? 'text' : 'numeric'}
+                pattern={allowAlphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*'}
+                aria-label={`OTP digit ${i + 1}`}
+                className={`w-10 h-10 text-center text-lg font-bold border-2 rounded-lg focus:outline-none transition-all duration-200
+                  ${locked || (disableOnError && isExpiredError) ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' :
+                    localSuccess || success
+                    ? 'border-green-500 bg-green-50'
+                    : localError || error
+                    ? 'border-red-500 bg-red-50'
+                    : value[i]
+                    ? 'border-green-500 bg-green-50'
+                    : focusedIndex === i
+                    ? 'border-red-500 bg-red-50'
+                    : 'border-gray-300'}
+                `}
+                placeholder={placeholder}
+                disabled={loading || locked || (disableOnError && isExpiredError)}
+                autoCapitalize="off"
+                spellCheck={false}
+              />
+              {/* Tooltip on hover */}
+              <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-20 hidden group-hover:block pointer-events-none">
+                <span className="bg-gray-900 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap opacity-90">
+                  {tooltipMsg}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {loading && (
           <div className="absolute flex items-center justify-center w-full h-full pointer-events-none top-0 left-0">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>

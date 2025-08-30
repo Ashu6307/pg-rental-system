@@ -125,10 +125,10 @@ const AdminLogin = () => {
     };
     setOtpError(getOtpValidationError(otp, options) || "Invalid OTP");
     setShowOtpError(true);
-    // OtpInput will auto-clear and red highlight
+    // OtpInput input box red for 1.2 sec, error message box for 5 sec
     setTimeout(() => {
       setShowOtpError(false);
-    }, 5000);
+    }, 1200); // Only keep error prop true for 1.2 sec
   };
 
   // OTP verify handler using centralized validation
@@ -410,7 +410,6 @@ const AdminLogin = () => {
                       success={!!otpSuccess}
                       loading={loading}
                       onComplete={otpValue => {
-                        // Prevent duplicate API calls: only call if not loading and OTP changed
                         if (
                           otpValue.length === 6 &&
                           !loading &&
@@ -440,11 +439,6 @@ const AdminLogin = () => {
                       }
                       otpCreatedAt={otpCreatedAt}
                       expirySeconds={300}
-                      statusBoxColor={{
-                        bg: 'bg-red-50',
-                        border: 'border border-red-200',
-                        text: 'text-red-600',
-                      }}
                     />
                     {/* OTP Timer, Expiry, and Resend */}
                     <div className="text-center">

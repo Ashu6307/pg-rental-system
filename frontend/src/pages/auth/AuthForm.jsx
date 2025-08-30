@@ -1753,10 +1753,10 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
         duration: 4000
       });
     }
-    // Hide error after 5 seconds, show timer again
+    // Hide error after 1.2s for input box red, but error message box will show 5s in OtpInput
     setTimeout(() => {
       setShowOtpError(false);
-    }, 5000);
+    }, 1200);
   };
 
   const handleVerifyOtp = async (e, otpOverride) => {
@@ -1798,9 +1798,8 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
               attempts: 'Too many invalid attempts. Please request a new OTP.'
             }
           }
-        ) || (data.message || 'Invalid OTP'));
-        setShowOtpError(true);
-        setTimeout(() => setShowOtpError(false), 5000);
+  ) || (data.message || 'Invalid OTP'));
+  setShowOtpError(true);
       }
     } catch (error) {
       handleOtpError('Network error. Please try again.', false); // No toast for forgot password
@@ -2114,7 +2113,7 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                     onChange={otp => {
                       setOtpSuccess('');
                       setFormData(prev => ({ ...prev, otp }));
-                      setShowOtpError(false);
+                      if (showOtpError) setShowOtpError(false);
                     }}
                     length={6}
                     error={!!(showOtpError && otpError)}
@@ -2138,8 +2137,6 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                         ? otpSuccess
                         : otpCreatedAt && isOtpExpired(otpCreatedAt, 300) && !showOtpError
                         ? 'OTP expired. Please resend.'
-                        : otpCreatedAt
-                        ? `OTP will expire in ${formatOtpTime(otpTimeLeft)}`
                         : ''
                     }
                     statusType={
@@ -2149,20 +2146,10 @@ export const ForgotPasswordForm = ({ role = 'user' }) => {
                         ? 'success'
                         : otpCreatedAt && isOtpExpired(otpCreatedAt, 300) && !showOtpError
                         ? 'error'
-                        : otpCreatedAt
-                        ? 'timer'
                         : ''
                     }
                     otpCreatedAt={otpCreatedAt}
                     expirySeconds={300}
-                    statusBoxColor={
-                      role === 'admin'
-                        ? { bg: 'bg-red-50', border: 'border border-red-200', text: 'text-red-600' }
-                        : role === 'owner'
-                        ? { bg: 'bg-green-50', border: 'border border-green-200', text: 'text-green-600' }
-                        : { bg: 'bg-blue-50', border: 'border border-blue-200', text: 'text-blue-600' }
-                    }
-                    // errorHighlightDuration={5000}
                   />
                   <div className="text-center space-y-1">
                     <p className="text-sm text-gray-600">
