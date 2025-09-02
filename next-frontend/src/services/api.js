@@ -85,6 +85,25 @@ class ApiService {
     };
     return this.request(endpoint, config);
   }
+
+  // Area Images Management
+  async addAreaImage(roomId, area, imageUrl, label = null) {
+    const body = { area, imageUrl };
+    if (area === 'others' && label) {
+      body.label = label;
+    }
+    
+    return this.post(`/api/rooms/${roomId}/area-images`, { body: JSON.stringify(body) });
+  }
+
+  async removeAreaImage(roomId, area, imageIndex, label = null) {
+    const body = { area, imageIndex };
+    if (area === 'others' && label) {
+      body.label = label;
+    }
+    
+    return this.delete(`/api/rooms/${roomId}/area-images`, { body: JSON.stringify(body) });
+  }
 }
 
 const apiService = new ApiService();

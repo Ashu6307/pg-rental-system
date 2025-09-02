@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft, FaChevronRight, FaBuilding, FaMotorcycle } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaBuilding } from 'react-icons/fa';
 
 interface AutoImageCarouselProps {
   images?: Array<{ url: string } | string>;
@@ -8,7 +8,7 @@ interface AutoImageCarouselProps {
   autoSlideInterval?: number;
   showControls?: boolean;
   showDots?: boolean;
-  type?: 'default' | 'bike' | 'pg';
+  type?: 'default' | 'pg';
 }
 
 const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
@@ -25,16 +25,14 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
 
   const getFallbackImage = () => {
-    if (type === 'bike') {
-      return 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop&q=80';
-    } else if (type === 'pg') {
+    if (type === 'pg') {
       return 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80';
     }
     return 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80';
   };
 
   const getFallbackIcon = () => {
-    return type === 'bike' ? FaMotorcycle : FaBuilding;
+    return FaBuilding;
   };
 
   const IconFallback: React.FC<{ message: string }> = ({ message }) => {
@@ -89,7 +87,7 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
       <div className={`bg-gradient-to-br from-blue-100 to-purple-100 flex flex-col items-center justify-center ${className}`}>
         <FallbackIcon size={48} className="text-blue-400 mb-2" />
         <span className="text-blue-600 text-sm font-medium">
-          {type === 'bike' ? 'Bike Image' : type === 'pg' ? 'PG Image' : 'No Image'}
+          {type === 'pg' ? 'PG Image' : 'No Image'}
         </span>
       </div>
     );
@@ -104,7 +102,7 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
       {/* Main Image */}
       <div className="relative w-full h-full">
         {imageErrors[currentIndex] ? (
-          <IconFallback message={`${type === 'bike' ? 'Bike' : type === 'pg' ? 'PG' : ''} Image not available`} />
+          <IconFallback message={`${type === 'pg' ? 'PG' : ''} Image not available`} />
         ) : (
           <img
             src={typeof images[currentIndex] === 'string' ? images[currentIndex] : (images[currentIndex] as any).url}

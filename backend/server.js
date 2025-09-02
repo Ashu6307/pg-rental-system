@@ -17,6 +17,7 @@ import errorHandler from './middleware/errorHandler.js';
 import adminRoutes from './routes/admin.js';
 import bookingRoutes from './routes/bookings.js';
 import pgRoutes from './routes/pg.js';
+import roomRoutes from './routes/roomRoutes.js';
 import bikeRoutes from './routes/bikes.js';
 import authRoutes from './routes/auth.js';
 import homeRoutes from './routes/home.js';
@@ -74,6 +75,7 @@ app.use('/api/home', homeRoutes); // /api/home public
 
 // Public routes (no auth required)
 app.use('/api/pgs', pgRoutes); // Public PG listings
+app.use('/api/rooms', roomRoutes); // Public Room listings
 app.use('/api/bikes', bikeRoutes); // Public bike listings
 app.use('/api/offers', offersRoutes); // Public offers
 app.use('/api/auth', authRoutes); // Authentication

@@ -258,10 +258,6 @@ const PG: React.FC = () => {
                   title="PG Type"
                 >
                   <option value="">🏠 All Room Types</option>
-                  <option value="hostel">Hostel</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="flat">Flat</option>
-                  <option value="villa">Villa</option>
                   <option value="Single">🛏️ Single Room</option>
                   <option value="Double">👥 Double Sharing</option>
                   <option value="Triple">👨‍👩‍👧 Triple Sharing</option>
@@ -279,7 +275,6 @@ const PG: React.FC = () => {
                   <option value="male">👨 Boys PG</option>
                   <option value="female">👩 Girls PG</option>
                   <option value="both">👫 Co-living</option>
-                  <option value="unisex">Unisex</option>
                 </select>
                 <select 
                   className="px-5 py-4 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 

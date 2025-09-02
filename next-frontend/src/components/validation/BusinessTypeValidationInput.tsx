@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { FaExclamationCircle, FaBuilding, FaHome, FaHotel, FaCity, FaBed } from "react-icons/fa";
+import { FaExclamationCircle, FaBuilding, FaHome, FaHotel, FaCity, FaBed, FaKey } from "react-icons/fa";
 import { getRoleColors } from "@/utils/roleColors";
 
 interface BusinessTypeValidationInputProps {
@@ -31,6 +31,7 @@ const BusinessTypeValidationInput: React.FC<BusinessTypeValidationInputProps> = 
 
   const businessTypeOptions = [
     { value: "PG", label: "PG (Paying Guest)", symbol: FaHome },
+    { value: "Room", label: "Room & Flat Rental", symbol: FaKey },
     { value: "Hostel", label: "Hostel", symbol: FaBed },
     { value: "Rental", label: "Rental Property", symbol: FaCity },
     { value: "Hotel", label: "Hotel/Lodge", symbol: FaHotel }
@@ -42,6 +43,8 @@ const BusinessTypeValidationInput: React.FC<BusinessTypeValidationInputProps> = 
     switch (businessValue) {
       case "PG":
         return "bg-blue-500 text-white";
+      case "Room":
+        return "bg-indigo-500 text-white";
       case "Hostel":
         return "bg-green-500 text-white";
       case "Rental":

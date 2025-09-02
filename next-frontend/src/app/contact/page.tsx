@@ -258,7 +258,7 @@ const Contact: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition disabled:bg-gray-100 shadow-sm bg-white text-sm"
                   >
                     <option value="general">General Inquiry</option>
-                    <option value="bike_rental">Bike Rental</option>
+                    <option value="room_rental">Room Rental</option>
                     <option value="pg_accommodation">PG Accommodation</option>
                     <option value="support">Technical Support</option>
                     <option value="complaint">Complaint</option>
@@ -477,7 +477,7 @@ const Contact: React.FC = () => {
                           className={`px-2 py-1 text-xs rounded-full ${
                             service === "pgRentals"
                               ? "bg-blue-100 text-blue-800"
-                              : service === "bikeRentals"
+                              : service === "roomRentals"
                               ? "bg-green-100 text-green-800"
                               : service === "maintenance"
                               ? "bg-yellow-100 text-yellow-800"

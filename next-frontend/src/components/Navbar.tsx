@@ -172,15 +172,15 @@ const Navbar: React.FC = () => {
                   <FaBuilding className="mr-1" /> PG{" "}
                 </Link>
                 <Link
-                  href="/bikes"
+                  href="/rooms"
                   className={`px-3 py-2 rounded-md text-sm font-medium flex items-center focus:outline-none active:scale-95 transition-transform duration-100 ${
-                    pathname.startsWith("/bikes")
+                    pathname.startsWith("/rooms")
                       ? "bg-blue-100 text-blue-700 font-semibold"
                       : "text-gray-700 hover:text-blue-600"
                   }`}
                 >
                   {" "}
-                  <FaMotorcycle className="mr-1" /> Bikes{" "}
+                  <FaHome className="mr-1" /> Rooms{" "}
                 </Link>
               </>
             )}
@@ -392,15 +392,15 @@ const Navbar: React.FC = () => {
                     <FaBuilding className="inline mr-2" /> PG
                   </Link>
                   <Link
-                    href="/bikes"
+                    href="/rooms"
                     className={`block px-3 py-2 rounded-md text-base font-medium ${
-                      pathname.startsWith("/bikes")
+                      pathname.startsWith("/rooms")
                         ? "bg-blue-100 text-blue-700 font-semibold"
                         : "text-gray-700 hover:text-blue-600"
                     }`}
-                    onClick={() => handleNavClick("/bikes")}
+                    onClick={() => handleNavClick("/rooms")}
                   >
-                    <FaMotorcycle className="inline mr-2" /> Bikes
+                    <FaHome className="inline mr-2" /> Rooms
                   </Link>
                 </>
               )}

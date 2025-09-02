@@ -36,6 +36,8 @@ import Navbar from './components/Navbar';
 import About from './pages/About.jsx';
 import Bike from './pages/Bike.jsx';
 import PG from './pages/PG.jsx';
+import RoomFlat from './pages/RoomFlat.jsx';
+import RoomFlatDetails from './pages/RoomFlatDetails.jsx';
 import Contact from './pages/Contact.jsx';
 import Footer from './components/Footer';
 import PGDetails from './pages/PGDetails.jsx';
@@ -56,6 +58,7 @@ import OwnerFavorites from './pages/owner/Favorites.jsx';
 import OwnerAuditLogs from './pages/owner/AuditLogs.jsx';
 import OwnerGDPRConsent from './pages/owner/GDPRConsent.jsx';
 import OwnerTenants from './pages/owner/Tenants.jsx';
+import RoomFlatManagement from './pages/owner/RoomFlatManagement.jsx';
 
 const MainApp = () => {
   const { role, loading, isAuthenticated } = useContext(AuthContext);
@@ -77,6 +80,7 @@ const MainApp = () => {
     '/user/notifications',
     '/owner/pg-management',
     '/owner/bike-management', 
+    '/owner/room-flat-management',
     '/owner/booking-management',
     '/owner/revenue-analytics',
     '/owner/document-verification',
@@ -129,6 +133,7 @@ const MainApp = () => {
         <Route path="/owner" element={<ProtectedRoute allowedRoles={["owner"]}><OwnerDashboard /></ProtectedRoute>} />
         <Route path="/owner/pg-management" element={<ProtectedRoute allowedRoles={["owner"]}><PGManagement /></ProtectedRoute>} />
         <Route path="/owner/bike-management" element={<ProtectedRoute allowedRoles={["owner"]}><BikeManagement /></ProtectedRoute>} />
+        <Route path="/owner/room-flat-management" element={<ProtectedRoute allowedRoles={["owner"]}><RoomFlatManagement /></ProtectedRoute>} />
         <Route path="/owner/booking-management" element={<ProtectedRoute allowedRoles={["owner"]}><BookingManagement /></ProtectedRoute>} />
         <Route path="/owner/revenue-analytics" element={<ProtectedRoute allowedRoles={["owner"]}><RevenueAnalytics /></ProtectedRoute>} />
         <Route path="/user/dashboard" element={<ProtectedRoute allowedRoles={["user"]}><UserDashboard /></ProtectedRoute>} />
@@ -155,7 +160,9 @@ const MainApp = () => {
         <Route path="/about" element={<PublicRoute><About /></PublicRoute>} />
         <Route path="/bikes" element={<PublicRoute><Bike /></PublicRoute>} />
         <Route path="/pg" element={<PublicRoute><PG /></PublicRoute>} />
-  <Route path="/pg/:id" element={<PublicRoute><PGDetails /></PublicRoute>} />
+        <Route path="/pg/:id" element={<PublicRoute><PGDetails /></PublicRoute>} />
+        <Route path="/rooms" element={<PublicRoute><RoomFlat /></PublicRoute>} />
+        <Route path="/rooms/:id" element={<PublicRoute><RoomFlatDetails /></PublicRoute>} />
         <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
         
         

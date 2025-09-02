@@ -14,6 +14,24 @@ export const authenticateJWT = (req, res, next) => {
   }
 };
 
+// Alias for backward compatibility
+export const authenticate = authenticateJWT;
+
+// Authorization middleware
+export const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    
+    next();
+  };
+};
+
 export const hashPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);

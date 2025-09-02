@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
-  FaBars, FaTimes, FaUser, FaMotorcycle, FaBuilding, FaHome, FaPhone, FaInfoCircle, FaSignOutAlt, FaCrown, FaUserTie, FaChevronDown 
+  FaBars, FaTimes, FaUser, FaMotorcycle, FaBuilding, FaHome, FaPhone, FaInfoCircle, FaSignOutAlt, FaCrown, FaUserTie, FaChevronDown, FaKey 
 } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 import StayWheelsLogo from './StayWheelsLogo';
@@ -82,6 +82,7 @@ const Navbar = () => {
               <>
                 <Link to="/" onClick={scrollToTop} className={`px-3 py-2 rounded-md text-sm font-medium flex items-center focus:outline-none active:scale-95 transition-transform duration-100 ${location.pathname === '/' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'}`}> <FaHome className="mr-1" /> Home </Link>
                 <Link to="/pg" onClick={scrollToTop} className={`px-3 py-2 rounded-md text-sm font-medium flex items-center focus:outline-none active:scale-95 transition-transform duration-100 ${location.pathname.startsWith('/pg') ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'}`}> <FaBuilding className="mr-1" /> PG </Link>
+                <Link to="/rooms" onClick={scrollToTop} className={`px-3 py-2 rounded-md text-sm font-medium flex items-center focus:outline-none active:scale-95 transition-transform duration-100 ${location.pathname.startsWith('/rooms') ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'}`}> <FaKey className="mr-1" /> Rooms </Link>
                 <Link to="/bikes" onClick={scrollToTop} className={`px-3 py-2 rounded-md text-sm font-medium flex items-center focus:outline-none active:scale-95 transition-transform duration-100 ${location.pathname.startsWith('/bikes') ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'}`}> <FaMotorcycle className="mr-1" /> Bikes </Link>
               </>
             )}
@@ -140,6 +141,7 @@ const Navbar = () => {
                 <>
                   <Link to="/" className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === '/' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'}`} onClick={() => { scrollToTop(); setIsOpen(false); }}><FaHome className="inline mr-2" /> Home</Link>
                   <Link to="/pg" className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname.startsWith('/pg') ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'}`} onClick={() => { scrollToTop(); setIsOpen(false); }}><FaBuilding className="inline mr-2" /> PG</Link>
+                  <Link to="/rooms" className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname.startsWith('/rooms') ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'}`} onClick={() => { scrollToTop(); setIsOpen(false); }}><FaKey className="inline mr-2" /> Rooms</Link>
                   <Link to="/bikes" className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname.startsWith('/bikes') ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-700 hover:text-blue-600'}`} onClick={() => { scrollToTop(); setIsOpen(false); }}><FaMotorcycle className="inline mr-2" /> Bikes</Link>
                 </>
               )}
