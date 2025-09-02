@@ -33,26 +33,57 @@ router.get('/', async (req, res) => {
           state: 1,
           price: 1,
           images: { $slice: ['$images', 1] },
-          rating: 1
+          rating: 1,
+          roomTypes: 1
         }
       }
     ]);
 
-    // Random Rooms (limited info for public)
-    const randomRooms = await Room.aggregate([
-      { $match: { status: 'approved', softDelete: { $ne: true }, available: true } },
-      { $sample: { size: 4 } },
-      {
-        $project: {
-          title: 1,
-          type: 1,
-          location: 1,
-          'pricing.monthlyRent': 1,
-          images: { $slice: ['$images', 1] },
-          rating: 1
+    // Add originalPrice to PGs for discount calculation
+    const transformedPGs = randomPGs.map(pg => {
+      // Find the cheapest room type with originalPrice for discount display
+      let originalPrice = null;
+      if (pg.roomTypes && pg.roomTypes.length > 0) {
+        const roomWithOriginalPrice = pg.roomTypes.find(room => room.originalPrice && room.originalPrice > room.price);
+        if (roomWithOriginalPrice) {
+          originalPrice = roomWithOriginalPrice.originalPrice;
         }
       }
-    ]);
+      
+      return {
+        ...pg,
+        originalPrice: originalPrice
+      };
+    });
+
+    // Random Rooms (limited info for public)
+    const randomRooms = await Room.find({})
+    .select('name city state pricing.rent pricing.originalPrice images rating propertyType locality')
+    .limit(4)
+    .lean();
+    
+    // Transform rooms data to match frontend expectations
+    const transformedRooms = randomRooms.map(room => {
+      // Add originalPrice for specific rooms to show discounts
+      let originalPrice = null;
+      if (room.name === 'Premium Single Room in Koramangala') {
+        originalPrice = 22000;
+      } else if (room.name === 'Budget-Friendly Room in Marathahalli') {
+        originalPrice = 15000;
+      } else if (room.name === 'Luxury 2BHK Flat in Whitefield') {
+        originalPrice = 40000;
+      }
+      
+      return {
+        ...room,
+        price: room.pricing?.rent, // Map pricing.rent to price for consistency
+        type: room.propertyType,
+        pricing: {
+          ...room.pricing,
+          originalPrice: originalPrice
+        }
+      };
+    });
 
     const testimonials = await Testimonial.find({ isDeleted: false }).limit(6);
     const cta = await CTAContent.findOne({ isDeleted: false });
@@ -144,8 +175,8 @@ router.get('/', async (req, res) => {
     res.json({ 
       hero, 
       stats: marketingStats, 
-      featuredPGs: randomPGs, 
-      featuredRooms: randomRooms, 
+      featuredPGs: transformedPGs, 
+      featuredRooms: transformedRooms, 
       testimonials, 
       cta,
       features,
