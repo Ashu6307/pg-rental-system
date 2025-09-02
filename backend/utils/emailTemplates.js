@@ -5,7 +5,7 @@ const createEmailTemplate = (content, headerColor = '#1f2937') => `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PG & Bike Rental System</title>
+    <title>PG & Room Rental System</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8fafc; color: #374151; line-height: 1.6; }
@@ -39,15 +39,15 @@ const createEmailTemplate = (content, headerColor = '#1f2937') => `
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🏠 PG & Bike Rental</div>
-            <div class="tagline">Your Trusted Accommodation & Transportation Partner</div>
+            <div class="logo">🏠 PG & Room Rental</div>
+            <div class="tagline">Your Trusted Accommodation Partner</div>
         </div>
         <div class="content">
             ${content}
         </div>
         <div class="footer">
             <div class="footer-text">
-                <strong>PG & Bike Rental System</strong><br>
+                <strong>PG & Room Rental System</strong><br>
                 Making accommodation and transportation easy & reliable
             </div>
             <div class="social-links">
@@ -56,7 +56,7 @@ const createEmailTemplate = (content, headerColor = '#1f2937') => `
                 <a href="#">🌐 Website</a>
             </div>
             <div class="footer-text" style="font-size: 12px; margin-top: 15px;">
-                © 2025 PG & Bike Rental System. All rights reserved.<br>
+                © 2025 PG & Room Rental System. All rights reserved.<br>
                 This email was sent to you as a registered user of our platform.
             </div>
         </div>
@@ -129,7 +129,7 @@ const emailTemplates = {
 
   // Welcome Email Template
   userWelcome: ({ name, role, email }) => createEmailTemplate(`
-    <div class="title">🎉 Welcome to PG & Bike Rental!</div>
+    <div class="title">🎉 Welcome to PG & Room Rental!</div>
     <div class="text">Dear <span class="highlight">${name}</span>,</div>
     <div class="text">
         Congratulations! Your <strong>${role}</strong> account has been successfully created.
@@ -147,9 +147,9 @@ const emailTemplates = {
     </div>
     <div class="text">
         ${role === 'user' ? 
-          '• Browse available PGs and bikes<br>• Make your first booking<br>• Complete your profile' :
+          '• Browse available PGs and rooms<br>• Make your first booking<br>• Complete your profile' :
           role === 'owner' ? 
-          '• List your PG properties<br>• Add bike rentals<br>• Manage bookings' :
+          '• List your PG properties<br>• Add room rentals<br>• Manage bookings' :
           '• Access admin dashboard<br>• Manage users and owners<br>• Monitor platform activity'
         }
     </div>
@@ -223,39 +223,6 @@ const emailTemplates = {
         🔍 Browse Other PGs
     </a>
   `, '#dc2626'),
-
-  bikeBookingConfirmed: ({ name, bikeCompany, bikeModel, bookingId, startDate, endDate }) => createEmailTemplate(`
-    <div class="title">🏍️ Bike Booking Confirmed!</div>
-    <div class="text">Dear <span class="highlight">${name}</span>,</div>
-    <div class="text">
-        Awesome! Your bike rental has been <span class="success">confirmed</span>.
-    </div>
-    
-    <div class="info-box">
-        <strong>🏍️ Rental Details:</strong><br>
-        Booking ID: <span class="highlight">#${bookingId}</span><br>
-        Bike: <span class="highlight">${bikeCompany} ${bikeModel}</span><br>
-        Start: <span class="highlight">${startDate}</span><br>
-        End: <span class="highlight">${endDate}</span><br>
-        Status: <span class="success">✅ Confirmed</span>
-    </div>
-    
-    <div class="text">
-        🔑 <strong>Pickup Instructions:</strong><br>
-        • Bring valid ID proof<br>
-        • Arrive 15 minutes early<br>
-        • Check bike condition before riding
-    </div>
-    
-    <a href="http://localhost:3000/user/my-bookings" class="button">
-        🗺️ View Booking Details
-    </a>
-    
-    <div class="divider"></div>
-    <div class="text" style="font-size: 14px; color: #6b7280;">
-        Ride safe! Don't forget to return the bike on time.
-    </div>
-  `, '#3b82f6'),
 
   // Booking Completion Template
   bookingCompleted: ({ name, itemType, itemName, bookingId, completionDate }) => createEmailTemplate(`
@@ -380,7 +347,7 @@ const emailTemplates = {
     
     <div class="divider"></div>
     <div class="text" style="font-size: 14px; color: #6b7280;">
-        This is an auto-generated receipt. For support, contact us at support@pgbikerental.com
+        This is an auto-generated receipt. For support, contact us at support@pgroomrental.com
     </div>
   `, '#3b82f6'),
 
@@ -475,7 +442,7 @@ const emailTemplates = {
   // Marketing & Promotional Email Templates
   
   // Newsletter Template
-  newsletter: ({ name, month, year, featuredPGs, featuredBikes, specialOffers, blogPosts, customerStories }) => createEmailTemplate(`
+  newsletter: ({ name, month, year, featuredPGs, featuredRooms, specialOffers, blogPosts, customerStories }) => createEmailTemplate(`
     <div class="title">📰 Monthly Newsletter - ${month} ${year}</div>
     <div class="text">Dear <span class="highlight">${name}</span>,</div>
     <div class="text">
@@ -492,12 +459,12 @@ const emailTemplates = {
     </div>
     ` : ''}
     
-    ${featuredBikes && featuredBikes.length > 0 ? `
+    ${featuredRooms && featuredRooms.length > 0 ? `
     <div class="info-box">
-        <strong>🏍️ Popular Bikes:</strong><br>
-        ${featuredBikes.map(bike => `
-          • <span class="highlight">${bike.company} ${bike.model}</span><br>
-          &nbsp;&nbsp;₹${bike.price}/day - ${bike.location}<br>
+        <strong>� Popular Rooms:</strong><br>
+        ${featuredRooms.map(room => `
+          • <span class="highlight">${room.title}</span><br>
+          &nbsp;&nbsp;₹${room.price}/month - ${room.location}<br>
         `).join('')}
     </div>
     ` : ''}
@@ -515,8 +482,8 @@ const emailTemplates = {
         <a href="http://localhost:3000/pg-listings" class="button" style="flex: 1; text-align: center;">
             🏠 Browse PGs
         </a>
-        <a href="http://localhost:3000/bike-listings" class="button" style="flex: 1; text-align: center; background: #059669;">
-            🏍️ Rent Bikes
+        <a href="http://localhost:3000/rooms" class="button" style="flex: 1; text-align: center; background: #059669;">
+            � Rent Rooms
         </a>
     </div>
     
@@ -548,7 +515,7 @@ const emailTemplates = {
     
     <div class="info-box">
         <strong>🎯 Offer Details:</strong><br>
-        Service: <span class="highlight">${serviceType || 'PG & Bike Rental'}</span><br>
+        Service: <span class="highlight">${serviceType || 'PG & Room Rental'}</span><br>
         Discount: <span class="success">${discount}</span><br>
         ${originalPrice && discountedPrice ? `
           Original Price: <span style="text-decoration: line-through;">₹${originalPrice}</span><br>
@@ -655,7 +622,7 @@ const emailTemplates = {
         <strong>🏆 Your Account Summary:</strong><br>
         Loyalty Points: <span class="highlight">${loyaltyPoints || 0} points</span><br>
         Last Booking: <span class="highlight">${lastBookingDate}</span><br>
-        Favorite Services: <span class="highlight">${favoriteServices || 'PG & Bike Rental'}</span><br>
+        Favorite Services: <span class="highlight">${favoriteServices || 'PG & Room Rental'}</span><br>
         Status: <span class="success">Valued Customer</span>
     </div>
     
@@ -686,7 +653,7 @@ const emailTemplates = {
     <div class="text">
         🌟 <strong>What's New Since You Left:</strong><br>
         • New PG properties in prime locations<br>
-        • Latest bike models available<br>
+        • Latest room options available<br>
         • Improved booking experience<br>
         • 24/7 customer support
     </div>
@@ -724,7 +691,7 @@ const emailTemplates = {
     <div class="text">
         🚀 <strong>Ready to Start Earning:</strong><br>
         • List your PG properties<br>
-        • Add bike rentals<br>
+        • Add room rentals<br>
         • Manage bookings & payments
     </div>
     

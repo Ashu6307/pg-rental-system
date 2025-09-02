@@ -147,7 +147,7 @@ class MarketingController {
         'festival': {
           subject: '🎉 Festival Special - Celebrate with Great Deals!',
           title: 'Festival Bonanza',
-          message: customMessage || 'Celebrate the festive season with amazing deals on PG stays and bike rentals!',
+          message: customMessage || 'Celebrate the festive season with amazing deals on PG stays and room rentals!',
           discount: '35% OFF',
           validUntil: 'Festival Period'
         }

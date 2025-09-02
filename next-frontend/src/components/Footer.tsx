@@ -9,9 +9,9 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">PG Rental</h3>
+            <h3 className="text-xl font-bold mb-4">PG & Room Rental</h3>
             <p className="text-gray-300 mb-4">
-              Your trusted partner for comfortable PG accommodations. 
+              Your trusted partner for comfortable PG accommodations and room rentals. 
               Making your stay convenient and affordable.
             </p>
             <div className="flex space-x-4">
@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
             <ul className="space-y-2">
               <li><Link href="/" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">Home</Link></li>
               <li><Link href="/pg" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">PG Listings</Link></li>
-              <li><Link href="/rooms" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">Room Rentals</Link></li>
+              <li><Link href="/rooms" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">Room & Flat Rentals</Link></li>
               <li><Link href="/about" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">About Us</Link></li>
               <li><Link href="/contact" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">Contact</Link></li>
             </ul>
@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
             <h3 className="text-xl font-bold mb-4">Services</h3>
             <ul className="space-y-2 text-gray-300">
               <li>PG Accommodation</li>
-              <li>Room Rentals</li>
+              <li>Room & Flat Rentals</li>
               <li>24/7 Support</li>
               <li>Maintenance Service</li>
               <li>Insurance Coverage</li>
@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
         {/* Bottom Section */}
         <div className="border-t border-gray-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-300 mb-4 md:mb-0">© {new Date().getFullYear()} PG Rental. All rights reserved.</p>
+            <p className="text-gray-300 mb-4 md:mb-0">© {new Date().getFullYear()} PG & Room Rental. All rights reserved.</p>
             <div className="flex space-x-6 text-sm">
               <Link href="/privacy" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">Privacy Policy</Link>
               <Link href="/terms" className="text-gray-300 hover:text-blue-400 transition-colors duration-200">Terms of Service</Link>

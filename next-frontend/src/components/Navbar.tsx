@@ -18,6 +18,7 @@ import {
   FaPhone,
   FaInfoCircle,
   FaSignOutAlt,
+  FaHotel,
   FaCrown,
   FaUserTie,
   FaChevronDown,
@@ -180,7 +181,7 @@ const Navbar: React.FC = () => {
                   }`}
                 >
                   {" "}
-                  <FaHome className="mr-1" /> Rooms{" "}
+                  <FaHotel className="mr-1" /> Rooms & Flats{" "}
                 </Link>
               </>
             )}
@@ -400,7 +401,7 @@ const Navbar: React.FC = () => {
                     }`}
                     onClick={() => handleNavClick("/rooms")}
                   >
-                    <FaHome className="inline mr-2" /> Rooms
+                    <FaHotel className="inline mr-2" /> Rooms & Flats
                   </Link>
                 </>
               )}

@@ -8,7 +8,7 @@ interface AutoImageCarouselProps {
   autoSlideInterval?: number;
   showControls?: boolean;
   showDots?: boolean;
-  type?: 'default' | 'pg';
+  type?: 'default' | 'pg' | 'room';
 }
 
 const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
@@ -27,6 +27,8 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
   const getFallbackImage = () => {
     if (type === 'pg') {
       return 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80';
+    } else if (type === 'room') {
+      return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop&q=80';
     }
     return 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80';
   };
@@ -87,7 +89,7 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
       <div className={`bg-gradient-to-br from-blue-100 to-purple-100 flex flex-col items-center justify-center ${className}`}>
         <FallbackIcon size={48} className="text-blue-400 mb-2" />
         <span className="text-blue-600 text-sm font-medium">
-          {type === 'pg' ? 'PG Image' : 'No Image'}
+          {type === 'pg' ? 'PG Image' : type === 'room' ? 'Room/Flat Image' : 'No Image'}
         </span>
       </div>
     );
@@ -102,7 +104,7 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
       {/* Main Image */}
       <div className="relative w-full h-full">
         {imageErrors[currentIndex] ? (
-          <IconFallback message={`${type === 'pg' ? 'PG' : ''} Image not available`} />
+          <IconFallback message={`${type === 'pg' ? 'PG' : type === 'room' ? 'Room/Flat' : ''} Image not available`} />
         ) : (
           <img
             src={typeof images[currentIndex] === 'string' ? images[currentIndex] : (images[currentIndex] as any).url}

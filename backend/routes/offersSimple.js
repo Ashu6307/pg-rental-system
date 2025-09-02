@@ -18,13 +18,13 @@ router.get('/', async (req, res) => {
       },
       {
         id: 2,
-        title: "Bike Rental Weekend Special",
-        description: "Flat 15% off on weekend bike rentals",
+        title: "Room Rental Weekend Special",
+        description: "Flat 15% off on weekend room rentals",
         discount: "15%",
         validUntil: "2025-08-31",
-        type: "bike",
+        type: "room",
         active: true,
-        imageUrl: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=200&fit=crop"
+        imageUrl: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=200&fit=crop"
       },
       {
         id: 3,

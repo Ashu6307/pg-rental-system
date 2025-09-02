@@ -180,7 +180,7 @@ class EmailService {
   async sendWelcomeEmail(user) {
     return this.sendEmailWithLogging({
       to: user.email,
-      subject: '🎉 Welcome to PG & Bike Rental Platform!',
+      subject: '🎉 Welcome to PG & Room Rental Platform!',
       emailType: 'welcome',
       templateName: 'userWelcome',
       templateData: {
@@ -195,7 +195,7 @@ class EmailService {
   async sendOTPEmail(user, otp, purpose = 'email verification') {
     return this.sendEmailWithLogging({
       to: user.email,
-      subject: '🔐 Your OTP Code - PG & Bike Rental',
+      subject: '🔐 Your OTP Code - PG & Room Rental',
       emailType: 'otp',
       templateName: 'otpEmail',
       templateData: {
@@ -212,7 +212,7 @@ class EmailService {
   async sendPasswordResetConfirmation(user, resetDetails) {
     return this.sendEmailWithLogging({
       to: user.email,
-      subject: '🔐 Password Reset Successful - PG & Bike Rental',
+      subject: '🔐 Password Reset Successful - PG & Room Rental',
       emailType: 'password_reset_confirmation',
       templateName: 'passwordResetConfirmation',
       templateData: {
@@ -276,7 +276,7 @@ class EmailService {
       'booking_rejected': `❌ ${itemType} Booking Update`,
       'booking_completed': `✅ ${itemType} Booking Completed`
     };
-    return subjects[emailType] + ' - PG & Bike Rental';
+    return subjects[emailType] + ' - PG & Room Rental';
   }
 
   getPaymentEmailSubject(emailType) {
@@ -285,7 +285,7 @@ class EmailService {
       'payment_failed': '❌ Payment Failed',
       'refund_confirmation': '💰 Refund Initiated'
     };
-    return subjects[emailType] + ' - PG & Bike Rental';
+    return subjects[emailType] + ' - PG & Room Rental';
   }
 
   getBookingTemplateData(booking) {

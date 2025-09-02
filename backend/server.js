@@ -18,7 +18,6 @@ import adminRoutes from './routes/admin.js';
 import bookingRoutes from './routes/bookings.js';
 import pgRoutes from './routes/pg.js';
 import roomRoutes from './routes/roomRoutes.js';
-import bikeRoutes from './routes/bikes.js';
 import authRoutes from './routes/auth.js';
 import homeRoutes from './routes/home.js';
 import otpRoutes from './routes/otp.js';
@@ -76,7 +75,6 @@ app.use('/api/home', homeRoutes); // /api/home public
 // Public routes (no auth required)
 app.use('/api/pgs', pgRoutes); // Public PG listings
 app.use('/api/rooms', roomRoutes); // Public Room listings
-app.use('/api/bikes', bikeRoutes); // Public bike listings
 app.use('/api/offers', offersRoutes); // Public offers
 app.use('/api/auth', authRoutes); // Authentication
 app.use('/api/user', authMeRouter); // Auth/me endpoint for user profile
@@ -86,7 +84,7 @@ app.use('/api/forgot-password', forgotPasswordRoutes); // Password reset
 app.use('/api/soft-delete', softDeleteRoutes); // Soft delete operations
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/pg_bike_rental', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/pg_room_rental', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
@@ -135,7 +133,7 @@ mongoose.connection.on('connected', () => {
 
 // Health check route
 app.get('/', (req, res) => {
-  res.send('PG & Bike Rental System Backend Running');
+  res.send('PG & Room Rental System Backend Running');
 });
 
 

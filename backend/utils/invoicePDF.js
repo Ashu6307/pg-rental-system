@@ -10,7 +10,7 @@ const generateInvoicePDFBuffer = (invoice) => {
       resolve(pdfData);
     });
     // Header
-    doc.fontSize(16).text(invoice.header || 'PG & Bike Rental Invoice', { align: 'center' });
+    doc.fontSize(16).text(invoice.header || 'PG & Room Rental Invoice', { align: 'center' });
     doc.moveDown();
     // Invoice details
     doc.fontSize(12).text(`Invoice ID: ${invoice.invoiceId}`);
@@ -26,7 +26,7 @@ const generateInvoicePDFBuffer = (invoice) => {
     doc.moveDown();
     if (invoice.details) doc.text(`Details: ${JSON.stringify(invoice.details)}`);
     doc.moveDown();
-    doc.fontSize(10).text(invoice.footer || 'Thank you for using PG & Bike Rental System', { align: 'center' });
+    doc.fontSize(10).text(invoice.footer || 'Thank you for using PG & Room Rental System', { align: 'center' });
     doc.end();
   });
 };

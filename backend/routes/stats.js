@@ -1,7 +1,7 @@
 import express from 'express';
 import Stat from '../models/Stat.js';
 import PG from '../models/PG.js';
-import Bike from '../models/Bike.js';
+import Room from '../models/Room.js';
 import User from '../models/User.js';
 import Booking from '../models/Booking.js';
 
@@ -12,13 +12,13 @@ router.get('/', async (req, res) => {
   try {
     // Real-time counts from collections
     const pgCount = await PG.countDocuments({ isDeleted: false });
-    const bikeCount = await Bike.countDocuments({ isDeleted: false });
+    const roomCount = await Room.countDocuments({ isDeleted: false });
     const userCount = await User.countDocuments({ isDeleted: false });
     const bookingCount = await Booking.countDocuments({ isDeleted: false });
 
     res.json({
       pg: pgCount,
-      bike: bikeCount,
+      room: roomCount,
       user: userCount,
       booking: bookingCount,
     });

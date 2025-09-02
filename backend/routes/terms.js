@@ -3,7 +3,7 @@ const router = express.Router();
 const Terms = require('../models/Terms');
 const { authenticateJWT } = require('../middleware/auth');
 
-// Get terms by type (pg_booking, bike_booking, add_pg, add_bike)
+// Get terms by type (pg_booking, room_booking, add_pg, add_room)
 router.get('/:type', async (req, res) => {
   try {
     const terms = await Terms.findOne({ type: req.params.type }).sort({ version: -1 });

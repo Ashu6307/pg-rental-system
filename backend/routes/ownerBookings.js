@@ -4,7 +4,7 @@ import { ownerAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Get all bookings for owner's PGs/Bikes
+// Get all bookings for owner's PGs/Rooms
 router.get('/', ownerAuth, getOwnerBookings);
 // Approve/Reject/Complete booking
 router.put('/:id', ownerAuth, updateBookingStatus);

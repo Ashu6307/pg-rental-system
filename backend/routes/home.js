@@ -7,7 +7,7 @@ import CTAContent from '../models/CTAContent.js';
 import FooterContent from '../models/FooterContent.js';
 import FeatureContent from '../models/FeatureContent.js';
 import PG from '../models/PG.js';
-import Bike from '../models/Bike.js';
+import Room from '../models/Room.js';
 
 const router = express.Router();
 
@@ -38,17 +38,16 @@ router.get('/', async (req, res) => {
       }
     ]);
 
-    // Random Bikes (limited info for public)
-    const randomBikes = await Bike.aggregate([
+    // Random Rooms (limited info for public)
+    const randomRooms = await Room.aggregate([
       { $match: { status: 'approved', softDelete: { $ne: true }, available: true } },
       { $sample: { size: 4 } },
       {
         $project: {
-          brand: 1,
-          model: 1,
+          title: 1,
           type: 1,
-          color: 1,
-          price_per_day: 1,
+          location: 1,
+          'pricing.monthlyRent': 1,
           images: { $slice: ['$images', 1] },
           rating: 1
         }
@@ -68,17 +67,17 @@ router.get('/', async (req, res) => {
         title: "PGs For You",
         subtitle: "Discover comfortable and affordable PG accommodations tailored just for you"
       },
-      bikes: {
-        title: "Bikes For You", 
-        subtitle: "Find the perfect bike for your daily commute or weekend adventures"
+      rooms: {
+        title: "Rooms For You", 
+        subtitle: "Find perfect rooms with all amenities for comfortable living"
       },
       testimonials: {
         title: "What Our Users Say",
-        subtitle: "Real experiences from our satisfied customers who found their perfect PG and bike"
+        subtitle: "Real experiences from our satisfied customers who found their perfect PG and room"
       },
       features: {
         title: "Why Choose Our Platform",
-        subtitle: "Experience the best in PG accommodations and bike rentals with our comprehensive platform"
+        subtitle: "Experience the best in PG accommodations and room rentals with our comprehensive platform"
       }
     };
     
@@ -92,7 +91,7 @@ router.get('/', async (req, res) => {
     if (!features) {
       features = {
         title: "Why Choose Our Platform",
-        subtitle: "Experience the best in PG accommodations and bike rentals with our comprehensive platform",
+        subtitle: "Experience the best in PG accommodations and room rentals with our comprehensive platform",
         ctaText: "Start Your Journey Today",
         items: [
           {
@@ -102,10 +101,10 @@ router.get('/', async (req, res) => {
             description: 'All our PG accommodations are verified and inspected for quality, safety, and cleanliness standards.'
           },
           {
-            icon: 'bicycle',
+            icon: 'building',
             color: 'purple',
-            title: 'Premium Bikes',
-            description: 'Well-maintained bikes with regular servicing, insurance coverage, and 24/7 roadside assistance.'
+            title: 'Quality Rooms',
+            description: 'Well-furnished rooms with all amenities, regular maintenance, and verified safety standards.'
           },
           {
             icon: 'credit-card',
@@ -146,7 +145,7 @@ router.get('/', async (req, res) => {
       hero, 
       stats: marketingStats, 
       featuredPGs: randomPGs, 
-      featuredBikes: randomBikes, 
+      featuredRooms: randomRooms, 
       testimonials, 
       cta,
       features,
