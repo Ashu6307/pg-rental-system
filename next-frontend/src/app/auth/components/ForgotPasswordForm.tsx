@@ -12,7 +12,7 @@ import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
 import { isValidEmail } from '../../../utils/validation/emailValidation';
 import { isValidOtp, isOtpExpired, getOtpValidationError, getOtpTimeRemaining, formatOtpTime } from '../../../utils/validation/otpValidation';
-import { getMaxResendAttempts } from '../../../utils/otpConfig';
+import { getMaxResendAttempts, getMaxOtpAttempts, getRoleMessages } from '../../../utils/otpConfig';
 
 const ForgotPasswordForm: React.FC = () => {
   const router = useRouter();
@@ -94,6 +94,8 @@ const ForgotPasswordForm: React.FC = () => {
   const [canResend, setCanResend] = useState(true);
   const [otpCreatedAt, setOtpCreatedAt] = useState<number | null>(null);
   const [otpAttempts, setOtpAttempts] = useState(0);
+  const [otpDisabled, setOtpDisabled] = useState(false);
+  const [otpErrorTrigger, setOtpErrorTrigger] = useState(0);
   // Resend count tracking
   const [resendCount, setResendCount] = useState(0);
   const [resendDisabled, setResendDisabled] = useState(false);
@@ -128,12 +130,25 @@ const ForgotPasswordForm: React.FC = () => {
     };
   }, [resendTimer]);
 
+  // Hide body scrollbar on component mount
+  useEffect(() => {
+    // Hide body overflow
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
+    };
+  }, []);
+
   // Step 1: Send OTP - using authService
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.email || !isValidEmail(formData.email)) {
-      toast.error('Please enter a valid email address');
+      // Toast removed - user will see inline validation
       return;
     }
 
@@ -145,10 +160,7 @@ const ForgotPasswordForm: React.FC = () => {
       const data = await authService.forgotPassword(formData.email, role);
       
       setOtpSuccess('OTP sent successfully to your email!');
-      toast.success(`🔐 ${role.charAt(0).toUpperCase() + role.slice(1)} password reset OTP sent successfully!`, {
-        duration: 4000,
-        icon: '📧'
-      });
+      // Toast removed - success message shown in UI
       setCurrentStep(2);
       setResendTimer(60);
       setCanResend(false);
@@ -156,7 +168,7 @@ const ForgotPasswordForm: React.FC = () => {
       setOtpAttempts(0);
     } catch (error: any) {
       setOtpError(error.message || 'Failed to send OTP');
-      toast.error(error.message || 'Failed to send reset OTP');
+      // Toast removed - error shown in UI
     } finally {
       setLoading(false);
     }
@@ -205,10 +217,7 @@ const ForgotPasswordForm: React.FC = () => {
     setOtpError(formattedMessage);
     setShowOtpError(true);
     if (showToast) {
-      toast.error(formattedMessage, {
-        icon: errorIcon,
-        duration: 4000
-      });
+      // Toast removed - error shown in OTP component
     }
     // Hide error after 1.2s for input box red, but error message box will show 5s in OtpInput
     setTimeout(() => {
@@ -216,16 +225,25 @@ const ForgotPasswordForm: React.FC = () => {
     }, 1200);
   };
 
-  // Step 2: Verify OTP - Actual backend verification like old frontend
+  // Step 2: Verify OTP - Enhanced with proper attempt tracking
   const handleVerifyOtp = async (e: React.FormEvent | null, otpOverride?: string) => {
     if (e && e.preventDefault) e.preventDefault();
     const otpToCheck = otpOverride || formData.otp;
+    
+    // Check if OTP is disabled due to max attempts
+    if (otpDisabled) {
+      const roleMessages = getRoleMessages(role as 'user' | 'owner' | 'admin');
+      setOtpError(roleMessages.maxAttemptsReached);
+      setShowOtpError(true);
+      return;
+    }
     
     // Basic format validation
     if (!isValidOtp(otpToCheck, 6)) {
       const error = getOtpValidationError(otpToCheck, { length: 6 });
       setOtpError(error || 'Please enter a valid 6-digit OTP');
       setShowOtpError(true);
+      setOtpErrorTrigger(prev => prev + 1); // Increment to trigger new error in OtpInput
       return;
     }
 
@@ -245,20 +263,46 @@ const ForgotPasswordForm: React.FC = () => {
 
       if (response.success) {
         setOtpVerifySuccess('OTP verified successfully!');
-        // Reset resend states on successful verification
+        // Reset all OTP states on successful verification
+        setOtpAttempts(0);
+        setOtpDisabled(false);
         setResendCount(0);
         setResendDisabled(false);
         setTimeout(() => {
           setCurrentStep(3);
         }, 1000);
       } else {
-        setOtpAttempts(a => a + 1);
-        const errorMsg = response.message || 'Invalid OTP. Please try again.';
-        setOtpError(errorMsg);
-        setShowOtpError(true);
+        // Enhanced attempt tracking
+        const newAttempts = otpAttempts + 1;
+        setOtpAttempts(newAttempts);
+        
+        // Check max attempts using otpConfig
+        const maxAttempts = getMaxOtpAttempts(role as 'user' | 'owner' | 'admin');
+        const remainingAttempts = maxAttempts - newAttempts;
+        
+        if (newAttempts >= maxAttempts) {
+          // Max attempts reached
+          setOtpDisabled(true);
+          setOtpError(`Maximum ${maxAttempts} attempts reached. Please request a new OTP.`);
+          setShowOtpError(true);
+          // Toast removed - message already shown in OTP component
+        } else {
+          // Still have attempts left
+          setOtpError(`Invalid OTP. ${remainingAttempts} attempts remaining.`);
+          setShowOtpError(true);
+        }
+        
+        setOtpErrorTrigger(prev => prev + 1); // Increment to trigger new error in OtpInput
       }
     } catch (error: any) {
-      setOtpAttempts(a => a + 1);
+      // Enhanced attempt tracking for network errors
+      const newAttempts = otpAttempts + 1;
+      setOtpAttempts(newAttempts);
+      
+      // Check max attempts using otpConfig
+      const maxAttempts = getMaxOtpAttempts(role as 'user' | 'owner' | 'admin');
+      const remainingAttempts = maxAttempts - newAttempts;
+      
       console.error('OTP verification error:', error);
       
       let errorMsg = 'Network error. Please try again.';
@@ -268,8 +312,19 @@ const ForgotPasswordForm: React.FC = () => {
         errorMsg = error.message;
       }
       
-      setOtpError(errorMsg);
-      setShowOtpError(true);
+      if (newAttempts >= maxAttempts) {
+        // Max attempts reached
+        setOtpDisabled(true);
+        setOtpError(`Maximum ${maxAttempts} attempts reached. Please request a new OTP.`);
+        setShowOtpError(true);
+        // Toast removed - message already shown in OTP component
+      } else {
+        // Still have attempts left
+        setOtpError(`${errorMsg} ${remainingAttempts} attempts remaining.`);
+        setShowOtpError(true);
+      }
+      
+      setOtpErrorTrigger(prev => prev + 1); // Increment to trigger new error in OtpInput
     } finally {
       setLoading(false);
     }
@@ -297,7 +352,7 @@ const ForgotPasswordForm: React.FC = () => {
 
     // Check if there are any validation errors
     if (passwordError || confirmPasswordError) {
-      toast.error('Please fix the password errors before continuing');
+      // Toast removed - validation errors shown inline
       return;
     }
 
@@ -308,10 +363,7 @@ const ForgotPasswordForm: React.FC = () => {
       const data = await authService.resetPassword(formData.email, cleanOtp, formData.newPassword, role);
       
       if (data.success) {
-        toast.success(`🎉 Password reset successful! Please login with your new password.`, {
-          duration: 5000,
-          icon: '✅'
-        });
+        // Toast removed - success message will be shown via UI feedback
         
         // Role-based redirect after password reset
         setTimeout(() => {
@@ -333,7 +385,7 @@ const ForgotPasswordForm: React.FC = () => {
           setShowOtpError(true);
           setCurrentStep(2); // Go back to OTP step
         } else {
-          toast.error(data.message || 'Failed to reset password');
+          // Toast removed - error will be shown in UI
         }
       }
     } catch (error: any) {
@@ -350,7 +402,7 @@ const ForgotPasswordForm: React.FC = () => {
         setShowOtpError(true);
         setCurrentStep(2); // Go back to OTP step
       } else {
-        toast.error(errorMsg);
+        // Toast removed - error will be shown in UI
       }
     } finally {
       setLoading(false);
@@ -362,9 +414,9 @@ const ForgotPasswordForm: React.FC = () => {
     if (!canResend || resendDisabled) return;
     
     // Check resend limit
-    const maxResends = getMaxResendAttempts(role);
+    const maxResends = getMaxResendAttempts(role as 'user' | 'owner' | 'admin');
     if (resendCount >= maxResends) {
-      toast.error(`Maximum ${maxResends} resends allowed. Please refresh the page to start over.`);
+      // Toast removed - limit message will be shown in UI
       setResendDisabled(true);
       return;
     }
@@ -384,16 +436,17 @@ const ForgotPasswordForm: React.FC = () => {
       if (newResendCount >= maxResends) {
         setResendDisabled(true);
         setOtpSuccess('OTP resent successfully! (Last resend - refresh page for more)');
-        toast.success('Password reset OTP resent! (Last resend - refresh page for more)');
+        // Toast removed - success message shown in UI
       } else {
         setOtpSuccess(`OTP resent successfully! (${maxResends - newResendCount} resends left)`);
-        toast.success(`Password reset OTP resent! (${maxResends - newResendCount} resends left)`);
+        // Toast removed - success message shown in UI
       }
       
       setResendTimer(60);
       setCanResend(false);
       setOtpCreatedAt(Date.now());
       setOtpAttempts(0);
+      setOtpDisabled(false);
     } catch (error: any) {
       handleOtpError(error.message || 'Failed to resend OTP', false); // No toast for forgot password
     } finally {
@@ -461,11 +514,10 @@ const ForgotPasswordForm: React.FC = () => {
 
   return (
     <>
-      <Toaster position="top-center" reverseOrder={false} />
-      <div className={`h-screen flex flex-col justify-center py-2 px-4 sm:px-6 lg:px-8 ${bgColor}`}>
-        <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
-        
-        <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
+      {/* Fixed scroll lock and centered layout */}
+      {/* Toaster removed - no toast messages needed */}
+      <div className={`h-screen w-screen fixed inset-0 flex items-center justify-center overflow-hidden pt-16 ${bgColor}`}>
+        <div className="w-full max-w-md mx-auto px-4">
           <div className={`p-6 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl overflow-visible ${
             role === 'admin'
               ? 'bg-gradient-to-br from-red-50 via-white to-red-100'
@@ -677,6 +729,9 @@ const ForgotPasswordForm: React.FC = () => {
                       direction="ltr"
                       role={role as 'user' | 'owner' | 'admin'}
                       focusOnErrorTrigger={showOtpError}
+                      errorTrigger={otpErrorTrigger}
+                      disabled={otpDisabled}
+                      hideTimerOnMaxAttempts={otpDisabled}
                     />
                     <div className="text-center space-y-1">
                       <p className="text-sm text-gray-600">
@@ -699,7 +754,7 @@ const ForgotPasswordForm: React.FC = () => {
                         {resendDisabled 
                           ? 'Refresh page for more resends'
                           : canResend 
-                          ? `Resend Reset OTP (${getMaxResendAttempts(role) - resendCount} left)` 
+                          ? `Resend Reset OTP (${getMaxResendAttempts(role as 'user' | 'owner' | 'admin') - resendCount} left)` 
                           : `Resend in ${resendTimer}s`}
                       </button>
                     </div>
@@ -829,7 +884,6 @@ const ForgotPasswordForm: React.FC = () => {
               </Link>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </>

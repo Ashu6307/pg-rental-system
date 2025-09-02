@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { FaExclamationCircle } from "react-icons/fa";
+import { FaExclamationCircle, FaBuilding, FaHome, FaHotel, FaCity, FaBed } from "react-icons/fa";
 import { getRoleColors } from "@/utils/roleColors";
 
-interface GenderValidationInputProps {
+interface BusinessTypeValidationInputProps {
   value: string;
   onChange: (value: string) => void;
   error?: string;
@@ -15,7 +15,7 @@ interface GenderValidationInputProps {
   placeholder?: string;
 }
 
-const GenderValidationInput: React.FC<GenderValidationInputProps> = ({
+const BusinessTypeValidationInput: React.FC<BusinessTypeValidationInputProps> = ({
   value,
   onChange,
   error,
@@ -23,27 +23,30 @@ const GenderValidationInput: React.FC<GenderValidationInputProps> = ({
   required = false,
   disabled = false,
   className = "",
-  placeholder = "Select Gender"
+  placeholder = "Select Business Type"
 }) => {
   const roleColors = getRoleColors(role);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const genderOptions = [
-    { value: "male", label: "Male", symbol: "♂" },
-    { value: "female", label: "Female", symbol: "♀" },
-    { value: "other", label: "Other", symbol: "⚧" }
+  const businessTypeOptions = [
+    { value: "PG", label: "PG (Paying Guest)", symbol: FaHome },
+    { value: "Hostel", label: "Hostel", symbol: FaBed },
+    { value: "Rental", label: "Rental Property", symbol: FaCity },
+    { value: "Hotel", label: "Hotel/Lodge", symbol: FaHotel }
   ];
 
-  const selectedGender = genderOptions.find(option => option.value === value);
+  const selectedBusinessType = businessTypeOptions.find(option => option.value === value);
 
-  const getGenderColor = (genderValue: string) => {
-    switch (genderValue) {
-      case "male":
+  const getBusinessTypeColor = (businessValue: string) => {
+    switch (businessValue) {
+      case "PG":
         return "bg-blue-500 text-white";
-      case "female":
-        return "bg-pink-500 text-white";
-      case "other":
+      case "Hostel":
+        return "bg-green-500 text-white";
+      case "Rental":
+        return "bg-orange-500 text-white";
+      case "Hotel":
         return "bg-purple-500 text-white";
       default:
         return "bg-gray-500 text-white";
@@ -86,26 +89,22 @@ const GenderValidationInput: React.FC<GenderValidationInputProps> = ({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-invalid={error ? "true" : "false"}
-        aria-describedby={error ? "gender-error" : undefined}
+        aria-describedby={error ? "business-type-error" : undefined}
       >
         <span className={value ? 'text-gray-900' : 'text-gray-400'}>
-          {value ? genderOptions.find(opt => opt.value === value)?.label : placeholder}
+          {value ? businessTypeOptions.find(opt => opt.value === value)?.label : placeholder}
         </span>
       </button>
 
-      {/* Gender Icon - Right Side */}
+      {/* Business Type Icon - Right Side */}
       {!error && (
         <div className={`absolute right-10 top-2.5 h-6 w-6 ${
-          selectedGender ? getGenderColor(value) : roleColors.background
+          selectedBusinessType ? getBusinessTypeColor(value) : 'bg-gray-200'
         } rounded-full flex items-center justify-center pointer-events-none`}>
-          {selectedGender ? (
-            <span className="text-sm font-semibold" aria-hidden="true">
-              {selectedGender.symbol}
-            </span>
+          {selectedBusinessType ? (
+            <selectedBusinessType.symbol className="text-sm" aria-hidden="true" />
           ) : (
-            <span className={`text-sm ${roleColors.icon}`} aria-hidden="true">
-              ⚧
-            </span>
+            <FaBuilding className="text-xs text-gray-400" aria-hidden="true" />
           )}
         </div>
       )}
@@ -113,7 +112,7 @@ const GenderValidationInput: React.FC<GenderValidationInputProps> = ({
       {/* Custom Dropdown List */}
       {isOpen && (
         <div className="absolute top-full left-0.5 right-0.5 bg-gray-900/5 backdrop-blur-md border border-gray-300/5 rounded-lg shadow-lg z-50 max-h-40 overflow-auto transition-all duration-200">
-          {genderOptions.map((option) => (
+          {businessTypeOptions.map((option) => (
             <button
               key={option.value}
               type="button"
@@ -121,10 +120,8 @@ const GenderValidationInput: React.FC<GenderValidationInputProps> = ({
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-900 hover:bg-gray-200/20 focus:bg-gray-200/20 focus:outline-none transition-colors duration-150 border-b border-gray-300/10 last:border-b-0"
             >
               {/* Option Icon */}
-              <div className={`h-5 w-5 ${getGenderColor(option.value)} rounded-full flex items-center justify-center flex-shrink-0`}>
-                <span className="text-xs font-semibold" aria-hidden="true">
-                  {option.symbol}
-                </span>
+              <div className={`h-5 w-5 ${getBusinessTypeColor(option.value)} rounded-full flex items-center justify-center flex-shrink-0`}>
+                <option.symbol className="text-xs" aria-hidden="true" />
               </div>
               {/* Option Label */}
               <span>{option.label}</span>
@@ -164,7 +161,7 @@ const GenderValidationInput: React.FC<GenderValidationInputProps> = ({
 
       {/* Error Message */}
       {error && (
-        <p id="gender-error" className="text-red-500 text-xs mt-1">
+        <p id="business-type-error" className="text-red-500 text-xs mt-1">
           {error}
         </p>
       )}
@@ -172,4 +169,4 @@ const GenderValidationInput: React.FC<GenderValidationInputProps> = ({
   );
 };
 
-export default GenderValidationInput;
+export default BusinessTypeValidationInput;

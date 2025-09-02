@@ -469,12 +469,14 @@ const OtpInput: React.FC<OtpInputProps> = ({
                 pattern={allowAlphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*'}
                 aria-label={`OTP digit ${i + 1}`}
                 className={`w-10 h-10 text-center text-lg font-bold border-2 rounded-lg focus:outline-none transition-all duration-200
-                  ${isDisabled || (disableOnError && isExpiredError) 
-                    ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  ${(localError || error) && !errorTimerActive
+                    ? 'border-red-500 bg-red-50 text-red-700'
+                    : (localError || error) && errorTimerActive
+                    ? 'border-red-500 bg-red-50 text-red-700 cursor-not-allowed'
                     : localSuccess || success
                     ? 'border-green-500 bg-green-50 text-green-700'
-                    : localError || error
-                    ? 'border-red-500 bg-red-50 text-red-700'
+                    : isDisabled || (disableOnError && isExpiredError)
+                    ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
                     : value[i]
                     ? 'border-green-500 bg-green-50 text-gray-900'
                     : focusedIndex === i
@@ -482,7 +484,7 @@ const OtpInput: React.FC<OtpInputProps> = ({
                     : 'border-gray-300 bg-gray-50 text-gray-900'}
                 `}
                 placeholder={placeholder}
-                disabled={loading || isDisabled || (disableOnError && isExpiredError)}
+                disabled={loading || isDisabled || (disableOnError && isExpiredError) || errorTimerActive}
                 autoCapitalize="off"
                 spellCheck={false}
               />

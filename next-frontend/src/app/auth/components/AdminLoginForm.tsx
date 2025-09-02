@@ -9,7 +9,7 @@ import PasswordValidationInput from '../../../components/validation/PasswordVali
 import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
 import { isValidOtp, isOtpExpired, getOtpValidationError, getOtpTimeRemaining, formatOtpTime } from '../../../utils/validation/otpValidation';
-import { getMaxResendAttempts } from '../../../utils/otpConfig';
+import { getMaxResendAttempts, getMaxOtpAttempts, getRoleMessages } from '../../../utils/otpConfig';
 
 const AdminLoginForm: React.FC = () => {
   const router = useRouter();
@@ -31,6 +31,8 @@ const AdminLoginForm: React.FC = () => {
   const [canResend, setCanResend] = useState(true);
   const [otpCreatedAt, setOtpCreatedAt] = useState<number | null>(null);
   const [otpAttempts, setOtpAttempts] = useState(0);
+  const [otpDisabled, setOtpDisabled] = useState(false);
+  const [otpErrorTrigger, setOtpErrorTrigger] = useState(0);
   
   // Resend count tracking
   const [resendCount, setResendCount] = useState(0);
@@ -61,6 +63,19 @@ const AdminLoginForm: React.FC = () => {
       if (interval) clearInterval(interval);
     };
   }, [resendTimer]);
+
+  // Hide body scrollbar on component mount
+  useEffect(() => {
+    // Hide body overflow
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.documentElement.style.overflow = 'unset';
+    };
+  }, []);
 
   // No longer needed as PasswordValidationInput handles password changes
   // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,16 +175,25 @@ const AdminLoginForm: React.FC = () => {
     }, 1200);
   };
 
-  // Step 2: Verify OTP
+  // Step 2: Verify OTP - Enhanced with proper attempt tracking
   const handleVerifyOtp = async (e: React.FormEvent | null, otpOverride?: string) => {
     if (e && e.preventDefault) e.preventDefault();
     const otpToCheck = otpOverride || otp;
+    
+    // Check if OTP is disabled due to max attempts
+    if (otpDisabled) {
+      const roleMessages = getRoleMessages('admin');
+      setOtpError(roleMessages.maxAttemptsReached);
+      setShowOtpError(true);
+      return;
+    }
     
     // Basic format validation
     if (!isValidOtp(otpToCheck, 6)) {
       const error = getOtpValidationError(otpToCheck, { length: 6 });
       setOtpError(error || 'Please enter a valid 6-digit OTP');
       setShowOtpError(true);
+      setOtpErrorTrigger(prev => prev + 1); // Increment to trigger new error in OtpInput
       return;
     }
 
@@ -188,7 +212,9 @@ const AdminLoginForm: React.FC = () => {
         localStorage.setItem('user', JSON.stringify(loginResult.user));
         
         setOtpSuccess('✅ Admin login successful!');
-        // Reset resend states on successful login
+        // Reset all OTP states on successful verification
+        setOtpAttempts(0);
+        setOtpDisabled(false);
         setResendCount(0);
         setResendDisabled(false);
         
@@ -201,16 +227,52 @@ const AdminLoginForm: React.FC = () => {
           router.push('/admin/dashboard');
         }, 1000);
       } else {
-        throw new Error(loginResult.message || 'Invalid OTP');
+        // Enhanced attempt tracking
+        const newAttempts = otpAttempts + 1;
+        setOtpAttempts(newAttempts);
+        
+        // Check max attempts using otpConfig
+        const maxAttempts = getMaxOtpAttempts('admin');
+        const remainingAttempts = maxAttempts - newAttempts;
+        
+        if (newAttempts >= maxAttempts) {
+          // Max attempts reached
+          setOtpDisabled(true);
+          setOtpError(`Maximum ${maxAttempts} attempts reached. Please request a new OTP.`);
+          setShowOtpError(true);
+          // Toast removed - message already shown in OTP component
+        } else {
+          // Still have attempts left
+          setOtpError(`Invalid OTP. ${remainingAttempts} attempts remaining.`);
+          setShowOtpError(true);
+        }
+        
+        setOtpErrorTrigger(prev => prev + 1); // Increment to trigger new error in OtpInput
       }
     } catch (error: any) {
-      // Use error message to determine type
-      let errorType = 'invalid';
-      if (error.message && error.message.toLowerCase().includes('expired')) errorType = 'expired';
-      else if (error.message && error.message.toLowerCase().includes('used')) errorType = 'used';
+      // Enhanced attempt tracking for network errors
+      const newAttempts = otpAttempts + 1;
+      setOtpAttempts(newAttempts);
       
-      setOtpAttempts(prev => prev + 1);
-      handleOtpError(error.message || 'Failed to verify OTP');
+      // Check max attempts using otpConfig
+      const maxAttempts = getMaxOtpAttempts('admin');
+      const remainingAttempts = maxAttempts - newAttempts;
+      
+      let errorMsg = error.message || 'Failed to verify OTP';
+      
+      if (newAttempts >= maxAttempts) {
+        // Max attempts reached
+        setOtpDisabled(true);
+        setOtpError(`Maximum ${maxAttempts} attempts reached. Please request a new OTP.`);
+        setShowOtpError(true);
+        // Toast removed - message already shown in OTP component
+      } else {
+        // Still have attempts left
+        setOtpError(`${errorMsg} ${remainingAttempts} attempts remaining.`);
+        setShowOtpError(true);
+      }
+      
+      setOtpErrorTrigger(prev => prev + 1); // Increment to trigger new error in OtpInput
     } finally {
       setLoading(false);
     }
@@ -255,6 +317,7 @@ const AdminLoginForm: React.FC = () => {
         setCanResend(false);
         setOtpCreatedAt(Date.now());
         setOtpAttempts(0);
+        setOtpDisabled(false);
       } else {
         toast.error('Failed to resend OTP');
       }
@@ -267,11 +330,10 @@ const AdminLoginForm: React.FC = () => {
 
   return (
     <>
+      {/* Fixed scroll lock and centered layout */}
       <Toaster position="top-center" />
-      <div className="h-screen flex flex-col justify-center py-2 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-red-50 via-white to-red-100">
-        <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
-        
-        <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
+      <div className="h-screen w-screen fixed inset-0 flex items-center justify-center overflow-hidden pt-16 bg-gradient-to-br from-red-50 via-white to-red-100">
+        <div className="w-full max-w-md mx-auto px-4">
           <div className="p-6 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl bg-gradient-to-br from-red-50 via-white to-red-100">
             
             {/* Role Icon - Inside Card */}
@@ -503,6 +565,9 @@ const AdminLoginForm: React.FC = () => {
                         direction="ltr"
                         role="admin"
                         focusOnErrorTrigger={showOtpError}
+                        errorTrigger={otpErrorTrigger}
+                        disabled={otpDisabled}
+                        hideTimerOnMaxAttempts={otpDisabled}
                       />
                       
                       <div className="text-center space-y-1">
@@ -579,7 +644,6 @@ const AdminLoginForm: React.FC = () => {
               </Link>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </>
