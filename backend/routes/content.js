@@ -1,13 +1,19 @@
 import express from 'express';
 import Content from '../models/Content.js';
 const router = express.Router();
+
 // Get content by type and audience (public/user/owner)
 router.get('/:type', async (req, res) => {
   const { type } = req.params;
   const audience = req.query.for || 'public';
+  
   try {
     const content = await Content.findOne({ type, for: audience });
-    if (!content) return res.status(404).json({ error: 'Content not found' });
+    
+    if (!content) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+    
     res.json(content);
   } catch (err) {
     res.status(500).json({ error: err.message });

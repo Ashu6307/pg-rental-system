@@ -1,0 +1,490 @@
+'use client';
+
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+
+interface OtpInputProps {
+  value: string;
+  onChange: (otp: string) => void;
+  onVerify?: (otp: string) => void;
+  onComplete?: (otp: string) => void;
+  error?: boolean;
+  success?: boolean;
+  loading?: boolean;
+  length?: number;
+  className?: string;
+  statusMessage?: string;
+  statusType?: 'error' | 'success' | 'timer' | 'info' | '';
+  statusBoxColor?: {
+    bg?: string;
+    border?: string;
+    text?: string;
+  };
+  errorHighlightDuration?: number;
+  errorMessageDuration?: number;
+  placeholder?: string;
+  disabled?: boolean;
+  role?: 'user' | 'owner' | 'admin';
+  focusOnErrorTrigger?: any;
+  allowAlphanumeric?: boolean;
+  locked?: boolean;
+  autoSubmitOnComplete?: boolean;
+  onAutoSubmit?: (otp: string) => void;
+  direction?: 'ltr' | 'rtl';
+  i18n?: Record<string, string>;
+  otpCreatedAt?: number | null;
+  expirySeconds?: number;
+  autoClearOnError?: boolean;
+  disableOnError?: boolean;
+  hideDigitsOnError?: boolean;
+  maxAttempts?: number;
+  onMaxAttemptsReached?: () => void;
+  onResendOtp?: () => void;
+}
+
+/**
+ * OtpInput Component
+ * Features:
+ * - Custom length (default 6)
+ * - Digit-only or alphanumeric, auto-focus, paste support
+ * - Dynamic box coloring: green (all correct), red (all error), green (filled), red (focused), gray (empty)
+ * - Real-time verification: calls onVerify(otp) when all digits entered
+ * - onComplete callback: fires when all digits filled
+ * - Visual feedback: all boxes green on success, all red on error
+ * - Error/success auto-reset on change
+ * - Input type="tel" for mobile (or text for alphanumeric)
+ * - Auto-select on focus
+ * - Timer functionality with OTP expiry
+ * - Auto-clear on error
+ * - Paste animation feedback
+ * - Tooltip on hover
+ * - Role-based styling
+ */
+const OtpInput: React.FC<OtpInputProps> = ({
+  value = '',
+  onChange,
+  onVerify,
+  onComplete,
+  error = false,
+  success = false,
+  loading = false,
+  length = 6,
+  className = '',
+  statusMessage = '',
+  statusType = '',
+  statusBoxColor = {},
+  errorHighlightDuration = 1200,
+  errorMessageDuration = 5000,
+  placeholder = '●',
+  disabled = false,
+  role = 'user',
+  focusOnErrorTrigger,
+  allowAlphanumeric = false,
+  locked: lockedProp = false,
+  autoSubmitOnComplete = false,
+  onAutoSubmit,
+  direction = 'ltr',
+  i18n = {},
+  otpCreatedAt = null,
+  expirySeconds = 300,
+  autoClearOnError = true,
+  disableOnError = true,
+  hideDigitsOnError = true,
+  maxAttempts = 3,
+  onMaxAttemptsReached,
+  onResendOtp,
+}) => {
+  // Local state for error display duration and timer
+  const [showLocalError, setShowLocalError] = useState(false);
+  const [localErrorMsg, setLocalErrorMsg] = useState('');
+  const [timerMessage, setTimerMessage] = useState('');
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isDisabledByAttempts, setIsDisabledByAttempts] = useState(false);
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Timer calculation logic
+  useEffect(() => {
+    if (!otpCreatedAt || !expirySeconds) {
+      setTimerMessage('');
+      return;
+    }
+    
+    function getTimeLeft() {
+      const now = Date.now();
+      const expiry = Number(otpCreatedAt) + expirySeconds * 1000;
+      const diff = Math.max(0, Math.floor((expiry - now) / 1000));
+      return diff;
+    }
+    
+    function formatTime(sec: number) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+    
+    // Update timer every second
+    if (otpCreatedAt && expirySeconds) {
+      const update = () => {
+        const left = getTimeLeft();
+        if (left > 0) setTimerMessage(`OTP will expire in ${formatTime(left)}`);
+        else setTimerMessage('');
+      };
+      update();
+      timerIntervalRef.current = setInterval(update, 1000);
+      return () => {
+        if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      };
+    }
+  }, [otpCreatedAt, expirySeconds]);
+
+  // Whenever error statusMessage/statusType comes, show error for 5s, then show timer
+  const prevErrorStateRef = useRef(false);
+  useEffect(() => {
+    // Only show error message box for full errorMessageDuration when error prop transitions from false to true
+    if ((error || statusType === 'error') && !prevErrorStateRef.current && statusMessage) {
+      setShowLocalError(true);
+      setLocalErrorMsg(statusMessage);
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = setTimeout(() => {
+        setShowLocalError(false);
+      }, errorMessageDuration);
+    }
+    prevErrorStateRef.current = error || statusType === 'error';
+  }, [error, statusType, statusMessage, errorMessageDuration]);
+
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, []);
+
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  
+  // On resend OTP (otpCreatedAt change), focus first box
+  useEffect(() => {
+    if (otpCreatedAt) {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [otpCreatedAt]);
+  
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  
+  // Local state to auto-reset error/success on change
+  const [localError, setLocalError] = useState(false);
+  const [localSuccess, setLocalSuccess] = useState(false);
+  const [errorTimerActive, setErrorTimerActive] = useState(false); // Track if error timer is running
+
+  // Red highlight timer + auto-focus first box on error + auto-clear input
+  const prevErrorRef = useRef(false);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange; // Always keep current onChange reference
+
+  useEffect(() => {
+    // Only trigger red highlight when error transitions from false to true
+    if ((error || statusType === 'error') && !prevErrorRef.current) {
+      // Increment failed attempts counter
+      setFailedAttempts(prev => {
+        const newFailedAttempts = prev + 1;
+        
+        // Check if max attempts reached
+        if (newFailedAttempts >= maxAttempts) {
+          setIsDisabledByAttempts(true);
+          if (onMaxAttemptsReached) {
+            onMaxAttemptsReached();
+          }
+        }
+        
+        // Focus first input after short delay (only if not disabled)
+        if (newFailedAttempts < maxAttempts) {
+          setTimeout(() => {
+            inputRefs.current[0]?.focus();
+          }, 120);
+        }
+        
+        return newFailedAttempts;
+      });
+      
+      setLocalError(true);
+      setErrorTimerActive(true); // Mark timer as active
+      // Only clear input if autoClearOnError is true and we actually have a value to clear
+      if (autoClearOnError && value && value.length > 0) {
+        setTimeout(() => {
+          // Additional safety check to prevent infinite loops
+          if (value !== '') {
+            onChangeRef.current(''); // Use ref to avoid dependency
+          }
+        }, 100);
+      }
+      
+      // Reset red highlight after errorHighlightDuration (default 1.2s)
+      const t = setTimeout(() => {
+        setLocalError(false);
+        setErrorTimerActive(false); // Mark timer as inactive
+      }, errorHighlightDuration);
+      return () => {
+        clearTimeout(t);
+        setErrorTimerActive(false);
+      };
+    }
+    prevErrorRef.current = error || statusType === 'error';
+  }, [error, statusType, errorHighlightDuration, autoClearOnError, value, maxAttempts, onMaxAttemptsReached]); // Removed failedAttempts from deps
+
+  // Focus first input when focusOnErrorTrigger changes (used for error highlight/focus)
+  useEffect(() => {
+    if (error && focusOnErrorTrigger !== undefined) {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [focusOnErrorTrigger, error]);
+
+  // Reset failed attempts when new OTP is requested (when value becomes empty)
+  useEffect(() => {
+    if (value === '' && onResendOtp) {
+      setFailedAttempts(0);
+      setIsDisabledByAttempts(false);
+    }
+  }, [value, onResendOtp]);
+  useEffect(() => {
+    if (error) setLocalError(true);
+    else setLocalError(false);
+    if (success) setLocalSuccess(true);
+    else setLocalSuccess(false);
+  }, [error, success]);
+
+  // Success state management - show green for longer duration
+  const prevSuccessRef = useRef(false);
+  useEffect(() => {
+    // When success transitions from false to true
+    if (success && !prevSuccessRef.current) {
+      setLocalSuccess(true);
+      // Reset failed attempts on success
+      setFailedAttempts(0);
+      setIsDisabledByAttempts(false);
+      // Keep success state for longer (don't auto-reset)
+    }
+    prevSuccessRef.current = success;
+  }, [success]);
+
+  // Paste feedback animation
+  const [pasteAnim, setPasteAnim] = useState(false);
+
+  // Auto-reset error/success on any change (but not immediately for success)
+  // Don't reset localError if error timer is active - let the timer handle it
+  useEffect(() => {
+    // Only reset localError if timer is not active
+    if (localError && !errorTimerActive) {
+      setLocalError(false);
+    }
+    // Don't auto-reset success - let it stay green until form submission
+  }, [value, localError, errorTimerActive]);
+
+  // Real-time verification and onComplete
+  useEffect(() => {
+    const valid = allowAlphanumeric
+      ? value.length === length && /^[a-zA-Z0-9]+$/.test(value)
+      : value.length === length && /^\d+$/.test(value);
+    if (valid) {
+      if (onComplete) onComplete(value);
+      if (onVerify) onVerify(value);
+      if (autoSubmitOnComplete && onAutoSubmit) onAutoSubmit(value);
+    }
+  }, [value, length, onVerify, onComplete, autoSubmitOnComplete, onAutoSubmit, allowAlphanumeric]);
+
+  // Initialize refs array
+  useEffect(() => {
+    inputRefs.current = inputRefs.current.slice(0, length);
+  }, [length]);
+
+  // Handle paste event with feedback
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    let pasted = e.clipboardData.getData('text');
+    pasted = allowAlphanumeric
+      ? pasted.replace(/[^a-zA-Z0-9]/g, '').slice(0, length)
+      : pasted.replace(/\D/g, '').slice(0, length);
+    if (pasted.length > 0) {
+      onChangeRef.current(pasted.padEnd(length, ''));
+      // Focus next empty or last
+      const nextIndex = Math.min(pasted.length, length - 1);
+      inputRefs.current[nextIndex]?.focus();
+      setPasteAnim(true);
+      setTimeout(() => setPasteAnim(false), 400);
+    }
+  }, [allowAlphanumeric, length]); // Removed onChange from deps
+
+  // Handle input change
+  const handleInputChange = useCallback((i: number, v: string) => {
+    if (v !== '' && !(allowAlphanumeric ? /^[a-zA-Z0-9]$/.test(v) : /^[0-9]$/.test(v))) return;
+    const arr = value.split('');
+    arr[i] = v;
+    onChangeRef.current(arr.join('').slice(0, length));
+    if (v && i < length - 1) inputRefs.current[i + 1]?.focus();
+  }, [value, length, allowAlphanumeric]); // Removed onChange from deps
+
+  // Handle keydown for backspace and tab
+  const handleKeyDown = useCallback((i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !value[i] && i > 0) {
+      inputRefs.current[i - 1]?.focus();
+    }
+    if (e.key === 'ArrowLeft' && i > 0) {
+      inputRefs.current[i - 1]?.focus();
+    }
+    if (e.key === 'ArrowRight' && i < length - 1) {
+      inputRefs.current[i + 1]?.focus();
+    }
+    // Tab/Shift+Tab handled by browser
+  }, [value, length]);
+
+  // Auto-select on focus
+  const handleFocus = useCallback((i: number, e: React.FocusEvent<HTMLInputElement>) => {
+    setFocusedIndex(i);
+    e.target.select();
+  }, []);
+
+  // Determine if OTP is expired
+  const isOtpExpired = otpCreatedAt && expirySeconds && (Date.now() > Number(otpCreatedAt) + expirySeconds * 1000);
+  const locked = lockedProp || isOtpExpired;
+  const isDisabled = disabled || locked || isDisabledByAttempts;
+
+  // Calculate dynamic width class based on message length
+  const getDynamicWidthClass = (messageLength: number) => {
+    if (messageLength <= 20) return 'w-48';  // 192px
+    if (messageLength <= 35) return 'w-64';  // 256px
+    if (messageLength <= 50) return 'w-80';  // 320px
+    if (messageLength <= 65) return 'w-96';  // 384px
+    return 'w-full max-w-md';  // 448px max
+  };
+
+  // Tooltip message logic
+  let tooltipMsg = '';
+  if (isDisabledByAttempts) tooltipMsg = `Too many attempts. Resend OTP to continue.`;
+  else if (locked) tooltipMsg = 'OTP expired. Please resend.';
+  else if (loading) tooltipMsg = 'Please wait...';
+  else tooltipMsg = 'Enter OTP';
+
+  return (
+    <div className={`flex flex-col items-center relative ${className}`} dir={direction}>
+      <div className={`flex justify-center space-x-2 w-full ${pasteAnim ? 'animate-shake' : ''}`}>
+        {[...Array(length)].map((_, i) => {
+          // Only disable/hide digits if error message is 'OTP expired. Please resend.'
+          const isExpiredError = showLocalError && localErrorMsg === 'OTP expired. Please resend.';
+          
+          return (
+            <div key={i} className="relative group">
+              <input
+                ref={el => { inputRefs.current[i] = el; }}
+                type={allowAlphanumeric ? 'text' : 'tel'}
+                maxLength={1}
+                value={
+                  isExpiredError
+                    ? ''
+                    : value[i] || ''
+                }
+                onFocus={e => handleFocus(i, e)}
+                onBlur={() => setFocusedIndex(-1)}
+                onChange={e => handleInputChange(i, e.target.value)}
+                onKeyDown={e => handleKeyDown(i, e)}
+                onPaste={i === 0 ? handlePaste : undefined}
+                autoComplete="one-time-code"
+                inputMode={allowAlphanumeric ? 'text' : 'numeric'}
+                pattern={allowAlphanumeric ? '[a-zA-Z0-9]*' : '[0-9]*'}
+                aria-label={`OTP digit ${i + 1}`}
+                className={`w-10 h-10 text-center text-lg font-bold border-2 rounded-lg focus:outline-none transition-all duration-200
+                  ${isDisabled || (disableOnError && isExpiredError) 
+                    ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : localSuccess || success
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : localError || error
+                    ? 'border-red-500 bg-red-50 text-red-700'
+                    : value[i]
+                    ? 'border-green-500 bg-green-50 text-gray-900'
+                    : focusedIndex === i
+                    ? 'border-red-500 bg-red-50 text-gray-900'
+                    : 'border-gray-300 bg-gray-50 text-gray-900'}
+                `}
+                placeholder={placeholder}
+                disabled={loading || isDisabled || (disableOnError && isExpiredError)}
+                autoCapitalize="off"
+                spellCheck={false}
+              />
+              {/* Tooltip on hover */}
+              <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-20 hidden group-hover:block pointer-events-none">
+                <span className="bg-gray-900 text-white text-xs rounded px-2 py-1 shadow-lg whitespace-nowrap opacity-90">
+                  {tooltipMsg}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+        {loading && (
+          <div className="absolute flex items-center justify-center w-full h-full pointer-events-none top-0 left-0">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
+          </div>
+        )}
+      </div>
+      
+      {/* Status Message Box (error/success/timer/info) - always below input, centered, no overlap */}
+      {(showLocalError && localErrorMsg) ? (
+        <div className="mt-2 flex items-center justify-center w-full relative min-h-8">
+          <div
+            className={`shadow-sm flex items-center justify-center rounded-md py-1 px-4 ${getDynamicWidthClass(localErrorMsg.length)}
+              ${statusBoxColor.bg ? statusBoxColor.bg : 'bg-red-50'}
+              ${statusBoxColor.border ? statusBoxColor.border : 'border border-red-200'}
+            `}
+            aria-live="polite"
+          >
+            <p className={`text-xs font-medium text-center px-2
+              ${statusBoxColor.text ? statusBoxColor.text : 'text-red-600'}
+            `}>
+              {localErrorMsg}
+            </p>
+          </div>
+        </div>
+      ) : (!showLocalError && (timerMessage || (otpCreatedAt && expirySeconds && timerMessage === ''))) ? (
+        <div className="mt-2 flex items-center justify-center w-full relative min-h-8">
+          {timerMessage ? (
+            <div className={`py-1 px-4 ${getDynamicWidthClass(timerMessage.length)}`}>
+              <p className="text-xs font-medium text-center px-2 text-gray-500" aria-live="polite">
+                {timerMessage}
+              </p>
+            </div>
+          ) : (
+            <div className={`py-1 px-4 ${getDynamicWidthClass('OTP expired. Please resend.'.length)}`}>
+              <p className="text-xs font-medium text-center px-2 text-red-600" aria-live="polite">
+                OTP expired. Please resend.
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (statusMessage && statusType !== 'error') ? (
+        <div className="mt-2 flex items-center justify-center w-full relative min-h-8">
+          <div
+            className={`shadow-sm flex items-center justify-center rounded-md py-1 px-4 ${getDynamicWidthClass(statusMessage.length)}
+              ${statusBoxColor.bg ? statusBoxColor.bg :
+                statusType === 'success' ? 'bg-green-50' :
+                'bg-gray-50'}
+              ${statusBoxColor.border ? statusBoxColor.border :
+                statusType === 'success' ? 'border border-green-200' :
+                'border border-gray-200'}
+            `}
+            aria-live="polite"
+          >
+            <p className={`text-xs font-medium text-center px-2
+              ${statusBoxColor.text ? statusBoxColor.text :
+                statusType === 'success' ? 'text-green-600' :
+                'text-gray-600'}
+            `}>
+              {statusMessage}
+            </p>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+export default OtpInput;
