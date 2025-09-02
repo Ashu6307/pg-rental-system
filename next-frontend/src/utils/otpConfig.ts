@@ -1,77 +1,102 @@
-/**
- * OTP Configuration Utilities
- * Role-based OTP attempt limits and other configurations
- */
-
-export type UserRole = 'admin' | 'owner' | 'user';
+export type UserRole = 'user' | 'owner' | 'admin';
 
 /**
- * Get maximum OTP attempts based on user role
- * @param role - User role (admin, owner, user)
- * @returns Number of maximum attempts allowed
+ * Get maximum wrong OTP attempts before disabling input
  */
-export const getMaxOtpAttempts = (role: UserRole): number => {
-  switch(role) {
-    case 'admin': 
-      return 5; // Admin gets 5 attempts (highest security level)
-    case 'owner': 
-      return 4; // Owner gets 4 attempts (business user)
-    case 'user': 
-      return 3; // Regular user gets 3 attempts (standard)
-    default: 
-      return 3; // Default fallback
+export function getMaxOtpAttempts(role: UserRole): number {
+  switch (role) {
+    case 'user': return 4;
+    case 'owner': return 5;
+    case 'admin': return 6;
+    default: return 4;
   }
-};
+}
 
 /**
- * Get OTP expiry time based on user role (in seconds)
- * @param role - User role
- * @returns Expiry time in seconds
+ * Get maximum OTP sends per hour (rate limiting)
  */
-export const getOtpExpiryTime = (role: UserRole): number => {
-  switch(role) {
-    case 'admin': 
-      return 600; // 10 minutes for admin
-    case 'owner': 
-      return 300; // 5 minutes for owner
-    case 'user': 
-      return 300; // 5 minutes for user
-    default: 
-      return 300; // Default 5 minutes
+export function getMaxOtpSendsPerHour(role: UserRole): number {
+  switch (role) {
+    case 'user': return 6;
+    case 'owner': return 8;
+    case 'admin': return 10;
+    default: return 6;
   }
-};
+}
 
 /**
- * Get resend timer based on user role (in seconds)
- * @param role - User role
- * @returns Resend timer in seconds
+ * Get maximum resend attempts per session
  */
-export const getResendTimer = (role: UserRole): number => {
-  switch(role) {
-    case 'admin': 
-      return 120; // 2 minutes for admin
-    case 'owner': 
-      return 90;  // 1.5 minutes for owner
-    case 'user': 
-      return 60;  // 1 minute for user
-    default: 
-      return 60;  // Default 1 minute
+export function getMaxResendAttempts(role: UserRole): number {
+  switch (role) {
+    case 'user': return 2;
+    case 'owner': return 3;
+    case 'admin': return 2;
+    default: return 2;
   }
-};
+}
 
 /**
- * Get role-specific error messages
- * @param role - User role
- * @returns Object with role-specific messages
+ * Get OTP expiry time in seconds
  */
-export const getRoleMessages = (role: UserRole) => {
-  const attempts = getMaxOtpAttempts(role);
-  
-  return {
-    maxAttemptsReached: `Too many attempts. ${role === 'admin' ? 'Admin' : role === 'owner' ? 'Owner' : 'User'} OTP disabled. Please resend.`,
-    otpSent: `${role === 'admin' ? 'Admin' : role === 'owner' ? 'Owner' : 'User'} OTP sent successfully!`,
-    attemptsRemaining: (remaining: number) => `${remaining} attempt${remaining === 1 ? '' : 's'} remaining`,
-    invalidOtp: 'Invalid OTP',
-    expiredOtp: 'OTP expired'
+export function getOtpExpiryTime(role: UserRole): number {
+  switch (role) {
+    case 'user': return 300; // 5 minutes
+    case 'owner': return 300; // 5 minutes  
+    case 'admin': return 300; // 5 minutes
+    default: return 300;
+  }
+}
+
+/**
+ * Get resend timer duration in seconds
+ */
+export function getResendTimer(role: UserRole): number {
+  switch (role) {
+    case 'user': return 60; // 1 minute
+    case 'owner': return 60; // 1 minute
+    case 'admin': return 60; // 1 minute
+    default: return 60;
+  }
+}
+
+/**
+ * Get role-specific OTP messages
+ */
+export function getOtpMessages(role: UserRole) {
+  const baseMessages = {
+    maxAttemptsReached: `Maximum ${getMaxOtpAttempts(role)} attempts reached. Please request a new OTP.`,
+    tooManyRequests: `Too many OTP requests. Maximum ${getMaxOtpSendsPerHour(role)} OTPs per hour allowed.`,
+    maxResendsReached: `Maximum ${getMaxResendAttempts(role)} resends allowed. Please refresh the page to start over.`
   };
-};
+
+  switch (role) {
+    case 'user':
+      return {
+        ...baseMessages,
+        otpSent: 'User verification OTP sent to your email!',
+        otpVerified: 'User email verified successfully!'
+      };
+    case 'owner':
+      return {
+        ...baseMessages,
+        otpSent: 'Owner verification OTP sent to your email!',
+        otpVerified: 'Owner email verified successfully!'
+      };
+    case 'admin':
+      return {
+        ...baseMessages,
+        otpSent: 'Admin security OTP sent to your email!',
+        otpVerified: 'Admin OTP verified successfully!'
+      };
+    default:
+      return baseMessages;
+  }
+}
+
+/**
+ * Get role-specific messages (alias for getOtpMessages for compatibility)
+ */
+export function getRoleMessages(role: UserRole) {
+  return getOtpMessages(role);
+}

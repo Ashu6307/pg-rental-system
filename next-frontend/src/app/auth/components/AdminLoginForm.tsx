@@ -9,6 +9,7 @@ import PasswordValidationInput from '../../../components/validation/PasswordVali
 import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
 import { isValidOtp, isOtpExpired, getOtpValidationError, getOtpTimeRemaining, formatOtpTime } from '../../../utils/validation/otpValidation';
+import { getMaxResendAttempts } from '../../../utils/otpConfig';
 
 const AdminLoginForm: React.FC = () => {
   const router = useRouter();
@@ -30,6 +31,10 @@ const AdminLoginForm: React.FC = () => {
   const [canResend, setCanResend] = useState(true);
   const [otpCreatedAt, setOtpCreatedAt] = useState<number | null>(null);
   const [otpAttempts, setOtpAttempts] = useState(0);
+  
+  // Resend count tracking
+  const [resendCount, setResendCount] = useState(0);
+  const [resendDisabled, setResendDisabled] = useState(false);
   
   // Email validation
   const [emailError, setEmailError] = useState('');
@@ -183,6 +188,10 @@ const AdminLoginForm: React.FC = () => {
         localStorage.setItem('user', JSON.stringify(loginResult.user));
         
         setOtpSuccess('✅ Admin login successful!');
+        // Reset resend states on successful login
+        setResendCount(0);
+        setResendDisabled(false);
+        
         toast.success('🎉 Admin login successful! Welcome back.', {
           duration: 3000,
           icon: '👑'
@@ -209,7 +218,15 @@ const AdminLoginForm: React.FC = () => {
 
   // Resend OTP
   const handleResendOtp = async () => {
-    if (!canResend) return;
+    if (!canResend || resendDisabled) return;
+    
+    // Check resend limit
+    const maxResends = getMaxResendAttempts('admin');
+    if (resendCount >= maxResends) {
+      toast.error(`Maximum ${maxResends} resends allowed. Please refresh the page to start over.`);
+      setResendDisabled(true);
+      return;
+    }
     
     setLoading(true);
     setOtpError('');
@@ -220,12 +237,24 @@ const AdminLoginForm: React.FC = () => {
       const result = await authService.sendOtp(formData.email, 'admin', formData.password);
       
       if (result.success) {
-        setOtpSuccess('OTP resent successfully!');
+        // Increment resend count
+        const newResendCount = resendCount + 1;
+        setResendCount(newResendCount);
+        
+        // Check if this was the last allowed resend
+        if (newResendCount >= maxResends) {
+          setResendDisabled(true);
+          setOtpSuccess('OTP resent successfully! (Last resend - refresh page for more)');
+          toast.success('Admin OTP resent successfully! (Last resend - refresh page for more)');
+        } else {
+          setOtpSuccess(`OTP resent successfully! (${maxResends - newResendCount} resends left)`);
+          toast.success(`Admin OTP resent successfully! (${maxResends - newResendCount} resends left)`);
+        }
+        
         setResendTimer(60);
         setCanResend(false);
         setOtpCreatedAt(Date.now());
         setOtpAttempts(0);
-        toast.success('Admin OTP resent successfully!');
       } else {
         toast.error('Failed to resend OTP');
       }
@@ -483,14 +512,18 @@ const AdminLoginForm: React.FC = () => {
                         <button
                           type="button"
                           onClick={handleResendOtp}
-                          disabled={!canResend || loading}
+                          disabled={!canResend || loading || resendDisabled}
                           className={`text-sm font-medium underline ${
-                            canResend 
+                            canResend && !resendDisabled
                               ? 'text-red-600 hover:text-red-800 cursor-pointer' 
                               : 'text-gray-400 cursor-not-allowed'
                           }`}
                         >
-                          {canResend ? 'Resend Admin OTP' : `Resend in ${resendTimer}s`}
+                          {resendDisabled 
+                            ? 'Refresh page for more resends'
+                            : canResend 
+                            ? `Resend Admin OTP (${getMaxResendAttempts('admin') - resendCount} left)` 
+                            : `Resend in ${resendTimer}s`}
                         </button>
                       </div>
                     </div>

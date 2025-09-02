@@ -26,18 +26,18 @@ async function isRateLimited(email, role = 'user') {
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   const count = await OtpAudit.countDocuments({ email, action: 'send', createdAt: { $gte: oneHourAgo } });
   
-  // Role-based rate limits
+  // Role-based rate limits (synced with frontend config)
   let maxLimit;
   switch (role) {
     case 'admin':
       maxLimit = 10; // Admin: 10 OTP per hour
       break;
     case 'owner':
-      maxLimit = 5;  // Owner: 5 OTP per hour
+      maxLimit = 8;  // Owner: 8 OTP per hour (updated to match frontend)
       break;
     case 'user':
     default:
-      maxLimit = 5;  // User: 5 OTP per hour
+      maxLimit = 6;  // User: 6 OTP per hour (updated to match frontend)
       break;
   }
   
@@ -97,8 +97,8 @@ async function sendOtp(req, res) {
   // This allows for better UX where users get immediate feedback before OTP is sent
   
   if (await isRateLimited(email, userRole)) {
-    const limits = { user: 5, owner: 5, admin: 10 };
-    const maxLimit = limits[userRole] || 5;
+    const limits = { user: 6, owner: 8, admin: 10 }; // Updated to match frontend config
+    const maxLimit = limits[userRole] || 6;
     await logOtpAction(email, 'send', 'error', 'Rate limit exceeded', req);
     return res.status(429).json({ 
       success: false, 
@@ -174,8 +174,8 @@ async function resendOtp(req, res) {
   }
   
   if (await isRateLimited(email, userRole)) {
-    const limits = { user: 5, owner: 5, admin: 10 };
-    const maxLimit = limits[userRole] || 5;
+    const limits = { user: 6, owner: 8, admin: 10 }; // Updated to match frontend config
+    const maxLimit = limits[userRole] || 6;
     await logOtpAction(email, 'resend', 'error', 'Rate limit exceeded', req);
     return res.status(429).json({ 
       success: false, 

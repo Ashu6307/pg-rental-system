@@ -12,6 +12,7 @@ import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
 import { isValidEmail } from '../../../utils/validation/emailValidation';
 import { isValidOtp, isOtpExpired, getOtpValidationError, getOtpTimeRemaining, formatOtpTime } from '../../../utils/validation/otpValidation';
+import { getMaxResendAttempts } from '../../../utils/otpConfig';
 
 const ForgotPasswordForm: React.FC = () => {
   const router = useRouter();
@@ -93,6 +94,9 @@ const ForgotPasswordForm: React.FC = () => {
   const [canResend, setCanResend] = useState(true);
   const [otpCreatedAt, setOtpCreatedAt] = useState<number | null>(null);
   const [otpAttempts, setOtpAttempts] = useState(0);
+  // Resend count tracking
+  const [resendCount, setResendCount] = useState(0);
+  const [resendDisabled, setResendDisabled] = useState(false);
   // OTP expiry timer for UI
   const otpTimeLeft = otpCreatedAt ? getOtpTimeRemaining(otpCreatedAt, 300) : 0;
   const [emailError, setEmailError] = useState(''); // Email validation error
@@ -241,6 +245,9 @@ const ForgotPasswordForm: React.FC = () => {
 
       if (response.success) {
         setOtpVerifySuccess('OTP verified successfully!');
+        // Reset resend states on successful verification
+        setResendCount(0);
+        setResendDisabled(false);
         setTimeout(() => {
           setCurrentStep(3);
         }, 1000);
@@ -352,7 +359,15 @@ const ForgotPasswordForm: React.FC = () => {
 
   // Resend OTP - using authService
   const handleResendOtp = async () => {
-    if (!canResend) return;
+    if (!canResend || resendDisabled) return;
+    
+    // Check resend limit
+    const maxResends = getMaxResendAttempts(role);
+    if (resendCount >= maxResends) {
+      toast.error(`Maximum ${maxResends} resends allowed. Please refresh the page to start over.`);
+      setResendDisabled(true);
+      return;
+    }
     
     setLoading(true);
     setOtpError('');
@@ -361,7 +376,20 @@ const ForgotPasswordForm: React.FC = () => {
     try {
       const data = await authService.forgotPassword(formData.email, role);
       
-      setOtpSuccess('OTP resent successfully!');
+      // Increment resend count
+      const newResendCount = resendCount + 1;
+      setResendCount(newResendCount);
+      
+      // Check if this was the last allowed resend
+      if (newResendCount >= maxResends) {
+        setResendDisabled(true);
+        setOtpSuccess('OTP resent successfully! (Last resend - refresh page for more)');
+        toast.success('Password reset OTP resent! (Last resend - refresh page for more)');
+      } else {
+        setOtpSuccess(`OTP resent successfully! (${maxResends - newResendCount} resends left)`);
+        toast.success(`Password reset OTP resent! (${maxResends - newResendCount} resends left)`);
+      }
+      
       setResendTimer(60);
       setCanResend(false);
       setOtpCreatedAt(Date.now());
@@ -657,9 +685,9 @@ const ForgotPasswordForm: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleResendOtp}
-                        disabled={!canResend || loading}
+                        disabled={!canResend || loading || resendDisabled}
                         className={`text-sm font-medium underline ${
-                          canResend 
+                          canResend && !resendDisabled
                             ? `${
                                 role === 'admin' ? 'text-red-600 hover:text-red-800' : 
                                 role === 'owner' ? 'text-green-600 hover:text-green-800' : 
@@ -668,7 +696,11 @@ const ForgotPasswordForm: React.FC = () => {
                             : 'text-gray-400 cursor-not-allowed'
                         }`}
                       >
-                        {canResend ? 'Resend Reset OTP' : `Resend in ${resendTimer}s`}
+                        {resendDisabled 
+                          ? 'Refresh page for more resends'
+                          : canResend 
+                          ? `Resend Reset OTP (${getMaxResendAttempts(role) - resendCount} left)` 
+                          : `Resend in ${resendTimer}s`}
                       </button>
                     </div>
                   </div>

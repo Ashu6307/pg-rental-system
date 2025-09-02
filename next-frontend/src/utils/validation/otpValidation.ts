@@ -80,7 +80,7 @@ export function getOtpValidationError(
     length = 6,
     alphanumeric = false,
     attempts = 0,
-    maxAttempts = 5,
+    maxAttempts = 6, // Updated default to be more user-friendly
     customMessages = {}
   }: OtpValidationOptions = {}
 ): string | null {

@@ -25,6 +25,7 @@ interface OtpInputProps {
   disabled?: boolean;
   role?: 'user' | 'owner' | 'admin';
   focusOnErrorTrigger?: any;
+  errorTrigger?: number; // Counter to trigger error processing
   allowAlphanumeric?: boolean;
   locked?: boolean;
   autoSubmitOnComplete?: boolean;
@@ -36,6 +37,7 @@ interface OtpInputProps {
   autoClearOnError?: boolean;
   disableOnError?: boolean;
   hideDigitsOnError?: boolean;
+  hideTimerOnMaxAttempts?: boolean; // Hide timer when max attempts reached
   maxAttempts?: number;
   onMaxAttemptsReached?: () => void;
   onResendOtp?: () => void;
@@ -78,6 +80,7 @@ const OtpInput: React.FC<OtpInputProps> = ({
   disabled = false,
   role = 'user',
   focusOnErrorTrigger,
+  errorTrigger,
   allowAlphanumeric = false,
   locked: lockedProp = false,
   autoSubmitOnComplete = false,
@@ -89,9 +92,10 @@ const OtpInput: React.FC<OtpInputProps> = ({
   autoClearOnError = true,
   disableOnError = true,
   hideDigitsOnError = true,
-  maxAttempts = 3,
+  maxAttempts = 5, // Updated default to be more user-friendly
   onMaxAttemptsReached,
   onResendOtp,
+  hideTimerOnMaxAttempts = false,
 }) => {
   // Local state for error display duration and timer
   const [showLocalError, setShowLocalError] = useState(false);
@@ -101,6 +105,13 @@ const OtpInput: React.FC<OtpInputProps> = ({
   const [isDisabledByAttempts, setIsDisabledByAttempts] = useState(false);
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Reset component state when external conditions change
+  useEffect(() => {
+    setFailedAttempts(0);
+    setIsDisabledByAttempts(false);
+    currentFailedAttemptsRef.current = 0; // Reset ref too
+  }, [maxAttempts]); // Reset when maxAttempts changes (like component remount)
 
   // Timer calculation logic
   useEffect(() => {
@@ -145,9 +156,15 @@ const OtpInput: React.FC<OtpInputProps> = ({
       setShowLocalError(true);
       setLocalErrorMsg(statusMessage);
       if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
-      errorTimeoutRef.current = setTimeout(() => {
-        setShowLocalError(false);
-      }, errorMessageDuration);
+      
+      // Don't auto-hide error if it's max attempts reached message
+      const isMaxAttemptsMessage = statusMessage.includes('Maximum') && statusMessage.includes('attempts reached');
+      
+      if (!isMaxAttemptsMessage) {
+        errorTimeoutRef.current = setTimeout(() => {
+          setShowLocalError(false);
+        }, errorMessageDuration);
+      }
     }
     prevErrorStateRef.current = error || statusType === 'error';
   }, [error, statusType, statusMessage, errorMessageDuration]);
@@ -180,20 +197,43 @@ const OtpInput: React.FC<OtpInputProps> = ({
   // Red highlight timer + auto-focus first box on error + auto-clear input
   const prevErrorRef = useRef(false);
   const onChangeRef = useRef(onChange);
+  const onMaxAttemptsReachedRef = useRef(onMaxAttemptsReached); // Use ref for callback
+  const maxAttemptsReachedRef = useRef(false); // Track if max attempts callback already called
+  const errorProcessingRef = useRef(false); // Prevent multiple error processing
+  const currentFailedAttemptsRef = useRef(0); // Track current failed attempts
+  const valueRef = useRef(value); // Track value without causing re-renders
   onChangeRef.current = onChange; // Always keep current onChange reference
+  onMaxAttemptsReachedRef.current = onMaxAttemptsReached; // Always keep current callback reference
+  valueRef.current = value; // Always keep current value reference
+
+  // Reset refs when component conditions change
+  useEffect(() => {
+    maxAttemptsReachedRef.current = false;
+    errorProcessingRef.current = false;
+    prevErrorRef.current = false;
+    currentFailedAttemptsRef.current = 0; // Reset failed attempts ref
+  }, [maxAttempts, value === '']); // Reset when maxAttempts changes or OTP is cleared
 
   useEffect(() => {
-    // Only trigger red highlight when error transitions from false to true
-    if ((error || statusType === 'error') && !prevErrorRef.current) {
+    // Only trigger red highlight when error transitions from false to true AND not already disabled
+    if ((error || statusType === 'error') && !prevErrorRef.current && !errorProcessingRef.current && !maxAttemptsReachedRef.current && !isDisabledByAttempts) {
+      errorProcessingRef.current = true; // Mark as processing
+      
       // Increment failed attempts counter
       setFailedAttempts(prev => {
         const newFailedAttempts = prev + 1;
+        currentFailedAttemptsRef.current = newFailedAttempts; // Update ref
         
-        // Check if max attempts reached
-        if (newFailedAttempts >= maxAttempts) {
+        // Check if max attempts reached - only call once
+        if (newFailedAttempts >= maxAttempts && !maxAttemptsReachedRef.current) {
           setIsDisabledByAttempts(true);
-          if (onMaxAttemptsReached) {
-            onMaxAttemptsReached();
+          maxAttemptsReachedRef.current = true; // Mark as called
+          
+          // Defer the callback to avoid render cycle issues
+          if (onMaxAttemptsReachedRef.current) {
+            setTimeout(() => {
+              onMaxAttemptsReachedRef.current?.();
+            }, 0);
           }
         }
         
@@ -209,28 +249,32 @@ const OtpInput: React.FC<OtpInputProps> = ({
       
       setLocalError(true);
       setErrorTimerActive(true); // Mark timer as active
-      // Only clear input if autoClearOnError is true and we actually have a value to clear
-      if (autoClearOnError && value && value.length > 0) {
-        setTimeout(() => {
-          // Additional safety check to prevent infinite loops
-          if (value !== '') {
-            onChangeRef.current(''); // Use ref to avoid dependency
-          }
-        }, 100);
-      }
       
-      // Reset red highlight after errorHighlightDuration (default 1.2s)
+      // Reset red highlight after errorHighlightDuration (default 1200ms)
+      // Also clear input and focus first box at the same time
       const t = setTimeout(() => {
         setLocalError(false);
         setErrorTimerActive(false); // Mark timer as inactive
+        errorProcessingRef.current = false; // Reset processing flag
+        
+        // Clear input and focus first box after red highlight ends (only if not disabled)
+        if (autoClearOnError && valueRef.current && valueRef.current.length > 0 && currentFailedAttemptsRef.current < maxAttempts) {
+          onChangeRef.current(''); // Clear the OTP input
+          
+          // Focus first input after clearing
+          setTimeout(() => {
+            inputRefs.current[0]?.focus();
+          }, 50); // Small delay after clear
+        }
       }, errorHighlightDuration);
       return () => {
         clearTimeout(t);
         setErrorTimerActive(false);
+        errorProcessingRef.current = false;
       };
     }
     prevErrorRef.current = error || statusType === 'error';
-  }, [error, statusType, errorHighlightDuration, autoClearOnError, value, maxAttempts, onMaxAttemptsReached]); // Removed failedAttempts from deps
+  }, [error, statusType, errorHighlightDuration, autoClearOnError, maxAttempts, isDisabledByAttempts]);
 
   // Focus first input when focusOnErrorTrigger changes (used for error highlight/focus)
   useEffect(() => {
@@ -241,19 +285,43 @@ const OtpInput: React.FC<OtpInputProps> = ({
     }
   }, [focusOnErrorTrigger, error]);
 
-  // Reset failed attempts when new OTP is requested (when value becomes empty)
+  // Handle external error trigger (when RegisterForm gets API error)
   useEffect(() => {
-    if (value === '' && onResendOtp) {
+    if (errorTrigger && errorTrigger > 0 && error) {
+      // Force error processing by resetting the flag first
+      errorProcessingRef.current = false;
+      prevErrorRef.current = false;
+      
+      // Small delay to ensure state is updated
+      setTimeout(() => {
+        // This will trigger the main error useEffect
+        prevErrorRef.current = false;
+      }, 10);
+    }
+  }, [errorTrigger, error]);
+
+  // Reset failed attempts when new OTP is requested (when value becomes empty or otpCreatedAt changes)
+  useEffect(() => {
+    if (value === '' || otpCreatedAt) {
       setFailedAttempts(0);
       setIsDisabledByAttempts(false);
+      maxAttemptsReachedRef.current = false; // Reset the flag when new OTP requested
+      errorProcessingRef.current = false; // Reset processing flag
     }
-  }, [value, onResendOtp]);
+  }, [value, otpCreatedAt]);
+  
+  // External error/success sync - but don't override timer-controlled localError
   useEffect(() => {
-    if (error) setLocalError(true);
-    else setLocalError(false);
+    // Only sync external error if we're not in the middle of error timer
+    if (error && !errorTimerActive) {
+      setLocalError(true);
+    } else if (!error && !errorTimerActive) {
+      setLocalError(false);
+    }
+    
     if (success) setLocalSuccess(true);
     else setLocalSuccess(false);
-  }, [error, success]);
+  }, [error, success, errorTimerActive]);
 
   // Success state management - show green for longer duration
   const prevSuccessRef = useRef(false);
@@ -275,11 +343,18 @@ const OtpInput: React.FC<OtpInputProps> = ({
   // Auto-reset error/success on any change (but not immediately for success)
   // Don't reset localError if error timer is active - let the timer handle it
   useEffect(() => {
-    // Only reset localError if timer is not active
-    if (localError && !errorTimerActive) {
+    // Only reset localError if timer is not active AND not processing error
+    if (localError && !errorTimerActive && !errorProcessingRef.current) {
       setLocalError(false);
     }
     // Don't auto-reset success - let it stay green until form submission
+  }, [localError, errorTimerActive]); // Remove value dependency to avoid conflicts
+
+  // Reset localError when user starts typing again (only if timer not active)
+  useEffect(() => {
+    if (value && value.length > 0 && localError && !errorTimerActive && !errorProcessingRef.current) {
+      setLocalError(false);
+    }
   }, [value, localError, errorTimerActive]);
 
   // Real-time verification and onComplete
@@ -444,7 +519,7 @@ const OtpInput: React.FC<OtpInputProps> = ({
             </p>
           </div>
         </div>
-      ) : (!showLocalError && (timerMessage || (otpCreatedAt && expirySeconds && timerMessage === ''))) ? (
+      ) : (!showLocalError && !hideTimerOnMaxAttempts && (timerMessage || (otpCreatedAt && expirySeconds && timerMessage === ''))) ? (
         <div className="mt-2 flex items-center justify-center w-full relative min-h-8">
           {timerMessage ? (
             <div className={`py-1 px-4 ${getDynamicWidthClass(timerMessage.length)}`}>

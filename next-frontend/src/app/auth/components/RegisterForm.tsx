@@ -13,7 +13,7 @@ import PasswordValidationInput from '../../../components/validation/PasswordVali
 import GenderValidationInput from '../../../components/validation/GenderValidationInput';
 import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
-import { getMaxOtpAttempts, getOtpExpiryTime, getResendTimer, getRoleMessages, UserRole } from '../../../utils/otpConfig';
+import { getMaxOtpAttempts, getOtpExpiryTime, getResendTimer, getRoleMessages, getMaxOtpSendsPerHour, getMaxResendAttempts, UserRole } from '../../../utils/otpConfig';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -36,6 +36,7 @@ export default function RegisterForm() {
   
   // Role-based configuration
   const maxAttempts = getMaxOtpAttempts(role as UserRole);
+  const maxResendAttempts = getMaxResendAttempts(role as UserRole);
   const otpExpiryTime = getOtpExpiryTime(role as UserRole);
   const resendTimerDuration = getResendTimer(role as UserRole);
   const roleMessages = getRoleMessages(role as UserRole);
@@ -78,6 +79,7 @@ export default function RegisterForm() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState('');
   const [showOtpError, setShowOtpError] = useState(false);
+  const [otpErrorTrigger, setOtpErrorTrigger] = useState(0); // Counter to trigger new errors
   const [otpSuccess, setOtpSuccess] = useState('');
   const [otpVerifySuccess, setOtpVerifySuccess] = useState('');
   const lastVerifiedOtpRef = useRef('');
@@ -90,6 +92,10 @@ export default function RegisterForm() {
   const [otpCreatedAt, setOtpCreatedAt] = useState<number | null>(null);
   const [otpAttempts, setOtpAttempts] = useState(0);
   const [otpDisabled, setOtpDisabled] = useState(false);
+  
+  // Resend counter state
+  const [resendCount, setResendCount] = useState(0);
+  const [resendDisabled, setResendDisabled] = useState(false);
 
   // Configure role-based colors and settings
   const roleConfig = {
@@ -350,12 +356,33 @@ export default function RegisterForm() {
         // Reset states
         setOtpDisabled(false);
         setOtpAttempts(0);
+        // Reset resend states too
+        setResendCount(0);
+        setResendDisabled(false);
       } else {
         throw new Error(result.message || 'Invalid OTP');
       }
     } catch (error: any) {
-      setOtpError('Invalid OTP, please try again');
-      setShowOtpError(true);
+      // Increment attempts counter
+      const newAttempts = otpAttempts + 1;
+      setOtpAttempts(newAttempts);
+      
+      const remainingAttempts = maxAttempts - newAttempts;
+      
+      if (newAttempts >= maxAttempts) {
+        // Max attempts reached
+        setOtpDisabled(true);
+        setOtpError(`Maximum ${maxAttempts} attempts reached. Please request a new OTP.`);
+        setShowOtpError(true);
+        // Toast removed - message already shown in OTP component
+      } else {
+        // Still have attempts left
+        setOtpError(`Invalid OTP. ${remainingAttempts} attempts remaining.`);
+        setShowOtpError(true);
+        toast.error(`❌ Invalid OTP. ${remainingAttempts} attempts remaining.`);
+      }
+      
+      setOtpErrorTrigger(prev => prev + 1); // Increment to trigger new error in OtpInput
     } finally {
       setOtpLoading(false);
     }
@@ -377,6 +404,11 @@ export default function RegisterForm() {
   // COMPLETELY SIMPLE: No useCallback, no dependencies
   const handleOtpChange = (otpValue: string) => {
     setOtp(otpValue);
+    // Clear error when user starts typing (but don't reset attempts counter)
+    if (showOtpError) {
+      setShowOtpError(false);
+      setOtpError('');
+    }
   };
 
   const handleOtpVerify = (otpValue: string) => {
@@ -416,7 +448,20 @@ export default function RegisterForm() {
                 </div>
               </div>
               <button
-                onClick={() => setShowOtpModal(false)}
+                onClick={() => {
+                  setShowOtpModal(false);
+                  setOtpError('');
+                  setOtpVerifySuccess('');
+                  setOtp('');
+                  setOtpSent(false);
+                  setOtpTimer(0);
+                  setCanResendOtp(true);
+                  setOtpAttempts(0);
+                  setOtpDisabled(false);
+                  // Reset resend states
+                  setResendCount(0);
+                  setResendDisabled(false);
+                }}
                 className="text-gray-400 hover:text-gray-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
               >
                 ✕
@@ -434,7 +479,20 @@ export default function RegisterForm() {
                       📧 {formData.email}
                     </p>
                     <button
-                      onClick={() => setShowOtpModal(false)}
+                      onClick={() => {
+                        setShowOtpModal(false);
+                        // Reset all OTP and resend states
+                        setOtpError('');
+                        setOtpVerifySuccess('');
+                        setOtp('');
+                        setOtpSent(false);
+                        setOtpTimer(0);
+                        setCanResendOtp(true);
+                        setOtpAttempts(0);
+                        setOtpDisabled(false);
+                        setResendCount(0);
+                        setResendDisabled(false);
+                      }}
                       className={`text-xs px-3 py-1 rounded-md border transition-colors ${
                         role === 'owner' 
                           ? 'border-green-300 text-green-700 hover:bg-green-100' 
@@ -530,6 +588,7 @@ export default function RegisterForm() {
                     error={!!(showOtpError && otpError)}
                     success={!!otpVerifySuccess}
                     loading={otpLoading}
+                    disabled={otpDisabled}
                     statusMessage={
                       showOtpError && otpError
                         ? otpError
@@ -565,17 +624,17 @@ export default function RegisterForm() {
                     errorMessageDuration={5000}
                     otpCreatedAt={otpCreatedAt}
                     expirySeconds={otpExpiryTime}
-                    autoClearOnError={false}
+                    autoClearOnError={true}
                     disableOnError={true}
                     hideDigitsOnError={true}
                     autoSubmitOnComplete={false}
                     allowAlphanumeric={false}
-                    maxAttempts={maxAttempts}
-                    onMaxAttemptsReached={handleMaxAttemptsReached}
                     placeholder="●"
                     direction="ltr"
                     role={role as 'user' | 'owner'}
                     focusOnErrorTrigger={showOtpError}
+                    errorTrigger={otpErrorTrigger}
+                    hideTimerOnMaxAttempts={otpDisabled}
                   />
                   
                   {/* Resend Section */}
@@ -586,7 +645,15 @@ export default function RegisterForm() {
                     <button
                       type="button"
                       onClick={async () => {
-                        if (!canResendOtp || otpLoading) return;
+                        if (!canResendOtp || otpLoading || resendDisabled) return;
+                        
+                        // Check resend limit
+                        const maxResends = getMaxResendAttempts(role);
+                        if (resendCount >= maxResends) {
+                          toast.error(`Maximum ${maxResends} resends allowed. Please refresh the page to start over.`);
+                          setResendDisabled(true);
+                          return;
+                        }
                         
                         setOtpLoading(true);
                         setOtpError('');
@@ -598,7 +665,19 @@ export default function RegisterForm() {
                           setOtpCreatedAt(Date.now());
                           setOtpAttempts(0);
                           setOtpDisabled(false);
-                          toast.success(roleMessages.otpSent);
+                          
+                          // Increment resend count
+                          const newResendCount = resendCount + 1;
+                          setResendCount(newResendCount);
+                          
+                          // Check if this was the last allowed resend
+                          if (newResendCount >= maxResends) {
+                            setResendDisabled(true);
+                            toast.success(`${roleMessages.otpSent} (Last resend - refresh page for more)`);
+                          } else {
+                            toast.success(`${roleMessages.otpSent} (${maxResends - newResendCount} resends left)`);
+                          }
+                          
                           startOtpTimer();
                         } catch (error: any) {
                           toast.error(error.message || 'OTP resend failed');
@@ -606,16 +685,20 @@ export default function RegisterForm() {
                           setOtpLoading(false);
                         }
                       }}
-                      disabled={!canResendOtp || otpLoading}
+                      disabled={!canResendOtp || otpLoading || resendDisabled}
                       className={`text-sm font-medium underline transition-colors ${
-                        !canResendOtp || otpLoading
+                        !canResendOtp || otpLoading || resendDisabled
                           ? 'text-gray-400 cursor-not-allowed'
                           : role === 'owner'
                           ? 'text-green-600 hover:text-green-700'
                           : 'text-blue-600 hover:text-blue-700'
                       }`}
                     >
-                      {!canResendOtp ? `Resend in ${otpTimer}s` : 'Resend Code'}
+                      {resendDisabled 
+                        ? 'Refresh page for more resends'
+                        : !canResendOtp 
+                        ? `Resend in ${otpTimer}s` 
+                        : `Resend Code (${getMaxResendAttempts(role) - resendCount} left)`}
                     </button>
                   </div>
                 </div>
