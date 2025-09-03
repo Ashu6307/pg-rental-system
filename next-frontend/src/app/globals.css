@@ -18,6 +18,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Custom spacing utility */
+.py-15 {
+  padding-top: 3.75rem; /* 60px */
+  padding-bottom: 3.75rem; /* 60px */
+}
+
 /* Line clamp utility for text wrapping */
 .line-clamp-2 {
   display: -webkit-box;

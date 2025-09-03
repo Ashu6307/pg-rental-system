@@ -142,7 +142,7 @@ const Home = () => {
 
       {/* Stats Section */}
       {homeData.stats && homeData.stats.length > 0 && (
-        <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden">
+        <section className="py-15 bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-extrabold mb-4 text-blue-900 tracking-tight drop-shadow">
@@ -196,7 +196,7 @@ const Home = () => {
 
       {/* Featured PGs Section */}
       {homeData.featuredPGs && homeData.featuredPGs.length > 0 && (
-        <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden">
+        <section className="py-15 bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-extrabold mb-4 text-blue-900 tracking-tight drop-shadow">
@@ -329,7 +329,7 @@ const Home = () => {
 
       {/* Featured Rooms & Flats Section */}
       {homeData.featuredRooms && homeData.featuredRooms.length > 0 && (
-        <section className="py-20 bg-gradient-to-br from-purple-50 to-pink-50 relative overflow-hidden">
+        <section className="py-15 bg-gradient-to-br from-purple-50 to-pink-50 relative overflow-hidden">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-extrabold mb-4 text-purple-900 tracking-tight drop-shadow">
@@ -466,7 +466,7 @@ const Home = () => {
 
       {/* Testimonials Section */}
       {homeData.testimonials && homeData.testimonials.length > 0 && (
-        <section className="py-20 bg-gradient-to-br from-green-50 to-teal-50 relative overflow-hidden">
+        <section className="py-15 bg-gradient-to-br from-green-50 to-teal-50 relative overflow-hidden">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold mb-4 text-green-900 tracking-tight drop-shadow">
@@ -505,7 +505,7 @@ const Home = () => {
       )}
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-br from-indigo-50 to-cyan-50 relative overflow-hidden">
+      <section className="py-15 bg-gradient-to-br from-indigo-50 to-cyan-50 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-extrabold mb-4 text-indigo-900 tracking-tight drop-shadow">
