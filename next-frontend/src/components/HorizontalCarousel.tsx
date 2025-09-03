@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface HorizontalCarouselProps {
@@ -18,121 +18,92 @@ const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
   className = ""
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [isScrolling, setIsScrolling] = useState(autoScroll);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [currentOffset, setCurrentOffset] = useState(0);
 
+  // Calculate animation duration for consistent linear speed
+  const animationDuration = Math.max(25, Math.floor(scrollSpeed * 0.7)); // Faster and more consistent
+
+  // Reset manual offset when auto-scroll resumes
   useEffect(() => {
-    let animationId: number;
-    
-    const scroll = () => {
-      if (contentRef.current && containerRef.current && isScrolling) {
-        const container = containerRef.current;
-        const content = contentRef.current;
-        
-        // Smooth auto scroll to right
-        container.scrollLeft += scrollSpeed / 60;
-        
-        // Calculate total width and reset point for seamless loop
-        const totalWidth = content.scrollWidth;
-        const containerWidth = container.clientWidth;
-        const singleSetWidth = totalWidth / 4; // We have 4 identical sets
-        
-        // Reset to start when we reach the end of first set
-        // This creates seamless infinite effect
-        if (container.scrollLeft >= singleSetWidth) {
-          container.scrollLeft = container.scrollLeft - singleSetWidth;
+    if (!isPaused && trackRef.current && currentOffset !== 0) {
+      trackRef.current.style.transition = 'transform 0.5s ease-out';
+      trackRef.current.style.transform = 'translate3d(0, 0, 0)';
+      setCurrentOffset(0);
+      
+      setTimeout(() => {
+        if (trackRef.current) {
+          trackRef.current.style.transition = '';
         }
-        
-        // Fallback: if we somehow reach the very end, reset to beginning
-        if (container.scrollLeft >= totalWidth - containerWidth - 50) {
-          container.scrollLeft = 0;
-        }
-      }
-      animationId = requestAnimationFrame(scroll);
-    };
-
-    if (isScrolling) {
-      animationId = requestAnimationFrame(scroll);
+      }, 500);
     }
-
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-    };
-  }, [isScrolling, scrollSpeed]);
-
-  useEffect(() => {
-    const updateScrollButtons = () => {
-      if (containerRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
-        // For infinite scroll, always show both arrows when there are enough cards
-        const hasEnoughCards = scrollWidth > clientWidth * 2;
-        setCanScrollLeft(hasEnoughCards);
-        setCanScrollRight(hasEnoughCards);
-      }
-    };
-
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', updateScrollButtons);
-      updateScrollButtons();
-      
-      return () => container.removeEventListener('scroll', updateScrollButtons);
-    }
-  }, [children]);
-
-  const scrollToDirection = (direction: 'left' | 'right') => {
-    if (containerRef.current && contentRef.current) {
-      const container = containerRef.current;
-      const content = contentRef.current;
-      const scrollAmount = 328; // Width of one card + gap (320 + 8)
-      const currentScrollLeft = container.scrollLeft;
-      const singleSetWidth = content.scrollWidth / 4; // 4 sets total
-      
-      let newScrollLeft;
-      
-      if (direction === 'left') {
-        newScrollLeft = currentScrollLeft - scrollAmount;
-        // If going too far left, wrap to end of first set
-        if (newScrollLeft < 0) {
-          newScrollLeft = singleSetWidth + newScrollLeft;
-        }
-      } else {
-        newScrollLeft = currentScrollLeft + scrollAmount;
-        // If going too far right, wrap to beginning
-        if (newScrollLeft >= singleSetWidth) {
-          newScrollLeft = newScrollLeft - singleSetWidth;
-        }
-      }
-      
-      container.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth'
-      });
-    }
-  };
+  }, [isPaused, currentOffset]);
 
   const handleMouseEnter = () => {
     if (autoScroll) {
-      setIsScrolling(false);
+      setIsPaused(true);
     }
   };
 
   const handleMouseLeave = () => {
     if (autoScroll) {
-      setIsScrolling(true);
+      setIsPaused(false);
+    }
+  };
+
+  const handleButtonClick = (direction: 'left' | 'right') => {
+    // Temporarily pause auto-scroll for manual navigation
+    setIsPaused(true);
+    scrollToDirection(direction);
+    
+    // Resume auto-scroll after 3 seconds
+    setTimeout(() => {
+      if (autoScroll) {
+        setIsPaused(false);
+      }
+    }, 3000);
+  };
+  const scrollToDirection = (direction: 'left' | 'right') => {
+    if (trackRef.current) {
+      const cardWidth = 352; // Card width (320px) + gap (32px)
+      const totalWidth = cardWidth * children.length; // Width of one set
+      
+      let newOffset = currentOffset;
+      
+      if (direction === 'right') {
+        newOffset = currentOffset - cardWidth;
+        // If we've scrolled past one complete set, reset to beginning of second set
+        if (Math.abs(newOffset) >= totalWidth) {
+          newOffset = 0;
+        }
+      } else {
+        newOffset = currentOffset + cardWidth;
+        // If we've scrolled back past the beginning, go to end of first set
+        if (newOffset > 0) {
+          newOffset = -totalWidth + cardWidth;
+        }
+      }
+      
+      setCurrentOffset(newOffset);
+      trackRef.current.style.transform = `translate3d(${newOffset}px, 0, 0)`;
+      trackRef.current.style.transition = 'transform 0.5s ease-out';
+      
+      // Remove transition after animation completes to avoid conflict with CSS animation
+      setTimeout(() => {
+        if (trackRef.current) {
+          trackRef.current.style.transition = '';
+        }
+      }, 500);
     }
   };
 
   return (
     <div className={`relative ${className}`}>
       {/* Left Arrow */}
-      {showArrows && canScrollLeft && (
+      {showArrows && (
         <button
-          onClick={() => scrollToDirection('left')}
+          onClick={() => handleButtonClick('left')}
           className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-300 hover:scale-110"
           aria-label="Scroll left"
         >
@@ -141,9 +112,9 @@ const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
       )}
 
       {/* Right Arrow */}
-      {showArrows && canScrollRight && (
+      {showArrows && (
         <button
-          onClick={() => scrollToDirection('right')}
+          onClick={() => handleButtonClick('right')}
           className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-300 hover:scale-110"
           aria-label="Scroll right"
         >
@@ -151,25 +122,35 @@ const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
         </button>
       )}
 
-      {/* Scrollable Container */}
-      <div
-        ref={containerRef}
-        className="overflow-x-auto scrollbar-hide carousel-smooth-scroll"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div
-          ref={contentRef}
-          className="flex gap-8 pb-4 carousel-container"
+      {/* Carousel Container - Ultra-smooth CSS Animation */}
+      <div className="carousel-container" ref={containerRef}>
+        <div 
+          ref={trackRef}
+          className={`carousel-track pg-carousel-track ${isPaused ? 'paused' : ''}`}
+          style={
+            {
+              '--carousel-duration': `${animationDuration}s`
+            } as React.CSSProperties
+          }
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
-          {/* Multiple sets for infinite loop - enough to ensure seamless scrolling */}
-          {Array.from({ length: 4 }, (_, setIndex) => 
-            children.map((child, index) => (
-              <div key={`set-${setIndex}-${index}`} className="flex-shrink-0 carousel-card">
-                {child}
-              </div>
-            ))
-          )}
+          {/* Multiple sets for ultra smooth infinite loop */}
+          {children.map((child, index) => (
+            <div key={`set1-${index}`} className="carousel-card">
+              {child}
+            </div>
+          ))}
+          {children.map((child, index) => (
+            <div key={`set2-${index}`} className="carousel-card">
+              {child}
+            </div>
+          ))}
+          {children.map((child, index) => (
+            <div key={`set3-${index}`} className="carousel-card">
+              {child}
+            </div>
+          ))}
         </div>
       </div>
     </div>

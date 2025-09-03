@@ -5,13 +5,6 @@
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -29,34 +22,80 @@ body {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 /* Horizontal Carousel Styles */
 .scrollbar-hide {
-  scrollbar-width: none;
   -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
+/* Infinite scroll carousel - Ultra-smooth CSS Animation */
 .carousel-container {
-  width: max-content;
+  position: relative;
+  overflow: hidden;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 32px;
+  animation: infiniteScroll 45s linear infinite;
+  width: fit-content;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU acceleration */
+  backface-visibility: hidden; /* Smooth rendering */
+  perspective: 1000px; /* Better 3D rendering */
+}
+
+.carousel-track:hover {
+  animation-play-state: paused;
+}
+
+.carousel-track.paused {
+  animation-play-state: paused;
+}
+
+/* Ultra-smooth infinite scroll with 3D transforms */
+@keyframes infiniteScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-33.333%, 0, 0);
+  }
 }
 
 .carousel-card {
+  flex: 0 0 auto;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
   width: 320px;
   min-width: 320px;
   max-width: 320px;
-  flex-shrink: 0;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU layer */
+  backface-visibility: hidden; /* Prevent flickering */
 }
 
-.carousel-smooth-scroll {
-  scroll-behavior: smooth;
+.carousel-card:hover {
+  transform: translateY(-8px) translateZ(0);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* Different speeds for different carousels with consistent linear timing */
+.pg-carousel-track {
+  animation: infiniteScroll var(--carousel-duration, 35s) linear infinite;
+}
+
+.room-carousel-track {
+  animation: infiniteScroll var(--carousel-duration, 40s) linear infinite;
 }
 
 /* OTP Input paste shake animation */
