@@ -8,6 +8,7 @@ import FooterContent from '../models/FooterContent.js';
 import FeatureContent from '../models/FeatureContent.js';
 import PG from '../models/PG.js';
 import Room from '../models/Room.js';
+import Bike from '../models/Bike.js';
 
 const router = express.Router();
 
@@ -22,10 +23,10 @@ router.get('/', async (req, res) => {
       isActive: true 
     }).sort({ order: 1 });
 
-    // Random PGs (limited info for public) - Increased to 20
+    // Random PGs (limited info for public)
     const randomPGs = await PG.aggregate([
       { $match: { status: 'active', softDelete: { $ne: true } } },
-      { $sample: { size: 20 } },
+      { $sample: { size: 4 } },
       {
         $project: {
           name: 1,
@@ -33,58 +34,46 @@ router.get('/', async (req, res) => {
           state: 1,
           price: 1,
           images: { $slice: ['$images', 1] },
-          rating: 1,
-          roomTypes: 1
+          rating: 1
         }
       }
     ]);
 
-    // Add originalPrice to PGs for discount calculation
-    const transformedPGs = randomPGs.map(pg => {
-      // Find the cheapest room type with originalPrice for discount display
-      let originalPrice = null;
-      if (pg.roomTypes && pg.roomTypes.length > 0) {
-        const roomWithOriginalPrice = pg.roomTypes.find(room => room.originalPrice && room.originalPrice > room.price);
-        if (roomWithOriginalPrice) {
-          originalPrice = roomWithOriginalPrice.originalPrice;
-        }
-      }
-      
-      return {
-        ...pg,
-        originalPrice: originalPrice
-      };
-    });
-
-    // Random Rooms (limited info for public) - Increased to 20
+    // Random Rooms (limited info for public) - Added for featured rooms
     const randomRooms = await Room.find({})
-    .select('name city state pricing.rent pricing.originalPrice media.images rating propertyType locality')
-    .limit(20)
-    .lean();
+      .select('name city state pricing.rent pricing.originalPrice media.images rating propertyType locality')
+      .limit(10)
+      .lean();
     
     // Transform rooms data to match frontend expectations
     const transformedRooms = randomRooms.map(room => {
-      // Add originalPrice for specific rooms to show discounts
-      let originalPrice = null;
-      if (room.name === 'Premium Single Room in Koramangala') {
-        originalPrice = 22000;
-      } else if (room.name === 'Budget-Friendly Room in Marathahalli') {
-        originalPrice = 15000;
-      } else if (room.name === 'Luxury 2BHK Flat in Whitefield') {
-        originalPrice = 40000;
-      }
-      
       return {
         ...room,
         price: room.pricing?.rent, // Map pricing.rent to price for consistency
         type: room.propertyType,
         images: room.media?.images || [], // Map media.images to images for frontend
         pricing: {
-          ...room.pricing,
-          originalPrice: originalPrice
+          ...room.pricing
         }
       };
     });
+
+    // Random Bikes (limited info for public)
+    const randomBikes = await Bike.aggregate([
+      { $match: { status: 'approved', softDelete: { $ne: true }, available: true } },
+      { $sample: { size: 4 } },
+      {
+        $project: {
+          brand: 1,
+          model: 1,
+          type: 1,
+          color: 1,
+          price_per_day: 1,
+          images: { $slice: ['$images', 1] },
+          rating: 1
+        }
+      }
+    ]);
 
     const testimonials = await Testimonial.find({ isDeleted: false }).limit(6);
     const cta = await CTAContent.findOne({ isDeleted: false });
@@ -103,13 +92,17 @@ router.get('/', async (req, res) => {
         title: "Rooms For You", 
         subtitle: "Find perfect rooms with all amenities for comfortable living"
       },
+      bikes: {
+        title: "Bikes For You", 
+        subtitle: "Find the perfect bike for your daily commute or weekend adventures"
+      },
       testimonials: {
         title: "What Our Users Say",
-        subtitle: "Real experiences from our satisfied customers who found their perfect PG and room"
+        subtitle: "Real experiences from our satisfied customers who found their perfect PG and bike"
       },
       features: {
         title: "Why Choose Our Platform",
-        subtitle: "Experience the best in PG accommodations and room rentals with our comprehensive platform"
+        subtitle: "Experience the best in PG accommodations and bike rentals with our comprehensive platform"
       }
     };
     
@@ -123,7 +116,7 @@ router.get('/', async (req, res) => {
     if (!features) {
       features = {
         title: "Why Choose Our Platform",
-        subtitle: "Experience the best in PG accommodations and room rentals with our comprehensive platform",
+        subtitle: "Experience the best in PG accommodations and bike rentals with our comprehensive platform",
         ctaText: "Start Your Journey Today",
         items: [
           {
@@ -133,10 +126,10 @@ router.get('/', async (req, res) => {
             description: 'All our PG accommodations are verified and inspected for quality, safety, and cleanliness standards.'
           },
           {
-            icon: 'building',
+            icon: 'bicycle',
             color: 'purple',
-            title: 'Quality Rooms',
-            description: 'Well-furnished rooms with all amenities, regular maintenance, and verified safety standards.'
+            title: 'Premium Bikes',
+            description: 'Well-maintained bikes with regular servicing, insurance coverage, and 24/7 roadside assistance.'
           },
           {
             icon: 'credit-card',
@@ -176,8 +169,9 @@ router.get('/', async (req, res) => {
     res.json({ 
       hero, 
       stats: marketingStats, 
-      featuredPGs: transformedPGs, 
-      featuredRooms: transformedRooms, 
+      featuredPGs: randomPGs, 
+      featuredRooms: transformedRooms,
+      featuredBikes: randomBikes, 
       testimonials, 
       cta,
       features,

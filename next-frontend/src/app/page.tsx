@@ -72,10 +72,10 @@ const Home = () => {
       <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold mb-6">
-            {hero?.title || 'Welcome to PG & Room Rental'}
+            {hero?.title || ''}
           </h1>
           <p className="text-xl mb-6 max-w-2xl mx-auto">
-            {hero?.subtitle || 'Find your perfect PG accommodation and room rental solution in one convenient platform'}
+            {hero?.subtitle || ''}
           </p>
           
           {/* Hero Image Carousel */}
@@ -146,10 +146,10 @@ const Home = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-extrabold mb-4 text-blue-900 tracking-tight drop-shadow">
-                {homeData.sectionHeaders?.stats?.title || "Our Achievements"}
+                {homeData.sectionHeaders?.stats?.title || ''}
               </h2>
               <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-                {homeData.sectionHeaders?.stats?.subtitle || "Numbers that speak for our commitment to excellence"}
+                {homeData.sectionHeaders?.stats?.subtitle || ''}
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -200,10 +200,10 @@ const Home = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-extrabold mb-4 text-blue-900 tracking-tight drop-shadow">
-                {homeData.sectionHeaders?.pgs?.title || "PGs For You"}
+                {homeData.sectionHeaders?.pgs?.title || ''}
               </h2>
               <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-                {homeData.sectionHeaders?.pgs?.subtitle || "Discover comfortable and affordable PG accommodations tailored just for you"}
+                {homeData.sectionHeaders?.pgs?.subtitle || ''}
               </p>
             </div>
             
@@ -333,10 +333,10 @@ const Home = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-extrabold mb-4 text-purple-900 tracking-tight drop-shadow">
-                {homeData.sectionHeaders?.rooms?.title || "Rooms & Flats For You"}
+                {homeData.sectionHeaders?.rooms?.title || ''}
               </h2>
               <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-                {homeData.sectionHeaders?.rooms?.subtitle || "Find the perfect room or flat for your comfortable stay and lifestyle"}
+                {homeData.sectionHeaders?.rooms?.subtitle || ''}
               </p>
             </div>
             
@@ -470,13 +470,14 @@ const Home = () => {
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold mb-4 text-green-900 tracking-tight drop-shadow">
-                {homeData.sectionHeaders?.testimonials?.title || "What Our Customers Say"}
+                {homeData.sectionHeaders?.testimonials?.title || ''}
               </h2>
               <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-                {homeData.sectionHeaders?.testimonials?.subtitle || "Real experiences from our satisfied customers"}
+                {homeData.sectionHeaders?.testimonials?.subtitle || ''}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <HorizontalCarousel autoScroll={true} scrollSpeed={35} showArrows={true}>
               {homeData.testimonials.map((review: any, idx: number) => (
                 <div key={idx} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group">
                   <div className="flex flex-col items-center text-center">
@@ -494,11 +495,11 @@ const Home = () => {
                       ))}
                       <span className="ml-2 text-gray-600 font-medium">{review.rating ?? 'N/A'}</span>
                     </div>
-                    <p className="text-gray-700 text-center italic">"{review.text || 'No review provided.'}"</p>
+                    <p className="text-gray-700 text-center italic">"{review.review || review.text || 'No review provided.'}"</p>
                   </div>
                 </div>
               ))}
-            </div>
+            </HorizontalCarousel>
           </div>
         </section>
       )}
@@ -508,10 +509,10 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-extrabold mb-4 text-indigo-900 tracking-tight drop-shadow">
-              {homeData.sectionHeaders?.features?.title || homeData.features?.title || "Why Choose Our Platform"}
+              {homeData.sectionHeaders?.features?.title || homeData.features?.title || ''}
             </h2>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-              {homeData.sectionHeaders?.features?.subtitle || homeData.features?.subtitle || "Experience the best in PG accommodations and room rentals with our comprehensive platform"}
+              {homeData.sectionHeaders?.features?.subtitle || homeData.features?.subtitle || ''}
             </p>
           </div>
           
@@ -546,39 +547,7 @@ const Home = () => {
                   </div>
                 );
               })
-            ) : (
-              [
-                { icon: 'building', title: 'Verified Properties', description: 'All our PGs and rooms are verified for quality and safety' },
-                { icon: 'star', title: 'Top Rated', description: 'Choose from highly rated accommodations with genuine reviews' },
-                { icon: 'lock', title: 'Secure Booking', description: 'Safe and secure payment processing for peace of mind' },
-                { icon: 'mobile', title: 'Easy Booking', description: 'Book your accommodation in just a few simple steps' },
-                { icon: 'key', title: 'Instant Confirmation', description: 'Get immediate booking confirmation and access details' },
-                { icon: 'headset', title: '24/7 Support', description: 'Round-the-clock customer support for all your needs' }
-              ].map((feature, idx) => {
-                const iconMap: { [key: string]: any } = {
-                  'building': FaBuilding,
-                  'star': FaStar,
-                  'lock': FaLock,
-                  'mobile': FaMobileAlt,
-                  'key': FaKey,
-                  'headset': FaHeadset
-                };
-                
-                const IconComponent = iconMap[feature.icon] || FaStar;
-                
-                return (
-                  <div key={idx} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="bg-indigo-100 p-4 rounded-full mb-4 group-hover:bg-indigo-200 transition-colors duration-300">
-                        <IconComponent size={32} className="text-indigo-600 group-hover:text-indigo-700 transition-colors" />
-                      </div>
-                      <h3 className="text-xl font-bold text-indigo-700 mb-2 group-hover:text-indigo-800 transition-colors">{feature.title}</h3>
-                      <p className="text-gray-600 text-center">{feature.description}</p>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+            ) : null}
           </div>
         </div>
       </section>

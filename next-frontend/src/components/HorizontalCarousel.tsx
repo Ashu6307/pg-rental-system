@@ -66,7 +66,7 @@ const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
   };
   const scrollToDirection = (direction: 'left' | 'right') => {
     if (trackRef.current) {
-      const cardWidth = 352; // Card width (320px) + gap (32px)
+      const cardWidth = 452; // Card width (420px) + gap (32px)
       const totalWidth = cardWidth * children.length; // Width of one set
       
       let newOffset = currentOffset;
