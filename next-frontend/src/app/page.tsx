@@ -25,6 +25,7 @@ const HomePageLoader = () => (
 const Home = () => {
   const [homeData, setHomeData] = useState<any>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const router = useRouter();
 
   // Auto-change images every 4 seconds
@@ -56,6 +57,24 @@ const Home = () => {
     };
 
     fetchHomeData();
+  }, []);
+
+  // Screen size detection for responsive scrolling
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setScreenSize('mobile');
+      } else if (width < 1024) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   if (!homeData) {
@@ -505,50 +524,134 @@ const Home = () => {
       )}
 
       {/* Features Section */}
-      <section className="py-15 bg-gradient-to-br from-indigo-50 to-cyan-50 relative overflow-hidden">
+      <section className="py-20 bg-gradient-to-br from-indigo-50 to-cyan-50 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-extrabold mb-4 text-indigo-900 tracking-tight drop-shadow">
-              {homeData.sectionHeaders?.features?.title || homeData.features?.title || ''}
+              {homeData.sectionHeaders?.features?.title || homeData.features?.title || "Why Choose Our Platform"}
             </h2>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-              {homeData.sectionHeaders?.features?.subtitle || homeData.features?.subtitle || ''}
+              {homeData.sectionHeaders?.features?.subtitle || homeData.features?.subtitle || "Experience the best in PG accommodations and bike rentals with our comprehensive platform"}
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {homeData.features?.items && Array.isArray(homeData.features.items) ? (
-              homeData.features.items.map((feature: any, idx: number) => {
-                const iconMap: { [key: string]: any } = {
-                  'home': FaHome,
-                  'bed': FaBed,
-                  'credit-card': FaCreditCard,
-                  'star': FaStar,
-                  'lock': FaLock,
-                  'mobile': FaMobileAlt,
-                  'building': FaBuilding,
-                  'hotel': FaHotel,
-                  'key': FaKey,
-                  'wifi': FaWifi,
-                  'car': FaCar
-                };
-                
-                const IconComponent = iconMap[feature.icon] || FaStar;
-                
-                return (
-                  <div key={idx} className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="bg-indigo-100 p-4 rounded-full mb-4 group-hover:bg-indigo-200 transition-colors duration-300">
-                        <IconComponent size={32} className="text-indigo-600 group-hover:text-indigo-700 transition-colors" />
-                      </div>
-                      <h3 className="text-xl font-bold text-indigo-700 mb-2 group-hover:text-indigo-800 transition-colors">{feature.title}</h3>
-                      <p className="text-gray-600 text-center">{feature.description}</p>
-                    </div>
+          {(() => {
+            const features = homeData.features?.items && Array.isArray(homeData.features.items) ? homeData.features.items : [];
+            
+            // Responsive scrolling logic for Features - Show all 6 cards on desktop
+            const getFeaturesScrollThreshold = () => {
+              if (screenSize === 'mobile') return 1;   // Mobile: >1 card = scroll
+              if (screenSize === 'tablet') return 2;   // Tablet: >2 cards = scroll  
+              return 6;                                // Desktop: >6 cards = scroll (show all 6)
+            };
+            
+            const shouldScrollFeatures = features.length > getFeaturesScrollThreshold();
+            
+            const iconMap: { [key: string]: any } = {
+              'home': FaHome,
+              'bed': FaBed,
+              'credit-card': FaCreditCard,
+              'star': FaStar,
+              'lock': FaLock,
+              'mobile': FaMobileAlt,
+              'building': FaBuilding,
+              'hotel': FaHotel,
+              'key': FaKey,
+              'wifi': FaWifi,
+              'car': FaCar
+            };
+            
+            const FeatureCard = ({ feature, idx }: { feature: any, idx: number }) => {
+              const IconComponent = iconMap[feature.icon] || FaStar;
+              
+              // Color mapping based on database color field - matching old frontend exactly
+              const colorMap: { [key: string]: { border: string, bg: string, bgHover: string, text: string, title: string } } = {
+                'blue': {
+                  border: 'border-blue-500',
+                  bg: 'bg-blue-100',
+                  bgHover: 'group-hover:bg-blue-200',
+                  text: 'text-blue-600',
+                  title: 'text-blue-900'
+                },
+                'purple': {
+                  border: 'border-purple-500',
+                  bg: 'bg-purple-100',
+                  bgHover: 'group-hover:bg-purple-200',
+                  text: 'text-purple-600',
+                  title: 'text-purple-900'
+                },
+                'green': {
+                  border: 'border-green-500',
+                  bg: 'bg-green-100',
+                  bgHover: 'group-hover:bg-green-200',
+                  text: 'text-green-600',
+                  title: 'text-green-900'
+                },
+                'orange': {
+                  border: 'border-orange-500',
+                  bg: 'bg-orange-100',
+                  bgHover: 'group-hover:bg-orange-200',
+                  text: 'text-orange-600',
+                  title: 'text-orange-900'
+                },
+                'pink': {
+                  border: 'border-pink-500',
+                  bg: 'bg-pink-100',
+                  bgHover: 'group-hover:bg-pink-200',
+                  text: 'text-pink-600',
+                  title: 'text-pink-900'
+                },
+                'cyan': {
+                  border: 'border-cyan-500',
+                  bg: 'bg-cyan-100',
+                  bgHover: 'group-hover:bg-cyan-200',
+                  text: 'text-cyan-600',
+                  title: 'text-cyan-900'
+                }
+              };
+              
+              const colors = colorMap[feature.color] || colorMap['blue']; // fallback to blue
+              
+              return (
+                <div
+                  key={idx}
+                  className={`bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 ${colors.border} hover:scale-105 transition-transform duration-300 group`}
+                >
+                  <div className={`${colors.bg} p-4 rounded-full mb-6 ${colors.bgHover} transition`}>
+                    <IconComponent size={40} className={colors.text} />
                   </div>
-                );
-              })
-            ) : null}
-          </div>
+                  <h3 className={`text-2xl font-bold mb-4 ${colors.title}`}>
+                    {feature.title || "Feature"}
+                  </h3>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    {feature.description || "Feature description"}
+                  </p>
+                </div>
+              );
+            };
+            
+            if (shouldScrollFeatures) {
+              return (
+                <div className="horizontal-carousel">
+                  <div className="carousel-track">
+                    {features.map((feature: any, idx: number) => (
+                      <div key={idx} className="carousel-slide">
+                        <FeatureCard feature={feature} idx={idx} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            } else {
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-8">
+                  {features.map((feature: any, idx: number) => (
+                    <FeatureCard key={idx} feature={feature} idx={idx} />
+                  ))}
+                </div>
+              );
+            }
+          })()}
         </div>
       </section>
     </div>

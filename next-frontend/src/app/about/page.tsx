@@ -19,7 +19,24 @@ const About: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const values = aboutContent.values || [];
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setScreenSize('mobile');
+      } else if (window.innerWidth < 1024) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -113,117 +130,224 @@ const About: React.FC = () => {
   );
 
   // Values Section
-  const Values = () => (
-    <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-extrabold text-center mb-8 text-blue-900 tracking-tight drop-shadow">Our Values</h2>
-        <div className="flex justify-center mb-8">
-          <div className="flex flex-wrap gap-2 bg-gray-100 p-2 rounded-lg">
-            {["all", "core", "service", "business", "social"].map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                  selectedCategory === category
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {category === "all" ? "All" : category.charAt(0).toUpperCase() + category.slice(1)}
-              </button>
-            ))}
+  const Values = () => {
+    const filteredValues = values.filter((value: any) => selectedCategory === "all" || value.category === selectedCategory);
+    
+    // Responsive scrolling logic for Values
+    const getValuesScrollThreshold = () => {
+      if (screenSize === 'mobile') return 1;   // Mobile: >1 card = scroll
+      if (screenSize === 'tablet') return 2;   // Tablet: >2 cards = scroll  
+      return 4;                                // Desktop: >4 cards = scroll
+    };
+    
+    const shouldScrollValues = filteredValues.length > getValuesScrollThreshold();
+    
+    return (
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-extrabold text-center mb-8 text-blue-900 tracking-tight drop-shadow">Our Values</h2>
+          <div className="flex justify-center mb-8">
+            <div className="flex flex-wrap gap-2 bg-gray-100 p-2 rounded-lg">
+              {["all", "core", "service", "business", "social"].map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                    selectedCategory === category
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {category === "all" ? "All" : category.charAt(0).toUpperCase() + category.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {values
-            .filter((value: any) => selectedCategory === "all" || value.category === selectedCategory)
-            .map((value: any, index: number) => (
-              <div key={index} className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl" style={{ background: value.color?.background || "#DBEAFE", color: value.color?.text || "#1E3A8A" }}>{value.icon}</div>
-                <h3 className="text-xl font-bold mb-2 text-blue-900">{value.title}</h3>
-                <span className="text-xs text-gray-500 capitalize mb-2">{value.category}</span>
-                <p className="text-gray-600 text-base mb-4 w-full text-left">{value.description}</p>
-                {value.benefits && value.benefits.length > 0 && (
-                  <ul className="text-xs text-gray-600 space-y-1 mb-2 text-left w-full pl-4">
-                    {value.benefits.map((benefit: string, i: number) => (
-                      <li key={i} className="flex items-center">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {value.metrics && (
-                  <div className="flex items-center justify-center gap-4 pt-2">
-                    <span className="flex items-center text-yellow-500"><FaStar className="mr-1 text-xs" />{value.metrics.satisfactionRate}%</span>
-                    <span className="flex items-center text-purple-600"><FaHeart className="mr-1 text-xs" />Impact: {value.metrics.impactScore}/10</span>
+          {shouldScrollValues ? (
+            <div className="horizontal-carousel">
+              <div className="carousel-track">
+                {filteredValues.map((value: any, index: number) => (
+                  <div key={index} className="carousel-slide">
+                    <div className="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group h-full">
+                      <div className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl" style={{ background: value.color?.background || "#DBEAFE", color: value.color?.text || "#1E3A8A" }}>{value.icon}</div>
+                      <h3 className="text-xl font-bold mb-2 text-blue-900">{value.title}</h3>
+                      <span className="text-xs text-gray-500 capitalize mb-2">{value.category}</span>
+                      <p className="text-gray-600 text-base mb-4 w-full text-left line-clamp-2">{value.description}</p>
+                      {value.benefits && value.benefits.length > 0 && (
+                        <ul className="text-xs text-gray-600 space-y-1 mb-2 text-left w-full pl-4">
+                          {value.benefits.slice(0, 3).map((benefit: string, i: number) => (
+                            <li key={i} className="flex items-center">
+                              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {value.metrics && (
+                        <div className="flex items-center justify-center gap-4 pt-2 mt-auto">
+                          <span className="flex items-center text-yellow-500"><FaStar className="mr-1 text-xs" />{value.metrics.satisfactionRate}%</span>
+                          <span className="flex items-center text-purple-600"><FaHeart className="mr-1 text-xs" />{value.metrics.impactScore}/10</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-                {value.tags && value.tags.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1 justify-center">
-                    {value.tags.map((tag: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">#{tag}</span>
-                    ))}
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredValues.map((value: any, index: number) => (
+                <div key={index} className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group">
+                  <div className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl" style={{ background: value.color?.background || "#DBEAFE", color: value.color?.text || "#1E3A8A" }}>{value.icon}</div>
+                  <h3 className="text-xl font-bold mb-2 text-blue-900">{value.title}</h3>
+                  <span className="text-xs text-gray-500 capitalize mb-2">{value.category}</span>
+                  <p className="text-gray-600 text-base mb-4 w-full text-left">{value.description}</p>
+                  {value.benefits && value.benefits.length > 0 && (
+                    <ul className="text-xs text-gray-600 space-y-1 mb-2 text-left w-full pl-4">
+                      {value.benefits.map((benefit: string, i: number) => (
+                        <li key={i} className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                          {benefit}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {value.metrics && (
+                    <div className="flex items-center justify-center gap-4 pt-2">
+                      <span className="flex items-center text-yellow-500"><FaStar className="mr-1 text-xs" />{value.metrics.satisfactionRate}%</span>
+                      <span className="flex items-center text-purple-600"><FaHeart className="mr-1 text-xs" />Impact: {value.metrics.impactScore}/10</span>
+                    </div>
+                  )}
+                  {value.tags && value.tags.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1 justify-center">
+                      {value.tags.map((tag: string, i: number) => (
+                        <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">#{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    </section>
-  );
+      </section>
+    );
+  };
 
   // Team Section
-  const Team = () => (
-    <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-extrabold text-center mb-8 text-blue-900 tracking-tight drop-shadow">Our Team</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {(aboutContent?.team || []).map((member: any, index: number) => (
-            <div key={index} className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group">
-              {member?.avatar && member?.avatar.startsWith("http") ? (
-                <img
-                  src={member.avatar}
-                  alt={member.name}
-                  className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-500"
-                  style={{ background: "transparent" }}
-                />
-              ) : (
-                <div
-                  className="w-20 h-20 mb-4 rounded-full flex items-center justify-center font-bold"
-                  style={{
-                    background: `linear-gradient(135deg, #3b82f6 ${(member?.name?.charCodeAt(0) || 65) % 60}%, #8b5cf6 100%)`,
-                    color: "#fff",
-                    fontSize: "2.5rem",
-                    letterSpacing: "1px",
-                    fontWeight: 700,
-                    textShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                    userSelect: "none",
-                    border: "2px solid #3b82f6",
-                  }}
-                >
-                  {member?.name?.charAt(0)?.toUpperCase() || "U"}
-                </div>
-              )}
-              <h3 className="text-xl font-bold mb-1 text-blue-900">{member?.name || "Team Member"}</h3>
-              <p className="text-blue-600 font-medium mb-2">{member?.position || "Position"}</p>
-              <p className="text-sm text-gray-500 mb-4">{member?.bio || "Bio information"}</p>
-              {member?.social && (
-                <div className="flex justify-center space-x-4">
-                  {member.social.linkedin && (
-                    <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm">LinkedIn</a>
-                  )}
-                  {member.social.email && (
-                    <a href={`mailto:${member.social.email}`} className="text-gray-600 hover:text-gray-800 text-sm">Email</a>
-                  )}
-                </div>
-              )}
+  const Team = () => {
+    const teamMembers = aboutContent?.team || [];
+    
+    // Responsive scrolling logic
+    const getScrollThreshold = () => {
+      if (screenSize === 'mobile') return 1;   // Mobile: >1 card = scroll
+      if (screenSize === 'tablet') return 2;   // Tablet: >2 cards = scroll  
+      return 4;                                // Desktop: >4 cards = scroll
+    };
+    
+    const shouldScroll = teamMembers.length > getScrollThreshold();
+    
+    return (
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-extrabold text-center mb-8 text-blue-900 tracking-tight drop-shadow">Our Team</h2>
+          {shouldScroll ? (
+            <div className="horizontal-carousel">
+              <div className="carousel-track">
+                {teamMembers.map((member: any, index: number) => (
+                  <div key={index} className="carousel-slide">
+                    <div className="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group h-full">
+                      {member?.avatar && member?.avatar.startsWith("http") ? (
+                        <img
+                          src={member.avatar}
+                          alt={member.name}
+                          className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-500"
+                          style={{ background: "transparent" }}
+                        />
+                      ) : (
+                        <div
+                          className="w-20 h-20 mb-4 rounded-full flex items-center justify-center font-bold"
+                          style={{
+                            background: `linear-gradient(135deg, #3b82f6 ${(member?.name?.charCodeAt(0) || 65) % 60}%, #8b5cf6 100%)`,
+                            color: "#fff",
+                            fontSize: "2.5rem",
+                            letterSpacing: "1px",
+                            fontWeight: 700,
+                            textShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                            userSelect: "none",
+                            border: "2px solid #3b82f6",
+                          }}
+                        >
+                          {member?.name?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+                      )}
+                      <h3 className="text-xl font-bold mb-1 text-blue-900">{member?.name || "Team Member"}</h3>
+                      <p className="text-blue-600 font-medium mb-2">{member?.position || "Position"}</p>
+                      <p className="text-sm text-gray-500 mb-4 line-clamp-2">{member?.bio || "Bio information"}</p>
+                      {member?.social && (
+                        <div className="flex justify-center space-x-4 mt-auto">
+                          {member.social.linkedin && (
+                            <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm">LinkedIn</a>
+                          )}
+                          {member.social.email && (
+                            <a href={`mailto:${member.social.email}`} className="text-gray-600 hover:text-gray-800 text-sm">Email</a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {teamMembers.map((member: any, index: number) => (
+                <div key={index} className="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group h-full">
+                  {member?.avatar && member?.avatar.startsWith("http") ? (
+                    <img
+                      src={member.avatar}
+                      alt={member.name}
+                      className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-500"
+                      style={{ background: "transparent" }}
+                    />
+                  ) : (
+                    <div
+                      className="w-20 h-20 mb-4 rounded-full flex items-center justify-center font-bold"
+                      style={{
+                        background: `linear-gradient(135deg, #3b82f6 ${(member?.name?.charCodeAt(0) || 65) % 60}%, #8b5cf6 100%)`,
+                        color: "#fff",
+                        fontSize: "2.5rem",
+                        letterSpacing: "1px",
+                        fontWeight: 700,
+                        textShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                        userSelect: "none",
+                        border: "2px solid #3b82f6",
+                      }}
+                    >
+                      {member?.name?.charAt(0)?.toUpperCase() || "U"}
+                    </div>
+                  )}
+                  <h3 className="text-xl font-bold mb-1 text-blue-900">{member?.name || "Team Member"}</h3>
+                  <p className="text-blue-600 font-medium mb-2">{member?.position || "Position"}</p>
+                  <p className="text-sm text-gray-500 mb-4 line-clamp-2">{member?.bio || "Bio information"}</p>
+                  {member?.social && (
+                    <div className="flex justify-center space-x-4 mt-auto">
+                      {member.social.linkedin && (
+                        <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm">LinkedIn</a>
+                      )}
+                      {member.social.email && (
+                        <a href={`mailto:${member.social.email}`} className="text-gray-600 hover:text-gray-800 text-sm">Email</a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    </section>
-  );
+      </section>
+    );
+  };
 
   if (loading) {
     return (

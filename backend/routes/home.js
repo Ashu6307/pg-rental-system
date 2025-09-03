@@ -84,64 +84,17 @@ router.get('/', async (req, res) => {
       }
     };
     
-    // Features/Marketing content - try to get from database first
+    // Features/Marketing content - get from database only
     let features = await FeatureContent.findOne({ 
       isActive: true, 
       isDeleted: false 
     }).sort({ createdAt: -1 });
     
-    // If no features found in database, use default
-    if (!features) {
-      features = {
-        title: "Why Choose Our Platform",
-        subtitle: "Experience the best in PG accommodations and room rentals with our comprehensive platform",
-        ctaText: "Start Your Journey Today",
-        items: [
-          {
-            icon: 'home',
-            color: 'blue',
-            title: 'Verified PGs',
-            description: 'All our PG accommodations are verified and inspected for quality, safety, and cleanliness standards.'
-          },
-          {
-            icon: 'building',
-            color: 'purple',
-            title: 'Quality Rooms',
-            description: 'Well-furnished rooms with all amenities, regular maintenance, and verified safety standards.'
-          },
-          {
-            icon: 'credit-card',
-            color: 'green',
-            title: 'Secure Payments',
-            description: 'Safe and secure payment gateway with multiple payment options and instant booking confirmation.'
-          },
-          {
-            icon: 'star',
-            color: 'orange',
-            title: 'Best Prices',
-            description: 'Competitive pricing with no hidden charges, transparent billing, and flexible payment plans.'
-          },
-          {
-            icon: 'lock',
-            color: 'pink',
-            title: 'Safe & Secure',
-            description: 'Advanced security measures, background-verified owners, and comprehensive safety protocols.'
-          },
-          {
-            icon: 'mobile',
-            color: 'cyan',
-            title: 'Easy Booking',
-            description: 'Simple and intuitive booking process with instant confirmation and easy cancellation policies.'
-          }
-        ]
-      };
-    } else {
-      // Sort active items by order
-      if (features.items) {
-        features.items = features.items
-          .filter(item => item.isActive)
-          .sort((a, b) => (a.order || 0) - (b.order || 0));
-      }
+    // Sort active items by order if features exist
+    if (features && features.items) {
+      features.items = features.items
+        .filter(item => item.isActive)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
     }
     
     res.json({ 

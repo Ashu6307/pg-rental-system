@@ -50,6 +50,13 @@ body {
   width: 100%;
 }
 
+.horizontal-carousel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin: 0 auto;
+}
+
 .carousel-track {
   display: flex;
   gap: 32px;
@@ -67,6 +74,13 @@ body {
 
 .carousel-track.paused {
   animation-play-state: paused;
+}
+
+.carousel-slide {
+  flex: 0 0 auto;
+  width: 350px;
+  min-width: 350px;
+  max-width: 350px;
 }
 
 /* Ultra-smooth infinite scroll with 3D transforms */

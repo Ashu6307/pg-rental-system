@@ -12,11 +12,28 @@ const Contact: React.FC = () => {
   const [content, setContent] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
   // Form validation states
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [mobileError, setMobileError] = useState('');
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setScreenSize('mobile');
+      } else if (window.innerWidth < 1024) {
+        setScreenSize('tablet');
+      } else {
+        setScreenSize('desktop');
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchContactContent = async () => {
@@ -142,6 +159,15 @@ const Contact: React.FC = () => {
   const offices = Array.isArray(content.offices) ? content.offices : [];
   const faq = Array.isArray(content.faq) ? content.faq : [];
   const contactInfo = content.contactInfo || {};
+
+  // Responsive scrolling logic for Offices
+  const getOfficesScrollThreshold = () => {
+    if (screenSize === 'mobile') return 1;   // Mobile: >1 office = scroll
+    if (screenSize === 'tablet') return 2;   // Tablet: >2 offices = scroll  
+    return 3;                                // Desktop: >3 offices = scroll
+  };
+
+  const shouldScrollOffices = offices.length > getOfficesScrollThreshold();
 
   if (loading) {
     return (
@@ -441,65 +467,122 @@ const Contact: React.FC = () => {
       </section>
 
       {/* Offices Section */}
-      <section className="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-extrabold text-center mb-8 text-blue-900 tracking-tight drop-shadow">Our Offices</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {offices.length === 0 ? (
-              <div className="text-center py-12 col-span-3">
-                <p className="text-gray-600">No offices found. Please check back later.</p>
-              </div>
-            ) : (
-              offices.map((office: any, idx: number) => (
-                <div key={idx} className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group">
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl bg-blue-100 text-blue-600">
-                    <FaBuilding />
+          {shouldScrollOffices ? (
+            <div className="horizontal-carousel">
+              <div className="carousel-track">
+                {offices.map((office: any, idx: number) => (
+                  <div key={idx} className="carousel-slide">
+                    <div className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group h-full">
+                      <div className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl bg-blue-100 text-blue-600">
+                        <FaBuilding />
+                      </div>
+                      <h3 className="text-xl font-bold mb-2 text-blue-900">
+                        {office.name || office.city || office.address?.city}
+                      </h3>
+                      <p className="text-gray-600 text-base mb-2 line-clamp-2">
+                        {office.address?.street || ''}{office.address?.city ? `, ${office.address.city}` : ''}{office.address?.state ? `, ${office.address.state}` : ''}{office.address?.pincode ? ` - ${office.address.pincode}` : ''}
+                      </p>
+                      {office.contact?.phone && (
+                        <p className="text-gray-700 mb-2">
+                          <FaPhone className="inline mr-2" />
+                          {typeof office.contact.phone === "object"
+                            ? office.contact.phone.primary || office.contact.phone.whatsapp
+                            : office.contact.phone}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2 justify-center mb-2">
+                        {office.services && Object.entries(office.services).slice(0, 3).map(([service, enabled]) =>
+                          enabled ? (
+                            <span
+                              key={service}
+                              className={`px-2 py-1 text-xs rounded-full ${
+                                service === "pgRentals"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : service === "roomRentals"
+                                  ? "bg-green-100 text-green-800"
+                                  : service === "maintenance"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : service === "insurance"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {service.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+                            </span>
+                          ) : null
+                        )}
+                      </div>
+                      {office.workingHours && (
+                        <div className="text-sm text-gray-600 mt-auto">
+                          <strong>Working Hours:</strong> {office.workingHours.start} - {office.workingHours.end}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-blue-900">
-                    {office.name || office.city || office.address?.city}
-                  </h3>
-                  <p className="text-gray-600 text-base mb-2">
-                    {office.address?.street || ''}{office.address?.city ? `, ${office.address.city}` : ''}{office.address?.state ? `, ${office.address.state}` : ''}{office.address?.pincode ? ` - ${office.address.pincode}` : ''}
-                  </p>
-                  {office.contact?.phone && (
-                    <p className="text-gray-700 mb-2">
-                      <FaPhone className="inline mr-2" />
-                      {typeof office.contact.phone === "object"
-                        ? office.contact.phone.primary || office.contact.phone.whatsapp
-                        : office.contact.phone}
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {offices.length === 0 ? (
+                <div className="text-center py-12 col-span-3">
+                  <p className="text-gray-600">No offices found. Please check back later.</p>
+                </div>
+              ) : (
+                offices.map((office: any, idx: number) => (
+                  <div key={idx} className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group">
+                    <div className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl bg-blue-100 text-blue-600">
+                      <FaBuilding />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2 text-blue-900">
+                      {office.name || office.city || office.address?.city}
+                    </h3>
+                    <p className="text-gray-600 text-base mb-2">
+                      {office.address?.street || ''}{office.address?.city ? `, ${office.address.city}` : ''}{office.address?.state ? `, ${office.address.state}` : ''}{office.address?.pincode ? ` - ${office.address.pincode}` : ''}
                     </p>
-                  )}
-                  <div className="flex flex-wrap gap-2 justify-center mb-2">
-                    {office.services && Object.entries(office.services).map(([service, enabled]) =>
-                      enabled ? (
-                        <span
-                          key={service}
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            service === "pgRentals"
-                              ? "bg-blue-100 text-blue-800"
-                              : service === "roomRentals"
-                              ? "bg-green-100 text-green-800"
-                              : service === "maintenance"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : service === "insurance"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {service.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
-                        </span>
-                      ) : null
+                    {office.contact?.phone && (
+                      <p className="text-gray-700 mb-2">
+                        <FaPhone className="inline mr-2" />
+                        {typeof office.contact.phone === "object"
+                          ? office.contact.phone.primary || office.contact.phone.whatsapp
+                          : office.contact.phone}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap gap-2 justify-center mb-2">
+                      {office.services && Object.entries(office.services).map(([service, enabled]) =>
+                        enabled ? (
+                          <span
+                            key={service}
+                            className={`px-2 py-1 text-xs rounded-full ${
+                              service === "pgRentals"
+                                ? "bg-blue-100 text-blue-800"
+                                : service === "roomRentals"
+                                ? "bg-green-100 text-green-800"
+                                : service === "maintenance"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : service === "insurance"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {service.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+                          </span>
+                        ) : null
+                      )}
+                    </div>
+                    {office.workingHours && (
+                      <div className="text-sm text-gray-600">
+                        <strong>Working Hours:</strong> {office.workingHours.start} - {office.workingHours.end}
+                      </div>
                     )}
                   </div>
-                  {office.workingHours && (
-                    <div className="text-sm text-gray-600">
-                      <strong>Working Hours:</strong> {office.workingHours.start} - {office.workingHours.end}
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </section>
 
