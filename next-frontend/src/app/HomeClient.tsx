@@ -4,6 +4,7 @@ import { FaBuilding, FaHome, FaBed, FaCreditCard, FaStar, FaLock, FaMobileAlt, F
 import { useRouter } from 'next/navigation';
 import apiService from '@/services/api';
 import HorizontalCarousel from '@/components/HorizontalCarousel';
+import CitySelectModal from '@/components/CitySelectModal';
 
 // Utility function to shuffle array
 function shuffleArray(array: any[]) {
@@ -26,6 +27,10 @@ const HomeClient = () => {
   const [homeData, setHomeData] = useState<any>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [showCityModal, setShowCityModal] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<any>(null);
+  const [cities, setCities] = useState<any[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
   // Auto-change images every 4 seconds
@@ -64,6 +69,37 @@ const HomeClient = () => {
     fetchHomeData();
   }, []);
 
+  // Check if user is logged in and fetch cities
+  useEffect(() => {
+    const checkAuthAndFetchCities = async () => {
+      try {
+        // Check if user is logged in
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (token) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+          // Fetch cities for modal if user is not logged in
+          const citiesData = await apiService.get('/api/cities');
+          setCities(citiesData.cities || []);
+          
+          // Check if city is already selected in localStorage
+          const savedCity = localStorage.getItem('selectedCity');
+          if (!savedCity) {
+            setShowCityModal(true);
+          } else {
+            setSelectedCity(JSON.parse(savedCity));
+          }
+        }
+      } catch (err) {
+        console.error('Error checking auth or fetching cities:', err);
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuthAndFetchCities();
+  }, []);
+
   // Screen size detection for responsive scrolling
   useEffect(() => {
     const handleResize = () => {
@@ -81,6 +117,18 @@ const HomeClient = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Handle city selection
+  const handleCitySelect = (city: any) => {
+    setSelectedCity(city);
+    localStorage.setItem('selectedCity', JSON.stringify(city));
+    setShowCityModal(false);
+  };
+
+  // Handle modal close
+  const handleModalClose = () => {
+    setShowCityModal(false);
+  };
 
   if (!homeData) {
     return <HomePageLoader />;
@@ -659,6 +707,14 @@ const HomeClient = () => {
           })()}
         </div>
       </section>
+
+      {/* City Select Modal */}
+      <CitySelectModal
+        isOpen={showCityModal}
+        onClose={handleModalClose}
+        onCitySelect={handleCitySelect}
+        cities={cities}
+      />
     </div>
   );
 };

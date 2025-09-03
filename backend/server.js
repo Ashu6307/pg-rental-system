@@ -7,6 +7,7 @@ import ownerWebhookLogsRoutes from './routes/ownerWebhookLogs.js';
 import contentRoutes from './routes/content.js';
 import offersRoutes from './routes/offersSimple.js';
 import ownersRoutes from './routes/ownersSimple.js';
+import citiesRoutes from './routes/cities.js';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -73,6 +74,7 @@ app.use(logger.logRequest.bind(logger));
 app.use('/api/home', homeRoutes); // /api/home public
 
 // Public routes (no auth required)
+app.use('/api/cities', citiesRoutes); // Cities list
 app.use('/api/pgs', pgRoutes); // Public PG listings
 app.use('/api/rooms', roomRoutes); // Public Room listings
 app.use('/api/offers', offersRoutes); // Public offers
