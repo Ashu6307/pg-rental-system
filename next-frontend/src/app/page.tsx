@@ -44,6 +44,11 @@ const Home = () => {
     }
   }, [homeData]);
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Home | PG & Room Rental';
+  }, []);
+
   useEffect(() => {
     const fetchHomeData = async () => {
       try {

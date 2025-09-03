@@ -11,6 +11,13 @@ function RegisterPageContent() {
   const role = searchParams.get('role');
 
   useEffect(() => {
+      // Set page title role wise
+      if (role === 'owner') {
+        document.title = 'Owner Register | PG & Room Rental';
+      } else {
+        document.title = 'User Register | PG & Room Rental';
+      }
+    
     // Redirect to role-specific page if no role parameter
     if (!role) {
       router.replace('/auth/register?role=user');

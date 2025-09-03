@@ -24,6 +24,11 @@ const PG: React.FC = () => {
   });
   const router = useRouter();
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'PG Accommodations | PG & Room Rental';
+  }, []);
+
   // Agar ScrollToTop migrate kiya hai to yahan use karo
   // const scrollToTop = useScrollToTop({ behavior: 'smooth', enableMultiTiming: true });
 

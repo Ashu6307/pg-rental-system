@@ -9,6 +9,13 @@ export default function LoginPage() {
   const role = searchParams.get('role');
 
   useEffect(() => {
+      // Set page title role wise
+      if (role === 'owner') {
+        document.title = 'Owner Login | PG & Room Rental';
+      } else {
+        document.title = 'User Login | PG & Room Rental';
+      }
+    
     // Redirect to role-specific page if no role parameter
     if (!role) {
       router.replace('/auth/login?role=user');

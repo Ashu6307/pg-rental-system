@@ -19,6 +19,11 @@ const Contact: React.FC = () => {
   const [emailError, setEmailError] = useState('');
   const [mobileError, setMobileError] = useState('');
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Contact Us | PG & Room Rental';
+  }, []);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {

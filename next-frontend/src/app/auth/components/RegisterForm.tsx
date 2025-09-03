@@ -152,12 +152,15 @@ export default function RegisterForm() {
   
   // Cleanup on unmount
   useEffect(() => {
+    // Set dynamic page title based on role
+    document.title = `${role === 'owner' ? 'Owner' : 'User'} Register | PG & Room Rental`;
+    
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-  }, []);
+  }, [role]);
 
   // STABLE onChange handlers to prevent infinite re-renders
   const handleNameChange = useCallback((value: string) => {

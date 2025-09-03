@@ -9,6 +9,15 @@ export default function ForgotPasswordPage() {
   const role = searchParams.get('role');
 
   useEffect(() => {
+      // Set page title role wise
+      if (role === 'admin') {
+        document.title = 'Admin Forgot Password | PG & Room Rental';
+      } else if (role === 'owner') {
+        document.title = 'Owner Forgot Password | PG & Room Rental';
+      } else {
+        document.title = 'User Forgot Password | PG & Room Rental';
+      }
+    
     // Redirect to role-specific page if no role parameter
     if (!role) {
       router.replace('/auth/forgot-password?role=user');

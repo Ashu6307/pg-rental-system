@@ -18,6 +18,11 @@ const About: React.FC = () => {
   const [aboutContent, setAboutContent] = useState<any>(defaultContent);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
+
+  // Set page title
+  useEffect(() => {
+    document.title = 'About Us | PG & Room Rental';
+  }, []);
   const [error, setError] = useState("");
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   const values = aboutContent.values || [];

@@ -113,6 +113,9 @@ const ForgotPasswordForm: React.FC = () => {
 
   // OTP Timer countdown - exactly like old frontend
   useEffect(() => {
+    // Set dynamic page title based on role
+    document.title = `${role === 'owner' ? 'Owner' : role === 'admin' ? 'Admin' : 'User'} Forgot Password | PG & Room Rental`;
+    
     let interval: NodeJS.Timeout | null = null;
     if (resendTimer > 0) {
       interval = setInterval(() => {

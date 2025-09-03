@@ -25,6 +25,11 @@ const Rooms: React.FC = () => {
   });
   const router = useRouter();
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Rooms & Flats | PG & Room Rental';
+  }, []);
+
   useEffect(() => {
     fetchRooms();
   }, []);

@@ -45,6 +45,9 @@ const LoginForm: React.FC = () => {
       setFormData(prev => ({ ...prev, email: rememberedEmail }));
       setRememberMe(true);
     }
+    
+    // Set dynamic page title based on role
+    document.title = `${role === 'owner' ? 'Owner' : 'User'} Login | PG & Room Rental`;
   }, [role]);
 
   const getRoleConfig = () => {

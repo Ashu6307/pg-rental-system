@@ -1,6 +1,15 @@
 "use client";
-import LoginForm from '../../components/LoginForm';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function OwnerLogin() {
-  return <LoginForm />;
+  const router = useRouter();
+  
+  useEffect(() => {
+    document.title = 'Owner Login | PG & Room Rental';
+    // Redirect to main login with owner role
+    router.replace('/auth/login?role=owner');
+  }, [router]);
+  
+  return null; // Component will redirect
 }
