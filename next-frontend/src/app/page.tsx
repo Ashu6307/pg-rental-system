@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FaBuilding, FaHome, FaBed, FaCreditCard, FaStar, FaLock, FaMobileAlt, FaMapMarkerAlt, FaHeadset, FaUsers, FaShieldAlt, FaKey, FaWifi, FaCar, FaHotel } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import apiService from '@/services/api';
+import HorizontalCarousel from '@/components/HorizontalCarousel';
 
 // Utility function to shuffle array
 function shuffleArray(array: any[]) {
@@ -205,16 +206,17 @@ const Home = () => {
                 {homeData.sectionHeaders?.pgs?.subtitle || "Discover comfortable and affordable PG accommodations tailored just for you"}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {shuffleArray(homeData.featuredPGs).slice(0, 6).map((item: any, idx: number) => (
+            
+            <HorizontalCarousel autoScroll={true} scrollSpeed={40} showArrows={true}>
+              {homeData.featuredPGs.slice(0, 20).map((item: any, idx: number) => (
                 <div
                   key={`${item._id || idx}-${idx}`}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer overflow-hidden"
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer overflow-hidden h-80"
                   onClick={() => router.push('/pg')}
                 >
-                  <div className="relative p-6">
+                  <div className="relative p-3 h-full flex flex-col">
                     {/* Card Image */}
-                    <div className="w-full h-40 rounded-lg mb-4 overflow-hidden bg-gray-100">
+                    <div className="w-full h-48 rounded-lg mb-2 overflow-hidden bg-gray-100">
                       {item.images && item.images.length > 0 ? (
                         <img
                           src={item.images[0].url || item.images[0]}
@@ -239,7 +241,7 @@ const Home = () => {
                     
                     {/* Line 1: Name and Rating */}
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-base font-bold text-blue-700 group-hover:text-purple-700 transition mr-2 leading-5 line-clamp-2 max-w-[50%]">{item.name}</h3>
+                      <h3 className="text-sm font-bold text-blue-700 group-hover:text-purple-700 transition mr-2 leading-4 line-clamp-2 max-w-[50%]">{item.name}</h3>
                       <div className="flex items-center">
                         {(typeof item.rating === 'object' && item.rating?.overall) || 
                          (typeof item.rating === 'number' && item.rating > 0) ? (
@@ -294,17 +296,17 @@ const Home = () => {
                       </div>
                     </div>
                     {/* Line 2: Address and Price/month */}
-                    <div className="flex items-center justify-between">
-                      <p className="text-gray-500 text-sm truncate flex-1 mr-2">{item.city}, {item.state}</p>
+                    <div className="flex items-center justify-between mt-auto">
+                      <p className="text-gray-600 text-sm truncate flex-1 mr-2">{item.city}, {item.state}</p>
                       <div className="flex flex-col items-end">
                         {item.originalPrice && item.originalPrice > item.price && (
                           <span className="text-xs text-gray-400 line-through">₹{item.originalPrice}/month</span>
                         )}
-                        <span className="text-green-600 font-bold text-lg">₹{item.price}/month</span>
+                        <span className="text-green-600 font-bold text-sm">₹{item.price}/month</span>
                       </div>
                     </div>
                     
-                    {/* Badges */}
+                    {/* Badges */}  
                     <div className="absolute top-3 left-3">
                       <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow group-hover:bg-purple-600 transition">
                         PG
@@ -320,7 +322,7 @@ const Home = () => {
                   </div>
                 </div>
               ))}
-            </div>
+            </HorizontalCarousel>
           </div>
         </section>
       )}
@@ -337,16 +339,17 @@ const Home = () => {
                 {homeData.sectionHeaders?.rooms?.subtitle || "Find the perfect room or flat for your comfortable stay and lifestyle"}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {shuffleArray(homeData.featuredRooms).slice(0, 6).map((item: any, idx: number) => (
+            
+            <HorizontalCarousel autoScroll={true} scrollSpeed={45} showArrows={true}>
+              {homeData.featuredRooms.slice(0, 20).map((item: any, idx: number) => (
                 <div
                   key={`${item._id || idx}-${idx}`}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer overflow-hidden"
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer overflow-hidden h-80"
                   onClick={() => router.push('/rooms')}
                 >
-                  <div className="relative p-6">
+                  <div className="relative p-3 h-full flex flex-col">
                     {/* Card Image */}
-                    <div className="w-full h-40 rounded-lg mb-4 overflow-hidden bg-gray-100">
+                    <div className="w-full h-48 rounded-lg mb-2 overflow-hidden bg-gray-100">
                       {item.images && item.images.length > 0 ? (
                         <img
                           src={item.images[0].url || item.images[0]}
@@ -370,8 +373,8 @@ const Home = () => {
                     </div>
                     
                     {/* Line 1: Name and Rating */}
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-base font-bold text-blue-700 group-hover:text-purple-700 transition mr-2 leading-5 line-clamp-2 max-w-[50%]">{item.title || item.name}</h3>
+                    <div className="flex items-start justify-between mb-1">
+                      <h3 className="text-sm font-bold text-blue-700 group-hover:text-purple-700 transition mr-2 leading-4 line-clamp-2 max-w-[50%]">{item.title || item.name}</h3>
                       <div className="flex items-center">
                         {(typeof item.rating === 'object' && item.rating?.overall) || 
                          (typeof item.rating === 'number' && item.rating > 0) ? (
@@ -426,15 +429,15 @@ const Home = () => {
                       </div>
                     </div>
                     {/* Line 2: Address and Price/month */}
-                    <div className="flex items-center justify-between">
-                      <p className="text-gray-500 text-sm truncate flex-1 mr-2">
+                    <div className="flex items-center justify-between mt-auto">
+                      <p className="text-gray-600 text-sm truncate flex-1 mr-2">
                         {item.location || `${item.city}, ${item.state}`}
                       </p>
                       <div className="flex flex-col items-end">
                         {item.pricing?.originalPrice && item.pricing.originalPrice > (item.pricing?.rent || item.price) && (
                           <span className="text-xs text-gray-400 line-through">₹{item.pricing.originalPrice}/month</span>
                         )}
-                        <span className="text-green-600 font-bold text-lg">
+                        <span className="text-green-600 font-bold text-sm">
                           ₹{item.pricing?.rent || item.pricing?.monthlyRent || item.price}/month
                         </span>
                       </div>
@@ -456,7 +459,7 @@ const Home = () => {
                   </div>
                 </div>
               ))}
-            </div>
+            </HorizontalCarousel>
           </div>
         </section>
       )}

@@ -22,10 +22,10 @@ router.get('/', async (req, res) => {
       isActive: true 
     }).sort({ order: 1 });
 
-    // Random PGs (limited info for public)
+    // Random PGs (limited info for public) - Increased to 20
     const randomPGs = await PG.aggregate([
       { $match: { status: 'active', softDelete: { $ne: true } } },
-      { $sample: { size: 4 } },
+      { $sample: { size: 20 } },
       {
         $project: {
           name: 1,
@@ -56,10 +56,10 @@ router.get('/', async (req, res) => {
       };
     });
 
-    // Random Rooms (limited info for public)
+    // Random Rooms (limited info for public) - Increased to 20
     const randomRooms = await Room.find({})
     .select('name city state pricing.rent pricing.originalPrice media.images rating propertyType locality')
-    .limit(4)
+    .limit(20)
     .lean();
     
     // Transform rooms data to match frontend expectations

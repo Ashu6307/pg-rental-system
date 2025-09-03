@@ -33,6 +33,32 @@ body {
   overflow: hidden;
 }
 
+/* Horizontal Carousel Styles */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-container {
+  width: max-content;
+}
+
+.carousel-card {
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  flex-shrink: 0;
+}
+
+.carousel-smooth-scroll {
+  scroll-behavior: smooth;
+}
+
 /* OTP Input paste shake animation */
 .animate-shake {
   animation: shake 0.4s;
