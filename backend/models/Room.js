@@ -185,7 +185,7 @@ const roomSchema = new mongoose.Schema({
   // Business Information
   owner: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Owner', 
+    ref: 'User', 
     required: true,
     index: true
   },
@@ -648,7 +648,7 @@ const roomSchema = new mongoose.Schema({
       respondedAt: { type: Date },
       respondedBy: { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Owner' 
+        ref: 'User' 
       }
     }
   }],

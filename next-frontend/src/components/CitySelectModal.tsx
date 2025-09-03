@@ -83,6 +83,43 @@ const CitySelectModal: React.FC<CitySelectModalProps> = ({
         {/* Cities Grid - Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {/* All Cities Option */}
+            <div
+              onClick={() => handleCityClick({ id: 'all', name: 'All Cities', image: '/images/all-cities.jpg' })}
+              className={`relative cursor-pointer group hover:scale-105 transition-transform duration-200 ${
+                currentCity?.id === 'all' ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+              }`}
+            >
+              {/* Current Selection Badge */}
+              {currentCity?.id === 'all' && (
+                <div className="absolute -top-2 -left-2 z-10">
+                  <div className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                    Current
+                  </div>
+                </div>
+              )}
+              
+              {/* All Cities Image */}
+              <div className="relative rounded-xl overflow-hidden aspect-square">
+                <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-teal-500 flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <div className="text-2xl mb-1">🌍</div>
+                    <div className="text-xs font-semibold">All Cities</div>
+                  </div>
+                </div>
+                
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                
+                {/* City Name */}
+                <div className="absolute bottom-2 left-2 right-2">
+                  <h3 className="text-white font-semibold text-sm text-center">
+                    All Cities
+                  </h3>
+                </div>
+              </div>
+            </div>
+
             {cities.map((city) => (
               <div
                 key={city.id}

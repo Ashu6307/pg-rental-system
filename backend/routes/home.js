@@ -8,6 +8,7 @@ import FooterContent from '../models/FooterContent.js';
 import FeatureContent from '../models/FeatureContent.js';
 import PG from '../models/PG.js';
 import Room from '../models/Room.js';
+import City from '../models/City.js';
 
 const router = express.Router();
 
@@ -22,25 +23,71 @@ router.get('/', async (req, res) => {
       isActive: true 
     }).sort({ order: 1 });
 
-    // Random PGs (limited info for public)
-    const randomPGs = await PG.aggregate([
-      { $match: { status: 'active', softDelete: { $ne: true } } },
-      { $sample: { size: 4 } },
+    // Prioritize PGs with offers, then random PGs
+    const pgsWithOffers = await PG.aggregate([
+      { 
+        $match: { 
+          status: 'active', 
+          softDelete: { $ne: true },
+          originalPrice: { $exists: true, $ne: null },
+          $expr: { $gt: ['$originalPrice', '$price'] }
+        } 
+      },
       {
         $project: {
           name: 1,
           city: 1,
           state: 1,
           price: 1,
+          originalPrice: 1,
           images: { $slice: ['$images', 1] },
           rating: 1
         }
       }
     ]);
 
+    // Get random PGs to fill remaining slots
+    const remainingCount = Math.max(0, 4 - pgsWithOffers.length);
+    const randomPGs = remainingCount > 0 ? await PG.aggregate([
+      { 
+        $match: { 
+          status: 'active', 
+          softDelete: { $ne: true },
+          $or: [
+            { originalPrice: { $exists: false } },
+            { originalPrice: null },
+            { $expr: { $lte: ['$originalPrice', '$price'] } }
+          ]
+        } 
+      },
+      { $sample: { size: remainingCount } },
+      {
+        $project: {
+          name: 1,
+          city: 1,
+          state: 1,
+          price: 1,
+          originalPrice: 1,
+          images: { $slice: ['$images', 1] },
+          rating: 1
+        }
+      }
+    ]) : [];
+
+    // Combine offers PGs with random PGs
+    const allPGs = [...pgsWithOffers, ...randomPGs];
+
+    // Transform PG data to ensure frontend compatibility
+    const transformedPGs = allPGs.map(pg => {
+      return {
+        ...pg,
+        originalPrice: pg.originalPrice || null // Ensure field exists
+      };
+    });
+
     // Random Rooms (limited info for public) - Added for featured rooms
     const randomRooms = await Room.find({})
-      .select('name city state pricing.rent pricing.originalPrice media.images rating propertyType locality')
+      .select('name title city state pricing.rent pricing.originalPrice media.images rating propertyType locality')
       .limit(10)
       .lean();
     
@@ -48,6 +95,7 @@ router.get('/', async (req, res) => {
     const transformedRooms = randomRooms.map(room => {
       return {
         ...room,
+        title: room.title || room.name || `${room.propertyType} in ${room.city}`, // Ensure title exists
         price: room.pricing?.rent, // Map pricing.rent to price for consistency
         type: room.propertyType,
         images: room.media?.images || [], // Map media.images to images for frontend
@@ -100,7 +148,7 @@ router.get('/', async (req, res) => {
     res.json({ 
       hero, 
       stats: marketingStats, 
-      featuredPGs: randomPGs, 
+      featuredPGs: transformedPGs, // Use transformed PG data instead of randomPGs
       featuredRooms: transformedRooms,
       testimonials, 
       cta,
@@ -111,6 +159,106 @@ router.get('/', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Home content fetch failed', details: err.message });
+  }
+});
+
+// GET /api/home/city-stats/:cityName - Get city-specific statistics
+router.get('/city-stats/:cityName', async (req, res) => {
+  try {
+    const { cityName } = req.params;
+    
+    if (!cityName) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'City name is required' 
+      });
+    }
+
+    // Get city info
+    const cityInfo = await City.findOne({ 
+      name: new RegExp(cityName.trim(), 'i'),
+      isActive: true 
+    });
+
+    // Get PG stats for this city
+    const pgStats = await PG.aggregate([
+      { 
+        $match: { 
+          city: new RegExp(cityName.trim(), 'i'), 
+          status: 'active',
+          softDelete: { $ne: true }
+        } 
+      },
+      {
+        $group: {
+          _id: null,
+          totalPGs: { $sum: 1 },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+          avgRating: { $avg: '$rating.overall' }
+        }
+      }
+    ]);
+
+    // Get Room stats for this city
+    const roomStats = await Room.aggregate([
+      { 
+        $match: { 
+          city: new RegExp(cityName.trim(), 'i'),
+          'propertyStatus.listingStatus': 'Active'
+        } 
+      },
+      {
+        $group: {
+          _id: null,
+          totalRooms: { $sum: 1 },
+          avgRent: { $avg: '$pricing.rent' },
+          minRent: { $min: '$pricing.rent' },
+          maxRent: { $max: '$pricing.rent' },
+          avgRating: { $avg: '$rating.overall' }
+        }
+      }
+    ]);
+
+    // Get popular amenities in this city
+    const popularAmenities = await PG.aggregate([
+      { 
+        $match: { 
+          city: new RegExp(cityName.trim(), 'i'), 
+          status: 'active' 
+        } 
+      },
+      { $unwind: '$amenities' },
+      { 
+        $group: { 
+          _id: '$amenities', 
+          count: { $sum: 1 } 
+        } 
+      },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]);
+
+    res.json({
+      success: true,
+      city: {
+        name: cityName,
+        info: cityInfo,
+        stats: {
+          pgs: pgStats[0] || { totalPGs: 0, avgPrice: 0, minPrice: 0, maxPrice: 0, avgRating: 0 },
+          rooms: roomStats[0] || { totalRooms: 0, avgRent: 0, minRent: 0, maxRent: 0, avgRating: 0 },
+          popularAmenities: popularAmenities || []
+        }
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch city stats', 
+      details: err.message 
+    });
   }
 });
 

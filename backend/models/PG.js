@@ -18,7 +18,7 @@ const pgSchema = new mongoose.Schema({
   },
   
   // Business Information
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'Owner', required: true },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   contactNumber: { type: String, required: true },
   email: { type: String },
   rooms: { type: Number, required: true },

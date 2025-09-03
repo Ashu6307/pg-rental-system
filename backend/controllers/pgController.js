@@ -40,14 +40,13 @@ export const createPG = async (req, res) => {
   }
 };
 
-// Get all PGs with advanced filtering and pagination
+// Get all PGs with location-based filtering and pagination
 export const getAllPGs = async (req, res) => {
   try {
+  // console.log('getAllPGs API called with location filter:', req.locationInfo);
     const { 
       page = 1, 
       limit = 10, 
-      city, 
-      state, 
       priceMin, 
       priceMax, 
       pgType, 
@@ -58,46 +57,119 @@ export const getAllPGs = async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    // Build filter object
+    // Build filter object with location filtering from middleware
     const filter = { 
       status: 'active',
-      softDelete: { $ne: true }
+      softDelete: { $ne: true },
+      verificationStatus: 'verified'
     };
 
-    if (city) filter.city = new RegExp(city, 'i');
-    if (state) filter.state = new RegExp(state, 'i');
+    // Add location filter if available
+    if (req.locationFilter && Object.keys(req.locationFilter).length > 0) {
+      Object.assign(filter, req.locationFilter);
+  // console.log('Applied location filter for PGs:', req.locationFilter);
+    } else {
+  // console.log('No location filter applied for PGs');
+    }
+    
+    // Price filtering with room types consideration
     if (priceMin || priceMax) {
-      filter.price = {};
-      if (priceMin) filter.price.$gte = parseInt(priceMin);
-      if (priceMax) filter.price.$lte = parseInt(priceMax);
+      const priceFilter = {};
+      if (priceMin && !isNaN(priceMin)) priceFilter.$gte = parseInt(priceMin);
+      if (priceMax && !isNaN(priceMax)) priceFilter.$lte = parseInt(priceMax);
+      
+      if (Object.keys(priceFilter).length > 0) {
+        filter.$or = [
+          { price: priceFilter }, // Legacy price field
+          { 'roomTypes.price': priceFilter }, // New room types pricing
+          { 'priceRange.min': priceFilter }
+        ];
+      }
     }
     if (pgType) filter.pgType = pgType;
     if (genderAllowed) filter.genderAllowed = genderAllowed;
     if (featured) filter.featured = featured === 'true';
     if (amenities) {
-      const amenityList = amenities.split(',');
+      const amenityList = amenities.split(',').map(a => a.trim());
       filter.amenities = { $in: amenityList };
     }
 
+    // Enhanced sorting options
     const sortOptions = {};
-    sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    if (sortBy === 'price_low') {
+      sortOptions.price = 1;
+    } else if (sortBy === 'price_high') {
+      sortOptions.price = -1;
+    } else if (sortBy === 'rating') {
+      sortOptions['rating.overall'] = -1;
+    } else if (sortBy === 'featured') {
+      sortOptions.featured = -1;
+      sortOptions.createdAt = -1;
+    } else {
+      sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    }
+
+    const skip = Math.max(0, (Number(page) - 1) * Number(limit));
+    const limitNum = Math.min(Number(limit), 50); // Max 50 items per page
+
+  // console.log('Final PG query:', JSON.stringify(filter, null, 2));
 
     const pgs = await PG.find(filter)
       .sort(sortOptions)
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip(skip)
+      .limit(limitNum)
+      .select('-owner') // Exclude owner field for now
+      .lean();
 
     const total = await PG.countDocuments(filter);
+
+    // Get location-specific stats
+    const locationStats = req.locationInfo?.city ? await PG.aggregate([
+      { $match: filter },
+      {
+        $group: {
+          _id: null,
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+          totalPGs: { $sum: 1 }
+        }
+      }
+    ]).catch(err => {
+      console.error('Stats aggregation error:', err);
+      return [];
+    }) : [];
+
+  // console.log(`Found ${pgs.length} PGs for location: ${req.locationInfo?.city || 'all locations'}`);
 
     res.json({
       success: true,
       data: pgs,
       pagination: {
         currentPage: parseInt(page),
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / limitNum),
         totalItems: total,
-        itemsPerPage: parseInt(limit)
-      }
+        itemsPerPage: limitNum,
+        hasNextPage: parseInt(page) < Math.ceil(total / limitNum),
+        hasPrevPage: parseInt(page) > 1
+      },
+      filters: {
+        appliedLocation: req.locationInfo || null,
+        priceRange: { min: priceMin, max: priceMax },
+        pgType,
+        genderAllowed,
+        amenities: amenities ? amenities.split(',') : [],
+        featured
+      },
+      stats: locationStats.length > 0 ? {
+        locationName: req.locationInfo?.city,
+        avgPrice: Math.round(locationStats[0].avgPrice || 0),
+        priceRange: {
+          min: locationStats[0].minPrice || 0,
+          max: locationStats[0].maxPrice || 0
+        },
+        totalPGs: locationStats[0].totalPGs || 0
+      } : null
     });
   } catch (err) {
     console.error('Error in getAllPGs:', err);

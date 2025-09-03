@@ -49,6 +49,54 @@ export function requireRole(roles) {
     next();
   };
 }
+
+// Location-based filtering middleware
+export const addLocationFilter = (req, res, next) => {
+  try {
+    // Get city from query params
+    const { city, state, lat, lng, radius = 5000 } = req.query;
+    
+    // Initialize location filter object
+    req.locationFilter = {};
+    
+    // City-based filtering
+    if (city && city.trim()) {
+      req.locationFilter.city = new RegExp(city.trim(), 'i');
+    }
+    
+    // State-based filtering  
+    if (state && state.trim()) {
+      req.locationFilter.state = new RegExp(state.trim(), 'i');
+    }
+    
+    // Geo-location based filtering
+    if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+      req.locationFilter.location = {
+        $near: {
+          $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
+          $maxDistance: parseInt(radius) || 5000
+        }
+      };
+    }
+    
+    // Add location info to request for logging
+    req.locationInfo = {
+      city: city || null,
+      state: state || null,
+      coordinates: (lat && lng) ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null,
+      radius: parseInt(radius) || 5000
+    };
+    
+  // console.log('Location filter applied:', req.locationFilter);
+    next();
+  } catch (error) {
+    console.error('Location filter middleware error:', error);
+    // Don't fail the request, just continue without location filter
+    req.locationFilter = {};
+    req.locationInfo = { city: null, state: null, coordinates: null, radius: 5000 };
+    next();
+  }
+};
 // Owner authentication middleware
 export function ownerAuth(req, res, next) {
   if (req.user && req.user.role === 'owner') {

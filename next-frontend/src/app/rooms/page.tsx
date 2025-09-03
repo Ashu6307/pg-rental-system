@@ -37,10 +37,31 @@ const Rooms: React.FC = () => {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const response = await apiService.get('/api/rooms');
+      
+      // Get selected city from localStorage
+      const savedCity = localStorage.getItem('selectedCity');
+      const selectedCity = savedCity ? JSON.parse(savedCity) : null;
+      
+      // Build API URL with city filter
+      let apiUrl = '/api/rooms';
+      const params = new URLSearchParams();
+      
+      // Only add city filter if it's not "All Cities"
+      if (selectedCity && selectedCity.name && selectedCity.id !== 'all') {
+        params.append('city', selectedCity.name);
+      }
+      
+      if (params.toString()) {
+        apiUrl += `?${params.toString()}`;
+      }
+      
+      console.log('Fetching rooms with URL:', apiUrl);
+      console.log('Selected city:', selectedCity);
+      const response = await apiService.get(apiUrl);
       
       if (response?.success) {
         setRooms(response.data || []);
+        console.log(`Loaded ${response.data?.length || 0} rooms for city: ${selectedCity?.name || 'all cities'}`);
       }
     } catch (error) {
       console.error('Error fetching rooms:', error);

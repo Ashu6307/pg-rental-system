@@ -123,6 +123,12 @@ const HomeClient = () => {
     setSelectedCity(city);
     localStorage.setItem('selectedCity', JSON.stringify(city));
     setShowCityModal(false);
+    
+    // Show a brief notification about city change
+    console.log(`City changed to: ${city.name}`);
+    
+    // Trigger refresh of city-specific data if needed
+    // This can be enhanced later to refresh PG/Room lists
   };
 
   // Handle modal close

@@ -73,7 +73,26 @@ const PG: React.FC = () => {
   const fetchPGs = async () => {
     try {
       setLoading(true);
-      const response = await apiService.get('/api/pgs/public?limit=50');
+      
+      // Get selected city from localStorage
+      const savedCity = localStorage.getItem('selectedCity');
+      const selectedCity = savedCity ? JSON.parse(savedCity) : null;
+      
+      // Build API URL with city filter
+      let apiUrl = '/api/pgs/public';
+      const params = new URLSearchParams();
+      params.append('limit', '50');
+      
+      // Only add city filter if it's not "All Cities"
+      if (selectedCity && selectedCity.name && selectedCity.id !== 'all') {
+        params.append('city', selectedCity.name);
+      }
+      
+      apiUrl += `?${params.toString()}`;
+      console.log('Fetching PGs with URL:', apiUrl);
+      console.log('Selected city:', selectedCity);
+      
+      const response = await apiService.get(apiUrl);
       let pgData;
       if (response.success && response.data) {
         pgData = response.data;
