@@ -653,6 +653,28 @@ const roomSchema = new mongoose.Schema({
     }
   }],
   
+  // Overall Rating & Review Summary
+  rating: {
+    overall: { type: Number, min: 1, max: 5, default: 0 },
+    cleanliness: { type: Number, min: 1, max: 5, default: 0 },
+    location: { type: Number, min: 1, max: 5, default: 0 },
+    facilities: { type: Number, min: 1, max: 5, default: 0 },
+    staff: { type: Number, min: 1, max: 5, default: 0 },
+    valueForMoney: { type: Number, min: 1, max: 5, default: 0 }
+  },
+  
+  reviewSummary: {
+    totalReviews: { type: Number, default: 0 },
+    averageRating: { type: Number, min: 1, max: 5, default: 0 },
+    ratingDistribution: {
+      5: { type: Number, default: 0 },
+      4: { type: Number, default: 0 },
+      3: { type: Number, default: 0 },
+      2: { type: Number, default: 0 },
+      1: { type: Number, default: 0 }
+    }
+  },
+  
   // SEO & Marketing
   seo: {
     metaTitle: { 

@@ -217,7 +217,7 @@ const Home = () => {
                     <div className="w-full h-40 rounded-lg mb-4 overflow-hidden bg-gray-100">
                       {item.images && item.images.length > 0 ? (
                         <img
-                          src={item.images[0]}
+                          src={item.images[0].url || item.images[0]}
                           alt={item.name}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
@@ -238,8 +238,8 @@ const Home = () => {
                     </div>
                     
                     {/* Line 1: Name and Rating */}
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-bold text-blue-700 truncate group-hover:text-purple-700 transition flex-1 mr-2">{item.name}</h3>
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-base font-bold text-blue-700 group-hover:text-purple-700 transition mr-2 leading-5 line-clamp-2 max-w-[50%]">{item.name}</h3>
                       <div className="flex items-center">
                         {(typeof item.rating === 'object' && item.rating?.overall) || 
                          (typeof item.rating === 'number' && item.rating > 0) ? (
@@ -298,7 +298,7 @@ const Home = () => {
                       <p className="text-gray-500 text-sm truncate flex-1 mr-2">{item.city}, {item.state}</p>
                       <div className="flex flex-col items-end">
                         {item.originalPrice && item.originalPrice > item.price && (
-                          <span className="text-xs text-gray-400 line-through">₹{item.originalPrice}</span>
+                          <span className="text-xs text-gray-400 line-through">₹{item.originalPrice}/month</span>
                         )}
                         <span className="text-green-600 font-bold text-lg">₹{item.price}/month</span>
                       </div>
@@ -349,7 +349,7 @@ const Home = () => {
                     <div className="w-full h-40 rounded-lg mb-4 overflow-hidden bg-gray-100">
                       {item.images && item.images.length > 0 ? (
                         <img
-                          src={item.images[0]}
+                          src={item.images[0].url || item.images[0]}
                           alt={item.name}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
@@ -370,8 +370,8 @@ const Home = () => {
                     </div>
                     
                     {/* Line 1: Name and Rating */}
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-bold text-blue-700 truncate group-hover:text-purple-700 transition flex-1 mr-2">{item.title || item.name}</h3>
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-base font-bold text-blue-700 group-hover:text-purple-700 transition mr-2 leading-5 line-clamp-2 max-w-[50%]">{item.title || item.name}</h3>
                       <div className="flex items-center">
                         {(typeof item.rating === 'object' && item.rating?.overall) || 
                          (typeof item.rating === 'number' && item.rating > 0) ? (
@@ -432,7 +432,7 @@ const Home = () => {
                       </p>
                       <div className="flex flex-col items-end">
                         {item.pricing?.originalPrice && item.pricing.originalPrice > (item.pricing?.rent || item.price) && (
-                          <span className="text-xs text-gray-400 line-through">₹{item.pricing.originalPrice}</span>
+                          <span className="text-xs text-gray-400 line-through">₹{item.pricing.originalPrice}/month</span>
                         )}
                         <span className="text-green-600 font-bold text-lg">
                           ₹{item.pricing?.rent || item.pricing?.monthlyRent || item.price}/month

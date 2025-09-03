@@ -465,8 +465,8 @@ const Rooms: React.FC = () => {
                             <span className="text-sm font-normal text-gray-500 ml-1">/month</span>
                           </div>
                           {room.pricing?.originalPrice && room.pricing.originalPrice > room.pricing.rent && (
-                            <span className="text-sm text-gray-500 line-through" title={`Original price: ₹${room.pricing.originalPrice?.toLocaleString()}`}>
-                              ₹{room.pricing.originalPrice?.toLocaleString()}
+                            <span className="text-sm text-gray-500 line-through" title={`Original price: ₹${room.pricing.originalPrice?.toLocaleString()}/month`}>
+                              ₹{room.pricing.originalPrice?.toLocaleString()}/month
                             </span>
                           )}
                         </div>

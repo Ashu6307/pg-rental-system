@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
 
     // Random Rooms (limited info for public)
     const randomRooms = await Room.find({})
-    .select('name city state pricing.rent pricing.originalPrice images rating propertyType locality')
+    .select('name city state pricing.rent pricing.originalPrice media.images rating propertyType locality')
     .limit(4)
     .lean();
     
@@ -78,6 +78,7 @@ router.get('/', async (req, res) => {
         ...room,
         price: room.pricing?.rent, // Map pricing.rent to price for consistency
         type: room.propertyType,
+        images: room.media?.images || [], // Map media.images to images for frontend
         pricing: {
           ...room.pricing,
           originalPrice: originalPrice
