@@ -150,6 +150,20 @@ const HomeClient = () => {
             {hero?.subtitle || ''}
           </p>
           
+          {/* Selected City Display */}
+          {selectedCity && (
+            <div className="mb-6 flex justify-center">
+              <button
+                onClick={() => setShowCityModal(true)}
+                className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-3 border border-white/30 hover:border-white/50"
+              >
+                <span className="text-yellow-300">📍</span>
+                <span>Currently viewing: {selectedCity.name}</span>
+                <span className="text-sm opacity-75">• Click to change</span>
+              </button>
+            </div>
+          )}
+          
           {/* Hero Image Carousel */}
           <div className="relative mt-4">
             <img 
@@ -714,6 +728,7 @@ const HomeClient = () => {
         onClose={handleModalClose}
         onCitySelect={handleCitySelect}
         cities={cities}
+        currentCity={selectedCity}
       />
     </div>
   );
