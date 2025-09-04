@@ -44,9 +44,13 @@ export const createPG = async (req, res) => {
 export const getAllPGs = async (req, res) => {
   try {
   // console.log('getAllPGs API called with location filter:', req.locationInfo);
+    
+    // Check if user is authenticated for full access
+    const isAuthenticated = req.user ? true : false;
+    
     const { 
       page = 1, 
-      limit = 10, 
+      limit: queryLimit = 10, 
       priceMin, 
       priceMax, 
       pgType, 
@@ -56,6 +60,16 @@ export const getAllPGs = async (req, res) => {
       sortBy = 'createdAt',
       sortOrder = 'desc'
     } = req.query;
+
+    // Set limit based on authentication status
+    let limit;
+    if (isAuthenticated) {
+      // Full access for authenticated users - 30 per page with pagination
+      limit = Math.min(Number(queryLimit), 30); // Max 30 per page for authenticated
+    } else {
+      // Limited access for public (guest) users
+      limit = Math.min(Number(queryLimit), 12); // Max 12 for public
+    }
 
     // Build filter object with location filtering from middleware
     const filter = { 
@@ -110,7 +124,7 @@ export const getAllPGs = async (req, res) => {
     }
 
     const skip = Math.max(0, (Number(page) - 1) * Number(limit));
-    const limitNum = Math.min(Number(limit), 50); // Max 50 items per page
+    const limitNum = limit; // Use the dynamically set limit
 
   // console.log('Final PG query:', JSON.stringify(filter, null, 2));
 
@@ -145,13 +159,27 @@ export const getAllPGs = async (req, res) => {
     res.json({
       success: true,
       data: pgs,
-      pagination: {
+      pagination: isAuthenticated ? {
         currentPage: parseInt(page),
         totalPages: Math.ceil(total / limitNum),
         totalItems: total,
         itemsPerPage: limitNum,
         hasNextPage: parseInt(page) < Math.ceil(total / limitNum),
         hasPrevPage: parseInt(page) > 1
+      } : {
+        // No pagination for public users - fixed display
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: pgs.length,
+        itemsPerPage: pgs.length,
+        hasNextPage: false,
+        hasPrevPage: false
+      },
+      access: {
+        isAuthenticated,
+        accessType: isAuthenticated ? 'full' : 'limited',
+        message: isAuthenticated ? 'Full access - all PGs available' : 'Limited access - login for more PGs',
+        maxItems: isAuthenticated ? 30 : 12
       },
       filters: {
         appliedLocation: req.locationInfo || null,

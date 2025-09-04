@@ -35,8 +35,27 @@ export const createRoom = async (req, res) => {
 export const getAllRooms = async (req, res) => {
   try {
     
-    // Always get data from database, even if empty
-    const realRooms = await Room.find({}).limit(20).lean();
+    // Check if user is authenticated for full access
+    const isAuthenticated = req.user ? true : false;
+    const { page = 1, limit: queryLimit = 50 } = req.query;
+    
+    // Set limit based on authentication status
+    let limit;
+    if (isAuthenticated) {
+      // Full access for authenticated users - 30 per page with pagination
+      limit = Math.min(Number(queryLimit), 30); // Max 30 per page for authenticated
+    } else {
+      // Limited access for public (guest) users
+      limit = Math.min(Number(queryLimit), 12); // Max 12 for public
+    }
+    
+    const skip = Math.max(0, (Number(page) - 1) * limit);
+    
+    // Always get data from database with verification filter
+    const realRooms = await Room.find({
+      status: 'Active',
+      verified: true
+    }).skip(skip).limit(limit).lean();
     // console.log('Rooms found in database:', realRooms.length);
     let filteredRooms = realRooms;
     const { city } = req.query;
@@ -62,16 +81,36 @@ export const getAllRooms = async (req, res) => {
         rating: room.rating || { overall: 0, totalReviews: 0 }
       };
     });
+    // Get total count for pagination
+    const total = await Room.countDocuments({
+      status: 'Active',
+      verified: true
+    });
+    
     return res.status(200).json({
       success: true,
       data: enrichedRooms,
-      pagination: {
+      pagination: isAuthenticated ? {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit,
+        hasNextPage: parseInt(page) < Math.ceil(total / limit),
+        hasPrevPage: parseInt(page) > 1
+      } : {
+        // No pagination for public users - fixed display
         currentPage: 1,
-        totalPages: Math.ceil(filteredRooms.length / 20),
-        totalItems: filteredRooms.length,
-        itemsPerPage: 20,
+        totalPages: 1,
+        totalItems: enrichedRooms.length,
+        itemsPerPage: enrichedRooms.length,
         hasNextPage: false,
         hasPrevPage: false
+      },
+      access: {
+        isAuthenticated,
+        accessType: isAuthenticated ? 'full' : 'limited',
+        message: isAuthenticated ? 'Full access - all rooms available' : 'Limited access - login for more rooms',
+        maxItems: isAuthenticated ? 30 : 12
       },
       filters: {
         appliedLocation: req.locationInfo || null,

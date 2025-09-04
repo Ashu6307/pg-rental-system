@@ -13,14 +13,14 @@ import {
   trackInquiry 
 } from '../controllers/pgController.js';
 import OwnerProfile from '../models/OwnerProfile.js';
-import { authenticateJWT, ownerAuth, addLocationFilter } from '../middleware/auth.js';
+import { authenticateJWT, ownerAuth, addLocationFilter, optionalAuth } from '../middleware/auth.js';
 import { logAction } from '../utils/auditLogService.js';
 
 const router = express.Router();
 
-// Public Routes with location filtering
+// Public Routes with location filtering and optional authentication
 // Get all PGs with filtering and pagination
-router.get('/public', addLocationFilter, getAllPGs);
+router.get('/public', optionalAuth, addLocationFilter, getAllPGs);
 
 // Get featured PGs
 router.get('/public/featured', addLocationFilter, getFeaturedPGs);

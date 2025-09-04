@@ -105,4 +105,25 @@ export function ownerAuth(req, res, next) {
   return res.status(403).json({ error: 'Owner access required' });
 }
 
+// Optional authentication middleware - doesn't fail if no token
+export const optionalAuth = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    // No token provided - continue as guest user
+    req.user = null;
+    return next();
+  }
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    // Invalid token - continue as guest user
+    req.user = null;
+    next();
+  }
+};
+
 

@@ -6,7 +6,7 @@ interface City {
   id: string;
   name: string;
   image: string;
-  isNew?: boolean;
+  isNewCity?: boolean;
 }
 
 interface CitySelectModalProps {
@@ -138,7 +138,7 @@ const CitySelectModal: React.FC<CitySelectModalProps> = ({
                 )}
                 
                 {/* New Badge */}
-                {city.isNew && (
+                {city.isNewCity && (
                   <div className="absolute -top-2 -right-2 z-10">
                     <div className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold transform rotate-12">
                       New

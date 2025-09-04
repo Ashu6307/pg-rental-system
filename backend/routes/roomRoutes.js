@@ -10,13 +10,13 @@ import {
   getRoomsByOwner,
   addReview
 } from '../controllers/roomController.js';
-import { authenticate, authorize, addLocationFilter } from '../middleware/auth.js';
+import { authenticate, authorize, addLocationFilter, optionalAuth } from '../middleware/auth.js';
 import { validateRoom } from '../middleware/validation.js';
 
 const router = express.Router();
 
-// Public routes with location filtering
-router.get('/', addLocationFilter, getAllRooms); // Apply location middleware
+// Public routes with location filtering and optional authentication
+router.get('/', optionalAuth, addLocationFilter, getAllRooms); // Apply location middleware
 router.get('/:id', getRoomById); // Get room by ID
 
 // Fallback route without middleware for testing

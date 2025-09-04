@@ -12,7 +12,7 @@ const citySchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  isNew: {
+  isNewCity: {
     type: Boolean,
     default: false
   },
