@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith('/auth');
+  const isDashboardPage = pathname?.startsWith('/dashboard');
   const isLoginPage = pathname?.includes('/login');
 
   useEffect(() => {
@@ -21,6 +22,15 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       document.body.style.overflow = 'unset';
     };
   }, [isAuthPage, isLoginPage]);
+
+  // For dashboard pages, don't show public navbar/footer
+  if (isDashboardPage) {
+    return (
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    );
+  }
 
   return (
     <AuthProvider>

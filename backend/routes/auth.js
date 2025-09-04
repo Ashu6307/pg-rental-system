@@ -49,14 +49,8 @@ router.post('/register', async (req, res) => {
     otp // Add OTP field for verification
   } = req.body;
   try {
-    // Debug logging
-    console.log('Registration request body:', req.body);
-    console.log('OTP received:', otp);
-    console.log('Email received:', email);
-    
     // Check if OTP is provided and valid
     if (!otp) {
-      console.log('No OTP provided in request');
       return res.status(400).json({ error: 'Email verification OTP is required.' });
     }
 
@@ -164,7 +158,6 @@ router.post('/register', async (req, res) => {
     // Send welcome email using Enhanced Email Manager
     try {
       await EmailManager.sendWelcomeEmail(user, { useQueue: false });
-      console.log('Welcome email sent successfully via EmailManager');
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError);
       // Don't fail registration if welcome email fails
@@ -216,8 +209,6 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     const valid = await comparePassword(password, user.password_hash);
     if (!valid) {
-      // Log failed login attempt for security
-      console.log(`Failed login attempt for email: ${email} at ${new Date().toISOString()}`);
       return res.status(401).json({ 
         error: 'Incorrect password. Please try again.',
         hint: 'Forgot your password? You can reset it.'

@@ -48,11 +48,135 @@ export interface DashboardOverview {
   }>;
   quickActions: Array<{
     id: string;
-    label: string;
-    count: number;
-    enabled?: boolean;
-    urgent?: boolean;
   }>;
+}
+
+// Enhanced interfaces for new tenant tracking system
+export interface EnhancedDashboardOverview {
+  properties: {
+    pgs?: { total: number; occupied: number; available: number };
+    rooms?: { total: number; occupied: number; available: number };
+    flats?: { total: number; occupied: number; available: number };
+  };
+  tenants: {
+    total: number;
+    newThisMonth: number;
+    checkInsToday: number;
+    checkOutsThisWeek: number;
+    enhanced?: {
+      totalTracked: number;
+      active: number;
+      totalRevenue: number;
+      totalDues: number;
+      averageStayDays: number;
+      overdueCount: number;
+    };
+  };
+  financial: {
+    currentMonthRevenue: number;
+    lastMonthRevenue: number;
+    revenueGrowth: number;
+    pendingPayments: number;
+    pendingElectricityBills: number;
+    pendingElectricityAmount: number;
+    totalOutstanding: number;
+  };
+  overview: {
+    totalProperties: number;
+    totalTenants: number;
+    monthlyRevenue: number;
+    revenueGrowth: number;
+    occupancyRate: number;
+    pendingActions: number;
+  };
+}
+
+export interface TenantAnalytics {
+  occupancyStats: Array<{
+    _id: string;
+    total: number;
+    active: number;
+  }>;
+  monthlyTrends: Array<{
+    _id: { year: number; month: number };
+    checkIns: number;
+    totalRevenue: number;
+  }>;
+  paymentStatus: Array<{
+    totalDues: number;
+    totalCollected: number;
+    overdueCount: number;
+  }>;
+}
+
+export interface OccupancyStatus {
+  pg: Array<{
+    _id: string;
+    name: string;
+    totalBeds: number;
+    occupiedBeds: number;
+    availableBeds: number;
+    occupancyRate: number;
+  }>;
+  rooms: Array<{
+    _id: string;
+    name: string;
+    isOccupied: boolean;
+    currentTenant?: any;
+  }>;
+  flats: Array<{
+    _id: string;
+    name: string;
+    maxOccupancy: number;
+    currentOccupancy: number;
+    isAvailable: boolean;
+  }>;
+  summary: {
+    totalProperties: number;
+    totalOccupied: number;
+    totalCapacity: number;
+  };
+}
+
+export interface TenantActivity {
+  tenantName: string;
+  tenantPhone: string;
+  propertyType: string;
+  propertyName: string;
+  roomNumber: string;
+  checkInDate: string;
+  checkOutDate?: string;
+  isActive: boolean;
+  totalStayDays: number;
+  lastUpdated: string;
+}
+
+export interface PaymentOverview {
+  overview: {
+    totalExpectedRevenue: number;
+    totalDues: number;
+    totalAdvance: number;
+    overdueTenantsCount: number;
+    activeTenants: number;
+  };
+  recentPayments: Array<{
+    tenantName: string;
+    tenantPhone: string;
+    amount: number;
+    type: string;
+    date: string;
+    propertyType: string;
+    propertyName: string;
+    roomNumber: string;
+  }>;
+}
+
+export interface QuickAction {
+  id: string;
+  label: string;
+  count: number;
+  enabled?: boolean;
+  urgent?: boolean;
 }
 
 export interface AnalyticsData {
@@ -310,6 +434,99 @@ class OwnerDashboardService {
     return () => {
       console.log('Unsubscribed from real-time updates');
     };
+  }
+
+  // Enhanced Dashboard Methods
+  async getEnhancedDashboardOverview(): Promise<EnhancedDashboardOverview> {
+    try {
+      const response = await apiService.get('/api/owner/dashboard/overview');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching enhanced dashboard overview:', error);
+      throw error;
+    }
+  }
+
+  async getTenantAnalytics(): Promise<TenantAnalytics> {
+    try {
+      const response = await apiService.get('/api/owner/dashboard/analytics/tenants');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching tenant analytics:', error);
+      throw error;
+    }
+  }
+
+  async getOccupancyStatus(): Promise<OccupancyStatus> {
+    try {
+      const response = await apiService.get('/api/owner/dashboard/occupancy/status');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching occupancy status:', error);
+      throw error;
+    }
+  }
+
+  async getRecentTenantActivities(limit?: number): Promise<TenantActivity[]> {
+    try {
+      const queryParams = limit ? `?limit=${limit}` : '';
+      const response = await apiService.get(`/api/owner/dashboard/activities/tenants${queryParams}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching recent tenant activities:', error);
+      throw error;
+    }
+  }
+
+  async getPaymentOverview(): Promise<PaymentOverview> {
+    try {
+      const response = await apiService.get('/api/owner/dashboard/payments/overview');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching payment overview:', error);
+      throw error;
+    }
+  }
+
+  // Tenant Management Methods
+  async addNewTenant(tenantData: any): Promise<any> {
+    try {
+      const response = await apiService.post('/api/tenant-management/add', tenantData);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding new tenant:', error);
+      throw error;
+    }
+  }
+
+  async checkOutTenant(tenantId: string): Promise<any> {
+    try {
+      const response = await apiService.post(`/api/tenant-management/checkout/${tenantId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error checking out tenant:', error);
+      throw error;
+    }
+  }
+
+  async getTenantDetails(tenantId: string): Promise<any> {
+    try {
+      const response = await apiService.get(`/api/tenant-management/details/${tenantId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching tenant details:', error);
+      throw error;
+    }
+  }
+
+  async updateTenantPayment(tenantId: string, paymentData: any): Promise<any> {
+    try {
+      const response = await apiService.post(`/api/tenant-management/payment/${tenantId}`, paymentData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating tenant payment:', error);
+      throw error;
+    }
   }
 }
 

@@ -30,6 +30,20 @@ export const API_CONFIG = {
     OWNER_DASHBOARD: '/api/owner/dashboard',
     OWNER_REGISTER: '/api/auth/owner/register',
     
+    // Enhanced Owner Dashboard endpoints
+    OWNER_DASHBOARD_OVERVIEW: '/api/owner-dashboard/overview',
+    OWNER_TENANT_ANALYTICS: '/api/owner-dashboard/analytics/tenants',
+    OWNER_OCCUPANCY_STATUS: '/api/owner-dashboard/occupancy/status',
+    OWNER_TENANT_ACTIVITIES: '/api/owner-dashboard/activities/tenants',
+    OWNER_PAYMENT_OVERVIEW: '/api/owner-dashboard/payments/overview',
+    
+    // Tenant Management endpoints
+    TENANT_MANAGEMENT: '/api/tenant-management',
+    ADD_NEW_TENANT: '/api/tenant-management/add',
+    CHECK_OUT_TENANT: '/api/tenant-management/checkout',
+    GET_TENANT_DETAILS: '/api/tenant-management/details',
+    UPDATE_TENANT_PAYMENT: '/api/tenant-management/payment',
+    
     // Admin endpoints
     ADMIN_DASHBOARD: '/api/admin/dashboard',
   }
@@ -70,21 +84,32 @@ class ApiService {
     }
 
     try {
+      console.log('Making API request to:', url);
+      console.log('Request config:', config);
+      
       const response = await fetch(url, config);
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', [...response.headers.entries()]);
       
       if (!response.ok) {
         // Try to get error message from response
         let errorMessage = `HTTP error! status: ${response.status}`;
         try {
           const errorData = await response.json();
+          console.log('Error data:', errorData);
           errorMessage = errorData.message || errorMessage;
         } catch (e) {
+          console.log('Failed to parse error JSON:', e);
           // If we can't parse JSON, use the status message
         }
+        console.log('Throwing error:', errorMessage);
         throw new Error(errorMessage);
       }
       
-      return await response.json();
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
+      return responseData;
     } catch (error) {
       // Only show API errors in development
       if (process.env.NODE_ENV === 'development') {

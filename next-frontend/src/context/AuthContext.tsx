@@ -27,7 +27,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string>(typeof window !== 'undefined' ? sessionStorage.getItem('token') || '' : '');
+  const [token, setToken] = useState<string>('');
   const [role, setRole] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -36,16 +36,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const tokenRefreshInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Clean up any old localStorage tokens completely
+    // Check for existing authentication from both localStorage and sessionStorage
     if (typeof window !== 'undefined') {
-      const oldToken = localStorage.getItem('token');
-      if (oldToken) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('auth_last_activity');
-        localStorage.removeItem('auth_tab_id');
-        localStorage.removeItem('auth_session_expired');
-        localStorage.removeItem('auth_logout_signal');
+      // First check sessionStorage, then fallback to localStorage
+      const storedToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+      const storedRole = sessionStorage.getItem('userRole') || localStorage.getItem('userRole');
+      
+      if (storedToken && storedRole) {
+        setToken(storedToken);
+        setRole(storedRole);
+        setIsAuthenticated(true);
+        
+        // Store in sessionStorage for current session
+        sessionStorage.setItem('token', storedToken);
+        sessionStorage.setItem('userRole', storedRole);
+        
+        // Note: You might want to validate the token with the server here
       }
+      
+      setLoading(false);
     }
   }, []);
 
@@ -58,18 +67,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('auth_last_activity');
       sessionStorage.removeItem('auth_tab_id');
+      sessionStorage.removeItem('userRole');
       localStorage.removeItem('token');
       localStorage.removeItem('auth_last_activity');
       localStorage.removeItem('auth_tab_id');
+      localStorage.removeItem('userRole');
     }
     if (tokenRefreshInterval.current) clearInterval(tokenRefreshInterval.current);
     if (sessionCheckInterval.current) clearInterval(sessionCheckInterval.current);
   }, []);
 
-  // ...existing logic for login, token refresh, etc. (add as needed)
+  const setTokenHandler = useCallback((newToken: string) => {
+    setToken(newToken);
+    if (typeof window !== 'undefined') {
+      if (newToken) {
+        sessionStorage.setItem('token', newToken);
+        localStorage.setItem('token', newToken);
+      } else {
+        sessionStorage.removeItem('token');
+        localStorage.removeItem('token');
+      }
+    }
+  }, []);
+
+  const setRoleHandler = useCallback((newRole: string) => {
+    setRole(newRole);
+    if (typeof window !== 'undefined') {
+      if (newRole) {
+        sessionStorage.setItem('userRole', newRole);
+        localStorage.setItem('userRole', newRole);
+      } else {
+        sessionStorage.removeItem('userRole');
+        localStorage.removeItem('userRole');
+      }
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, role, isAuthenticated, loading, setUser, setToken, setRole, setIsAuthenticated, logout: handleGlobalLogout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      role, 
+      isAuthenticated, 
+      loading, 
+      setUser, 
+      setToken: setTokenHandler, 
+      setRole: setRoleHandler, 
+      setIsAuthenticated, 
+      logout: handleGlobalLogout 
+    }}>
       {children}
     </AuthContext.Provider>
   );

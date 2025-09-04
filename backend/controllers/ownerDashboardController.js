@@ -4,11 +4,10 @@ import PGResident from '../models/PGResident.js';
 import MeterReading from '../models/MeterReading.js';
 import ElectricityBill from '../models/ElectricityBill.js';
 import Flat from '../models/Flat.js';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const Payment = require('../models/Payment.js');
-const ActivityLog = require('../models/ActivityLog.js');
-const Notification = require('../models/Notification.js');
+import TenantTracking from '../models/TenantTracking.js';
+import Payment from '../models/Payment.js';
+import ActivityLog from '../models/ActivityLog.js';
+import Notification from '../models/Notification.js';
 import Maintenance from '../models/Maintenance.js';
 import Utility from '../models/Utility.js';
 import Booking from '../models/Booking.js';
@@ -98,6 +97,43 @@ export const getOwnerDashboardOverview = async (req, res) => {
         }
       })
     };
+
+    // Enhanced Tenant Statistics from TenantTracking
+    const enhancedTenantStats = await TenantTracking.aggregate([
+      { $match: { owner: ownerId } },
+      {
+        $group: {
+          _id: null,
+          totalTrackedTenants: { $sum: 1 },
+          activeTenants: {
+            $sum: { $cond: [{ $eq: ['$stayDetails.isActive', true] }, 1, 0] }
+          },
+          totalRevenue: { $sum: '$analytics.totalRevenue' },
+          totalDues: { $sum: '$financials.currentDues.total' },
+          averageStayDays: { $avg: '$analytics.totalStayDays' }
+        }
+      }
+    ]);
+
+    if (enhancedTenantStats.length > 0) {
+      const stats = enhancedTenantStats[0];
+      dashboardData.tenants.enhanced = {
+        totalTracked: stats.totalTrackedTenants,
+        active: stats.activeTenants,
+        totalRevenue: stats.totalRevenue || 0,
+        totalDues: stats.totalDues || 0,
+        averageStayDays: Math.round(stats.averageStayDays) || 0
+      };
+
+      // Get overdue tenants count
+      const overdueTenants = await TenantTracking.countDocuments({
+        owner: ownerId,
+        'stayDetails.isActive': true,
+        'financials.currentDues.total': { $gt: 0 }
+      });
+
+      dashboardData.tenants.enhanced.overdueCount = overdueTenants;
+    }
 
     // Financial overview
     const currentMonthPayments = await Payment.find({
@@ -1116,5 +1152,342 @@ export const getOwnerRecentActivities = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Enhanced Tenant Analytics for Owner Dashboard
+export const getOwnerTenantAnalytics = async (req, res) => {
+  try {
+    const ownerId = req.user._id;
+
+    // Get comprehensive tenant analytics
+    const tenantAnalytics = await TenantTracking.aggregate([
+      { $match: { owner: ownerId } },
+      {
+        $facet: {
+          occupancyStats: [
+            {
+              $group: {
+                _id: '$currentRoom.propertyType',
+                total: { $sum: 1 },
+                active: {
+                  $sum: { $cond: [{ $eq: ['$stayDetails.isActive', true] }, 1, 0] }
+                }
+              }
+            }
+          ],
+          monthlyTrends: [
+            {
+              $group: {
+                _id: {
+                  year: { $year: '$stayDetails.checkInDate' },
+                  month: { $month: '$stayDetails.checkInDate' }
+                },
+                checkIns: { $sum: 1 },
+                totalRevenue: { $sum: '$analytics.totalRevenue' }
+              }
+            },
+            { $sort: { '_id.year': -1, '_id.month': -1 } },
+            { $limit: 12 }
+          ],
+          paymentStatus: [
+            {
+              $group: {
+                _id: null,
+                totalDues: { $sum: '$financials.currentDues.total' },
+                totalCollected: { $sum: '$analytics.totalRevenue' },
+                overdueCount: {
+                  $sum: {
+                    $cond: [
+                      { $gt: ['$financials.currentDues.total', 0] },
+                      1,
+                      0
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: tenantAnalytics[0]
+    });
+  } catch (error) {
+    console.error('Error in getOwnerTenantAnalytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// Get Real-time Room Occupancy Status
+export const getRoomOccupancyStatus = async (req, res) => {
+  try {
+    const ownerId = req.user._id;
+
+    // Get all properties with occupancy status
+    const [pgOccupancy, roomOccupancy, flatOccupancy] = await Promise.all([
+      // PG Occupancy
+      PG.aggregate([
+        { $match: { owner: ownerId } },
+        {
+          $lookup: {
+            from: 'tenanttrackings',
+            let: { pgId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$currentRoom.propertyId', '$$pgId'] },
+                      { $eq: ['$currentRoom.propertyType', 'PG'] },
+                      { $eq: ['$stayDetails.isActive', true] }
+                    ]
+                  }
+                }
+              }
+            ],
+            as: 'activeTenants'
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            totalBeds: 1,
+            occupiedBeds: { $size: '$activeTenants' },
+            availableBeds: { $subtract: ['$totalBeds', { $size: '$activeTenants' }] },
+            occupancyRate: {
+              $multiply: [
+                { $divide: [{ $size: '$activeTenants' }, '$totalBeds'] },
+                100
+              ]
+            }
+          }
+        }
+      ]),
+
+      // Room Occupancy
+      Room.aggregate([
+        { $match: { owner: ownerId } },
+        {
+          $lookup: {
+            from: 'tenanttrackings',
+            let: { roomId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$currentRoom.propertyId', '$$roomId'] },
+                      { $eq: ['$currentRoom.propertyType', 'Room'] },
+                      { $eq: ['$stayDetails.isActive', true] }
+                    ]
+                  }
+                }
+              }
+            ],
+            as: 'activeTenants'
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            isOccupied: { $gt: [{ $size: '$activeTenants' }, 0] },
+            currentTenant: { $arrayElemAt: ['$activeTenants', 0] }
+          }
+        }
+      ]),
+
+      // Flat Occupancy
+      Flat.aggregate([
+        { $match: { owner: ownerId } },
+        {
+          $lookup: {
+            from: 'tenanttrackings',
+            let: { flatId: '$_id' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$currentRoom.propertyId', '$$flatId'] },
+                      { $eq: ['$currentRoom.propertyType', 'Flat'] },
+                      { $eq: ['$stayDetails.isActive', true] }
+                    ]
+                  }
+                }
+              }
+            ],
+            as: 'activeTenants'
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            maxOccupancy: 1,
+            currentOccupancy: { $size: '$activeTenants' },
+            isAvailable: { $lt: [{ $size: '$activeTenants' }, '$maxOccupancy'] }
+          }
+        }
+      ])
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        pg: pgOccupancy,
+        rooms: roomOccupancy,
+        flats: flatOccupancy,
+        summary: {
+          totalProperties: pgOccupancy.length + roomOccupancy.length + flatOccupancy.length,
+          totalOccupied: pgOccupancy.reduce((sum, pg) => sum + pg.occupiedBeds, 0) +
+                        roomOccupancy.filter(room => room.isOccupied).length +
+                        flatOccupancy.reduce((sum, flat) => sum + flat.currentOccupancy, 0),
+          totalCapacity: pgOccupancy.reduce((sum, pg) => sum + pg.totalBeds, 0) +
+                        roomOccupancy.length +
+                        flatOccupancy.reduce((sum, flat) => sum + flat.maxOccupancy, 0)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error in getRoomOccupancyStatus:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// Get Recent Tenant Activities (Enhanced Version)
+export const getRecentTenantActivities = async (req, res) => {
+  try {
+    const ownerId = req.user._id;
+    const limit = parseInt(req.query.limit) || 20;
+
+    // Get recent check-ins and check-outs
+    const recentActivities = await TenantTracking.find({
+      owner: ownerId
+    })
+    .sort({ 'stayDetails.lastUpdated': -1 })
+    .limit(limit)
+    .populate('tenant', 'name phone email')
+    .select('tenant stayDetails currentRoom analytics')
+    .lean();
+
+    // Format activities for dashboard
+    const formattedActivities = recentActivities.map(activity => ({
+      tenantName: activity.tenant?.name,
+      tenantPhone: activity.tenant?.phone,
+      propertyType: activity.currentRoom?.propertyType,
+      propertyName: activity.currentRoom?.propertyName,
+      roomNumber: activity.currentRoom?.roomNumber,
+      checkInDate: activity.stayDetails?.checkInDate,
+      checkOutDate: activity.stayDetails?.checkOutDate,
+      isActive: activity.stayDetails?.isActive,
+      totalStayDays: activity.analytics?.totalStayDays,
+      lastUpdated: activity.stayDetails?.lastUpdated
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: formattedActivities
+    });
+  } catch (error) {
+    console.error('Error in getRecentTenantActivities:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// Get Tenant Payment Overview
+export const getTenantPaymentOverview = async (req, res) => {
+  try {
+    const ownerId = req.user._id;
+
+    // Get payment analytics from TenantTracking
+    const paymentOverview = await TenantTracking.aggregate([
+      { $match: { owner: ownerId } },
+      {
+        $group: {
+          _id: null,
+          totalExpectedRevenue: { $sum: '$analytics.totalRevenue' },
+          totalDues: { $sum: '$financials.currentDues.total' },
+          totalAdvance: { $sum: '$financials.advancePayments.total' },
+          overdueTenantsCount: {
+            $sum: {
+              $cond: [
+                { 
+                  $and: [
+                    { $eq: ['$stayDetails.isActive', true] },
+                    { $gt: ['$financials.currentDues.total', 0] }
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          },
+          activeTenants: {
+            $sum: { $cond: [{ $eq: ['$stayDetails.isActive', true] }, 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    // Get recent payments from tenant tracking
+    const recentPayments = await TenantTracking.find({
+      owner: ownerId,
+      'paymentHistory.0': { $exists: true }
+    })
+    .sort({ 'paymentHistory.date': -1 })
+    .limit(10)
+    .populate('tenant', 'name phone')
+    .select('tenant paymentHistory currentRoom')
+    .lean();
+
+    // Format recent payments
+    const formattedPayments = [];
+    recentPayments.forEach(tracking => {
+      if (tracking.paymentHistory && tracking.paymentHistory.length > 0) {
+        const latestPayment = tracking.paymentHistory[tracking.paymentHistory.length - 1];
+        formattedPayments.push({
+          tenantName: tracking.tenant?.name,
+          tenantPhone: tracking.tenant?.phone,
+          amount: latestPayment.amount,
+          type: latestPayment.type,
+          date: latestPayment.date,
+          propertyType: tracking.currentRoom?.propertyType,
+          propertyName: tracking.currentRoom?.propertyName,
+          roomNumber: tracking.currentRoom?.roomNumber
+        });
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        overview: paymentOverview[0] || {
+          totalExpectedRevenue: 0,
+          totalDues: 0,
+          totalAdvance: 0,
+          overdueTenantsCount: 0,
+          activeTenants: 0
+        },
+        recentPayments: formattedPayments.slice(0, 10)
+      }
+    });
+  } catch (error) {
+    console.error('Error in getTenantPaymentOverview:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
 };

@@ -128,15 +128,22 @@ const LoginForm: React.FC = () => {
           localStorage.removeItem(`rememberedEmail_${role}`);
         }
 
+        // Store authentication data
         localStorage.setItem('token', data.token);
         localStorage.setItem('userRole', role);
+        
+        // Update context if available
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('token', data.token);
+        }
+        
         toast.success('🎉 Login successful!');
         
         // Redirect based on role
         if (role === 'owner') {
-          router.push('/owner/dashboard');
+          router.push('/dashboard'); // Owner dashboard route
         } else {
-          router.push('/dashboard');
+          router.push('/dashboard'); // User dashboard route (can be different later)
         }
       } else {
         toast.error(data.message || 'Login failed');

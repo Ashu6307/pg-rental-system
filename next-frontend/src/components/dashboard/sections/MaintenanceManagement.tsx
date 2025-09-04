@@ -17,7 +17,7 @@ import {
   Edit,
   Trash2,
   MapPin,
-  Tool,
+  Settings,
   Home,
   Droplets,
   Zap,
@@ -230,7 +230,7 @@ const MaintenanceManagement = () => {
       case 'wifi': return <Wifi className="h-5 w-5 text-indigo-600" />;
       case 'security': return <Shield className="h-5 w-5 text-red-600" />;
       case 'pest-control': return <Bug className="h-5 w-5 text-orange-600" />;
-      default: return <Tool className="h-5 w-5 text-gray-600" />;
+      default: return <Settings className="h-5 w-5 text-gray-600" />;
     }
   };
 
