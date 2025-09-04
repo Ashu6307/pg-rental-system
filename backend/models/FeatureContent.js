@@ -8,7 +8,7 @@ const FeatureContentSchema = new mongoose.Schema({
   },
   subtitle: {
     type: String,
-    default: 'Experience the best in PG accommodations and bike rentals with our comprehensive platform'
+    default: 'Experience the best in PG accommodations with our comprehensive platform'
   },
   ctaText: {
     type: String,

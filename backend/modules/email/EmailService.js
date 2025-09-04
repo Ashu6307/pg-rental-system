@@ -228,7 +228,7 @@ class EmailService {
   async sendBookingEmail(user, booking, emailType, additionalData = {}) {
     const templateMap = {
       'booking_request': 'bookingRequested',
-      'booking_approved': booking.item_type === 'PG' ? 'bookingApproved' : 'bikeBookingConfirmed',
+      'booking_approved': 'bookingApproved',
       'booking_rejected': 'bookingRejected',
       'booking_completed': 'bookingCompleted'
     };

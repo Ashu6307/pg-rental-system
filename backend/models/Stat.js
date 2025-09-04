@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const StatSchema = new mongoose.Schema({
-  type: { type: String, required: true }, // e.g. 'pg', 'bike', 'user', 'booking'
+  type: { type: String, required: true }, // e.g. 'pg', 'user', 'booking'
   count: { type: Number, required: true },
   updatedAt: { type: Date, default: Date.now },
   tenantId: { type: String }, // multi-tenancy support

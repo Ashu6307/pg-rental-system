@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const FavoriteSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  item_type: { type: String, enum: ['PG', 'Bike'], required: true },
+  item_type: { type: String, enum: ['PG'], required: true },
   item_id: { type: mongoose.Schema.Types.ObjectId, required: true },
   type: { type: String },
   is_read: { type: Boolean, default: false }

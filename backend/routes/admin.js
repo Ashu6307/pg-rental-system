@@ -466,7 +466,7 @@ router.get('/recent-activities', authenticateJWT, async (req, res) => {
         description: 'New booking created',
         user: 'Mike Johnson',
         timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-        details: 'Booking #BK001 created for Bike #BK123'
+        details: 'Booking #PG001 created for PG #PG123'
       }
     ];
     

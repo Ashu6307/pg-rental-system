@@ -192,7 +192,6 @@ router.get('/templates', adminAuth, (req, res) => {
     { name: 'passwordResetConfirmation', description: 'Password reset confirmation' },
     { name: 'bookingRequested', description: 'Booking request submitted' },
     { name: 'bookingApproved', description: 'PG booking approved' },
-    { name: 'bikeBookingConfirmed', description: 'Bike booking confirmed' },
     { name: 'bookingRejected', description: 'Booking rejected' },
     { name: 'bookingCompleted', description: 'Booking completed' },
     { name: 'paymentReceipt', description: 'Payment receipt' },

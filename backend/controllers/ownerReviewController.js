@@ -1,21 +1,17 @@
 import Review from '../models/Review.js';
 import PG from '../models/PG.js';
-import Bike from '../models/Bike.js';
 
-// Get all reviews for owner's PGs/Bikes
+// Get all reviews for owner's PGs
 export const getOwnerReviews = async (req, res) => {
   try {
-    // Find all PGs/Bikes owned by this owner
+    // Find all PGs owned by this owner
     const pgs = await PG.find({ owner: req.user._id }).select('_id');
-    const bikes = await Bike.find({ owner: req.user._id }).select('_id');
     const pgIds = pgs.map(pg => pg._id);
-    const bikeIds = bikes.map(bike => bike._id);
-    // Find reviews for these PGs/Bikes
+    
+    // Find reviews for these PGs
     const reviews = await Review.find({
-      $or: [
-        { item_type: 'PG', item_id: { $in: pgIds } },
-        { item_type: 'Bike', item_id: { $in: bikeIds } }
-      ]
+      item_type: 'PG', 
+      item_id: { $in: pgIds }
     }).sort({ created_at: -1 });
     res.json(reviews);
   } catch (err) {

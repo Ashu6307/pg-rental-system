@@ -11,7 +11,8 @@ import {
   Plus,
   FileText,
   MessageSquare,
-  Calendar
+  Calendar,
+  BarChart3
 } from 'lucide-react';
 
 const MainDashboard = () => {
@@ -34,7 +35,7 @@ const MainDashboard = () => {
   const quickActions = [
     { id: 'add-tenant', label: 'Add New Tenant', icon: Plus, color: 'bg-blue-500', action: () => {} },
     { id: 'generate-bills', label: 'Generate Bills', icon: FileText, color: 'bg-green-500', action: () => {} },
-    { id: 'send-reminders', label: 'Send Payment Reminders', icon: MessageSquare, color: 'bg-yellow-500', action: () => {} },
+    { id: 'view-analytics', label: 'View Analytics', icon: BarChart3, color: 'bg-indigo-500', action: () => {} },
     { id: 'schedule-maintenance', label: 'Schedule Maintenance', icon: Calendar, color: 'bg-purple-500', action: () => {} }
   ];
 

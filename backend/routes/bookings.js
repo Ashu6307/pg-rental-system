@@ -127,7 +127,7 @@ router.put('/:id', authenticateJWT, async (req, res) => {
         
         await sendEmail({ 
           to: user.email, 
-          subject: '❌ Booking Cancelled - Invoice Attached - BikeRental Pro', 
+          subject: '❌ Booking Cancelled - Invoice Attached - PG Rental Pro', 
           html: emailContent, 
           attachmentBuffer: pdfBuffer 
         });

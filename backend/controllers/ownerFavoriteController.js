@@ -1,21 +1,17 @@
 import Favorite from '../models/Favorite.js';
 import PG from '../models/PG.js';
-import Bike from '../models/Bike.js';
 
 // Get all favorites for owner
 export const getOwnerFavorites = async (req, res) => {
   try {
-    // Find all PGs/Bikes owned by this owner
+    // Find all PGs owned by this owner
     const pgs = await PG.find({ owner: req.user._id }).select('_id');
-    const bikes = await Bike.find({ owner: req.user._id }).select('_id');
     const pgIds = pgs.map(pg => pg._id);
-    const bikeIds = bikes.map(bike => bike._id);
-    // Find favorites for these PGs/Bikes
+    
+    // Find favorites for these PGs
     const favorites = await Favorite.find({
-      $or: [
-        { item_type: 'PG', item_id: { $in: pgIds } },
-        { item_type: 'Bike', item_id: { $in: bikeIds } }
-      ]
+      item_type: 'PG', 
+      item_id: { $in: pgIds }
     });
     res.json(favorites);
   } catch (err) {

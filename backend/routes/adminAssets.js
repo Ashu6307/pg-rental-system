@@ -7,10 +7,7 @@ const adminAuth = require('../middleware/adminAuth');
 router.get('/pgs', adminAuth, adminAssetController.listPGs);
 router.post('/pgs/approve/:id', adminAuth, adminAssetController.approvePG);
 router.post('/pgs/reject/:id', adminAuth, adminAssetController.rejectPG);
-// Bike routes
-router.get('/bikes', adminAuth, adminAssetController.listBikes);
-router.post('/bikes/approve/:id', adminAuth, adminAssetController.approveBike);
-router.post('/bikes/reject/:id', adminAuth, adminAssetController.rejectBike);
+
 // Owner routes
 router.get('/owners', adminAuth, adminAssetController.listOwners);
 router.post('/owners/approve/:id', adminAuth, adminAssetController.approveOwner);

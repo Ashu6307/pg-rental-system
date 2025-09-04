@@ -4,7 +4,7 @@ const invoiceSchema = new mongoose.Schema({
   invoiceId: { type: String, unique: true },
   bookingId: { type: String, required: true },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  itemType: { type: String, enum: ['PG', 'Bike'], required: true },
+  itemType: { type: String, enum: ['PG'], required: true },
   itemName: { type: String },
   itemAddress: { type: String },
   startDate: { type: Date },

@@ -126,7 +126,7 @@ class MarketingController {
         'summer': {
           subject: '☀️ Summer Special - Beat the Heat with Our Cool Rides!',
           title: 'Summer Special Offers',
-          message: customMessage || 'Beat the summer heat with our air-conditioned PGs and cool bike rides!',
+          message: customMessage || 'Beat the summer heat with our air-conditioned PGs and comfortable rooms!',
           discount: '25% OFF',
           validUntil: 'End of Summer Season'
         },
@@ -140,7 +140,7 @@ class MarketingController {
         'winter': {
           subject: '❄️ Winter Warmth - Cozy Stays & Heated Rooms!',
           title: 'Winter Comfort Package',
-          message: customMessage || 'Stay warm this winter with our heated rooms and winter-ready bike rentals!',
+          message: customMessage || 'Stay warm this winter with our heated rooms and cozy accommodations!',
           discount: '30% OFF',
           validUntil: 'Winter Season'
         },

@@ -36,7 +36,6 @@ const createRateLimiter = () => {
         '/api/otp/send-otp': 200,
         
         // Search and listing endpoints - very high limits
-        '/api/bikes': 2000,
         '/api/pg': 2000,
         '/api/home': 1000,
         

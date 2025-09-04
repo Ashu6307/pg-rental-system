@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const OwnerProfileSchema = new mongoose.Schema({
   owner_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  business_type: { type: String, enum: ['PG', 'Bike', 'Both'], required: true },
+  business_type: { type: String, enum: ['PG'], required: true },
   name: { type: String, required: true },
   email: { type: String, required: true },
   phone: { type: String },

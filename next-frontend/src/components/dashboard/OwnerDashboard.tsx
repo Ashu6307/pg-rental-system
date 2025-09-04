@@ -15,7 +15,8 @@ import {
   X,
   TrendingUp,
   Calendar,
-  Bell
+  Bell,
+  BarChart3
 } from 'lucide-react';
 
 // Import dashboard sections
@@ -28,6 +29,7 @@ import MaintenanceManagement from './sections/MaintenanceManagement';
 import CommunicationCenter from './sections/CommunicationCenter';
 import DocumentManagement from './sections/DocumentManagement';
 import SettingsPanel from './sections/SettingsPanel';
+import AnalyticsReports from './sections/AnalyticsReports';
 
 const OwnerDashboard = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -42,6 +44,7 @@ const OwnerDashboard = () => {
     { id: 'maintenance', label: 'Maintenance', icon: Wrench, badge: '5' },
     { id: 'communication', label: 'Messages', icon: MessageSquare, badge: '8' },
     { id: 'documents', label: 'Documents', icon: FileText, badge: null },
+    { id: 'analytics', label: 'Analytics & Reports', icon: BarChart3, badge: null },
     { id: 'settings', label: 'Settings', icon: Settings, badge: null },
   ];
 
@@ -63,6 +66,8 @@ const OwnerDashboard = () => {
         return <CommunicationCenter />;
       case 'documents':
         return <DocumentManagement />;
+      case 'analytics':
+        return <AnalyticsReports />;
       case 'settings':
         return <SettingsPanel />;
       default:
