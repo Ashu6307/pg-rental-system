@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const FeaturedListingSchema = new mongoose.Schema({
-  type: { type: String, enum: ['pg'], required: true },
+  type: { type: String, enum: ['pg', 'room', 'flat'], required: true },
   refId: { type: mongoose.Schema.Types.ObjectId, required: true, refPath: 'type' },
   isFeatured: { type: Boolean, default: true },
   tenantId: { type: String },

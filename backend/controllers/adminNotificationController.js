@@ -41,7 +41,7 @@ exports.sendNotification = async (req, res) => {
         const emailContent = emailTemplates.notification(title, message, user.name || user.username || 'User');
         result = await sendEmail({
           to: user.email,
-          subject: `📢 ${title} - PG Rental Pro`,
+          subject: `📢 ${title} - Property Rental Pro`,
           html: emailContent
         });
       } else {

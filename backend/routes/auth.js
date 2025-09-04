@@ -121,8 +121,8 @@ router.post('/register', async (req, res) => {
     let user;
     
     if (role === 'owner') {
-      if (!businessType || !['PG'].includes(businessType)) {
-        return res.status(400).json({ error: 'Business type must be PG only.' });
+      if (!businessType || !['PG', 'Room', 'Flat', 'All'].includes(businessType)) {
+        return res.status(400).json({ error: 'Business type must be PG, Room, Flat, or All.' });
       }
       user = new User({
         name: formattedOwnerName,
@@ -210,7 +210,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     if (user.status === 'blocked') {
       return res.status(403).json({ 
         error: 'Your account has been blocked. Please contact support.',
-        supportEmail: 'support@pgrental.com'
+        supportEmail: 'support@propertyrentalpro.com'
       });
     }
 

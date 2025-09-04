@@ -15,7 +15,7 @@ const ContactSchema = new mongoose.Schema({
   },
   subject: { type: String, required: true },
   message: { type: String, required: true },
-  inquiryType: { type: String, enum: ['general', 'pg_accommodation', 'support', 'complaint', 'partnership'], default: 'general' },
+  inquiryType: { type: String, enum: ['general', 'pg_accommodation', 'room_rental', 'flat_rental', 'support', 'complaint', 'partnership'], default: 'general' },
   priority: { type: String, enum: ['low', 'medium', 'high', 'urgent'], default: 'medium' },
   attachments: [AttachmentSchema],
   status: { type: String, enum: ['pending', 'reviewed', 'resolved', 'closed'], default: 'pending' },

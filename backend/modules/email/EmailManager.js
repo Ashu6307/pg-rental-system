@@ -78,7 +78,7 @@ class EmailManager {
 
     const emailData = {
       to: user.email,
-      subject: `${EMAIL_CONFIG.SUBJECTS[emailType]} - PG Rental`,
+      subject: `${EMAIL_CONFIG.SUBJECTS[emailType]} - Property Rental`,
       emailType,
       templateName: EMAIL_CONFIG.TEMPLATES[emailType],
       templateData: EMAIL_DATA_GENERATORS.paymentEmail(user, payment, booking),
@@ -337,7 +337,7 @@ class EmailManager {
       'booking_rejected': `❌ ${itemType} Booking Update`,
       'booking_completed': `✅ ${itemType} Booking Completed`
     };
-    return (typeMap[emailType] || 'Booking Update') + ' - PG Rental';
+    return (typeMap[emailType] || 'Booking Update') + ' - Property Rental';
   }
 
   async _sendBookingReminder(user, data) {
@@ -346,7 +346,7 @@ class EmailManager {
       user._id,
       'bookingReminder',
       {
-        subject: '⏰ Booking Reminder - PG Rental',
+        subject: '⏰ Booking Reminder - Property Rental',
         ...data
       }
     );
@@ -358,7 +358,7 @@ class EmailManager {
       user._id,
       'paymentReminder',
       {
-        subject: '💳 Payment Reminder - PG Rental',
+        subject: '💳 Payment Reminder - Property Rental',
         ...data
       }
     );

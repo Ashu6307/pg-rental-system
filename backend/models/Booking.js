@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const BookingSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  item_type: { type: String, enum: ['PG'], required: true },
+  item_type: { type: String, enum: ['PG', 'Room', 'Flat'], required: true },
   item_id: { type: mongoose.Schema.Types.ObjectId, required: true },
   from_date: { type: Date, required: true },
   to_date: { type: Date, required: true },

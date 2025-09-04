@@ -19,6 +19,7 @@ import adminRoutes from './routes/admin.js';
 import bookingRoutes from './routes/bookings.js';
 import pgRoutes from './routes/pg.js';
 import roomRoutes from './routes/roomRoutes.js';
+import flatRoutes from './routes/flats.js';
 import authRoutes from './routes/auth.js';
 import homeRoutes from './routes/home.js';
 import otpRoutes from './routes/otp.js';
@@ -78,6 +79,7 @@ app.use('/api/home', homeRoutes); // /api/home public
 app.use('/api/cities', citiesRoutes); // Cities list
 app.use('/api/pgs', pgRoutes); // Public PG listings
 app.use('/api/rooms', roomRoutes); // Public Room listings
+app.use('/api/flats', flatRoutes); // Public Flat listings
 app.use('/api/offers', offersRoutes); // Public offers
 app.use('/api/auth', authRoutes); // Authentication
 app.use('/api/user', authMeRouter); // Auth/me endpoint for user profile

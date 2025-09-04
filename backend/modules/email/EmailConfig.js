@@ -48,7 +48,7 @@ export const EMAIL_CONFIG = {
 
   // Subject prefixes
   SUBJECTS: {
-    welcome: '🎉 Welcome to PG Rental!',
+    welcome: '🎉 Welcome to Property Rental Platform!',
     otp: '🔐 Your OTP Code',
     password_reset: '🔐 Password Reset Request',
     password_reset_confirmation: '✅ Password Reset Successful',
@@ -74,6 +74,8 @@ export const EMAIL_CONFIG = {
     INACTIVE_USERS: 'inactive',
     NEW_USERS: 'new',
     PG_USERS: 'pg_users',
+    ROOM_USERS: 'room_users',
+    FLAT_USERS: 'flat_users',
     HIGH_VALUE_USERS: 'high_value'
   },
 
@@ -131,7 +133,7 @@ export const EMAIL_DATA_GENERATORS = {
     name: user.name,
     email: user.email,
     role: user.role,
-    platformName: 'PG Rental'
+    platformName: 'Property Rental Platform'
   }),
 
   otpEmail: (user, otp, purpose = 'verification') => ({
