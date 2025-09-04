@@ -51,7 +51,20 @@ const PG: React.FC = () => {
       filtered = filtered.filter(pg => pg.pgType === filters.pgType);
     }
     if (filters.genderAllowed) {
-      filtered = filtered.filter(pg => pg.genderAllowed === filters.genderAllowed);
+      filtered = filtered.filter(pg => {
+        // Support both old genderAllowed and new gender fields
+        const pgGender = pg.gender || pg.genderAllowed;
+        
+        // Map filter values to database values
+        if (filters.genderAllowed === 'male') {
+          return pgGender === 'Male' || pgGender === 'male';
+        } else if (filters.genderAllowed === 'female') {
+          return pgGender === 'Female' || pgGender === 'female';
+        } else if (filters.genderAllowed === 'unisex' || filters.genderAllowed === 'both') {
+          return pgGender === 'Unisex' || pgGender === 'unisex' || pgGender === 'both';
+        }
+        return pgGender === filters.genderAllowed;
+      });
     }
     if (filters.sort) {
       filtered.sort((a, b) => {
@@ -127,29 +140,32 @@ const PG: React.FC = () => {
   };
 
   const getDiscountBadge = (pg: any) => {
+    let maxDiscount = 0;
+    
+    // Check roomTypes for discount first (for old PGs)
     if (pg.roomTypes && pg.roomTypes.length > 0) {
-      const maxDiscount = Math.max(...pg.roomTypes.map((room: any) => {
+      maxDiscount = Math.max(...pg.roomTypes.map((room: any) => {
         if (room.originalPrice && room.originalPrice > room.price) {
           return Math.round(((room.originalPrice - room.price) / room.originalPrice) * 100);
         }
         return 0;
       }));
-      if (maxDiscount > 0) {
-        return (
-          <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-            UP TO {maxDiscount}% OFF
-          </div>
-        );
-      }
     }
-    if (pg.originalPrice && pg.originalPrice > pg.price) {
-      const discount = Math.round(((pg.originalPrice - pg.price) / pg.originalPrice) * 100);
+    
+    // Check main price discount (for new PGs)
+    if (maxDiscount === 0 && pg.originalPrice && pg.originalPrice > pg.price) {
+      maxDiscount = Math.round(((pg.originalPrice - pg.price) / pg.originalPrice) * 100);
+    }
+    
+    // Show consistent "UP TO X% OFF" format for all PGs
+    if (maxDiscount > 0) {
       return (
         <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-          {discount}% OFF
+          UP TO {maxDiscount}% OFF
         </div>
       );
     }
+    
     return null;
   };
 
@@ -413,21 +429,21 @@ const PG: React.FC = () => {
                   </div>
                   {/* Gender & Availability */}
                   <div className="flex items-center justify-between mb-2">
-                    {pg.genderAllowed && (
+                    {(pg.gender || pg.genderAllowed) && (
                       <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                        pg.genderAllowed === 'male' 
+                        (pg.gender === 'Male' || pg.genderAllowed === 'male')
                           ? 'bg-blue-100 text-blue-700' 
-                          : pg.genderAllowed === 'female' 
+                          : (pg.gender === 'Female' || pg.genderAllowed === 'female')
                           ? 'bg-pink-100 text-pink-700' 
                           : 'bg-purple-100 text-purple-700'
-                      }`} title={`Gender Allowed: ${pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex' ? 'Boys & Girls' : pg.genderAllowed === 'male' ? 'Boys Only' : 'Girls Only'}`}>
-                        {pg.genderAllowed === 'male' && <FaMale className="text-xs" title="Boys Only" />}
-                        {pg.genderAllowed === 'female' && <FaFemale className="text-xs" title="Girls Only" />}
-                        {(pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex') && <FaUsers className="text-xs" title="Boys & Girls" />}
-                        <span className="capitalize" title={`This PG is for ${pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex' ? 'both boys and girls' : pg.genderAllowed === 'male' ? 'boys only' : 'girls only'}`}>
-                          {pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex' 
+                      }`} title={`Gender Allowed: ${(pg.gender === 'Unisex' || pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex') ? 'Boys & Girls' : (pg.gender === 'Male' || pg.genderAllowed === 'male') ? 'Boys Only' : 'Girls Only'}`}>
+                        {(pg.gender === 'Male' || pg.genderAllowed === 'male') && <FaMale className="text-xs" title="Boys Only" />}
+                        {(pg.gender === 'Female' || pg.genderAllowed === 'female') && <FaFemale className="text-xs" title="Girls Only" />}
+                        {(pg.gender === 'Unisex' || pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex') && <FaUsers className="text-xs" title="Boys & Girls" />}
+                        <span className="capitalize" title={`This PG is for ${(pg.gender === 'Unisex' || pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex') ? 'both boys and girls' : (pg.gender === 'Male' || pg.genderAllowed === 'male') ? 'boys only' : 'girls only'}`}>
+                          {(pg.gender === 'Unisex' || pg.genderAllowed === 'both' || pg.genderAllowed === 'unisex')
                             ? 'Co-living' 
-                            : pg.genderAllowed === 'male' 
+                            : (pg.gender === 'Male' || pg.genderAllowed === 'male')
                             ? 'Boys' 
                             : 'Girls'
                           }
