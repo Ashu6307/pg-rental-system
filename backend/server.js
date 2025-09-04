@@ -123,6 +123,14 @@ app.use('/api/owner/versioned-settings', ownerVersionedSettingsRoutes);
 import { emailRoutes } from './modules/email/index.js';
 app.use('/api/emails', emailRoutes);
 
+// City-wise Admin Management Routes
+import adminCityRoutes from './routes/adminCity.js';
+app.use('/api/admin/cities', adminCityRoutes);
+
+// User Inquiry System Routes (Admin-Mediated Communication)
+import inquiryRoutes from './routes/inquiry.js';
+app.use('/api/inquiries', inquiryRoutes);
+
 // User-specific protected routes (These routes already have their own auth middleware)
 app.use('/api/users', usersRoutes);
 app.use('/api/bookings', bookingRoutes);
