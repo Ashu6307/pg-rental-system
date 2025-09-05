@@ -615,4 +615,256 @@ router.post('/webhook/trigger', async (req, res) => {
   }
 });
 
+// Create New Admin (Super Admin Only)
+router.post('/create-admin', authenticateJWT, async (req, res) => {
+  try {
+    // Check if user is super admin
+    const currentAdmin = await Admin.findById(req.user.id);
+    if (!currentAdmin || currentAdmin.role !== 'super_admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Only Super Admin can create new administrators' 
+      });
+    }
+
+    const { 
+      name, 
+      email, 
+      phone, 
+      password, 
+      role, 
+      assignedCities, 
+      permissions 
+    } = req.body;
+
+    // Input validation
+    if (!name || !email || !phone || !password || !role) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'All required fields must be provided' 
+      });
+    }
+
+    // Validate role
+    const validRoles = ['admin', 'super_admin', 'city_admin'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid admin role' 
+      });
+    }
+
+    // Check if admin already exists
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Admin with this email already exists' 
+      });
+    }
+
+    // Hash password
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Set permissions based on role
+    let adminPermissions = {
+      ownerVerification: true,
+      propertyApproval: true,
+      userManagement: true,
+      cityManagement: role === 'super_admin',
+      adminManagement: role === 'super_admin'
+    };
+
+    // Override with provided permissions if any
+    if (permissions) {
+      adminPermissions = {
+        ...adminPermissions,
+        ...permissions,
+        // Ensure only super_admin can have these permissions
+        cityManagement: role === 'super_admin' ? permissions.cityManagement !== false : false,
+        adminManagement: role === 'super_admin' ? permissions.adminManagement !== false : false
+      };
+    }
+
+    // Create new admin
+    const newAdmin = new Admin({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      password: hashedPassword,
+      role,
+      isActive: true,
+      assignedCities: role === 'city_admin' ? (assignedCities || []) : [],
+      permissions: adminPermissions,
+      created_at: new Date(),
+      stats: {
+        ownersVerified: 0,
+        propertiesApproved: 0,
+        inquiriesHandled: 0,
+        lastActiveDate: new Date()
+      }
+    });
+
+    await newAdmin.save();
+
+    // Send welcome email using Enhanced Email Manager
+    try {
+      await EmailManager.sendWelcomeEmail(
+        { email: newAdmin.email, name: newAdmin.name },
+        {
+          role: role,
+          loginUrl: process.env.FRONTEND_URL + '/sys-mgmt/auth',
+          tempPassword: password // In production, generate temp password
+        }
+      );
+    } catch (emailError) {
+      console.warn('Failed to send welcome email to new admin:', emailError);
+      // Don't fail the admin creation if email fails
+    }
+
+    // Log the admin creation action
+    await logAction({
+      action: 'Admin Created',
+      performedBy: req.user.id,
+      targetId: newAdmin._id,
+      targetType: 'Admin',
+      details: { 
+        newAdminEmail: newAdmin.email, 
+        newAdminRole: role,
+        assignedCities: newAdmin.assignedCities?.length || 0
+      }
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Admin created successfully',
+      admin: {
+        id: newAdmin._id,
+        name: newAdmin.name,
+        email: newAdmin.email,
+        role: newAdmin.role,
+        isActive: newAdmin.isActive,
+        assignedCities: newAdmin.assignedCities,
+        permissions: newAdmin.permissions,
+        createdAt: newAdmin.created_at
+      }
+    });
+
+  } catch (error) {
+    console.error('Create admin error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to create admin. Please try again.' 
+    });
+  }
+});
+
+// List All Admins (Super Admin Only)
+router.get('/list-admins', authenticateJWT, async (req, res) => {
+  try {
+    // Check if user is super admin
+    const currentAdmin = await Admin.findById(req.user.id);
+    if (!currentAdmin || currentAdmin.role !== 'super_admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Only Super Admin can view administrator list' 
+      });
+    }
+
+    // Get all admins except passwords
+    const adminList = await Admin.find({}).select('-password').sort({ created_at: -1 });
+
+    const formattedAdmins = adminList.map(admin => ({
+      id: admin._id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+      isActive: admin.isActive,
+      assignedCities: admin.assignedCities || [],
+      permissions: admin.permissions,
+      lastLogin: admin.lastLogin,
+      createdAt: admin.created_at,
+      stats: admin.stats
+    }));
+
+    res.json({ 
+      success: true, 
+      admins: formattedAdmins,
+      total: formattedAdmins.length
+    });
+
+  } catch (error) {
+    console.error('List admins error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch administrators' 
+    });
+  }
+});
+
+// Toggle Admin Status (Super Admin Only)
+router.patch('/toggle-status/:adminId', authenticateJWT, async (req, res) => {
+  try {
+    // Check if user is super admin
+    const currentAdmin = await Admin.findById(req.user.id);
+    if (!currentAdmin || currentAdmin.role !== 'super_admin') {
+      return res.status(403).json({ 
+        success: false, 
+        message: 'Only Super Admin can modify administrator status' 
+      });
+    }
+
+    const { adminId } = req.params;
+    const { isActive } = req.body;
+
+    // Prevent super admin from deactivating themselves
+    if (adminId === req.user.id && !isActive) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'You cannot deactivate your own account' 
+      });
+    }
+
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Administrator not found' 
+      });
+    }
+
+    admin.isActive = isActive;
+    await admin.save();
+
+    // Log the action
+    await logAction({
+      action: `Admin ${isActive ? 'Activated' : 'Deactivated'}`,
+      performedBy: req.user.id,
+      targetId: admin._id,
+      targetType: 'Admin',
+      details: { 
+        targetEmail: admin.email, 
+        newStatus: isActive 
+      }
+    });
+
+    res.json({ 
+      success: true, 
+      message: `Admin ${isActive ? 'activated' : 'deactivated'} successfully`,
+      admin: {
+        id: admin._id,
+        isActive: admin.isActive
+      }
+    });
+
+  } catch (error) {
+    console.error('Toggle admin status error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to update administrator status' 
+    });
+  }
+});
+
 export default router;

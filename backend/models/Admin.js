@@ -4,7 +4,7 @@ const AdminSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['super_admin', 'city_admin'], default: 'city_admin' },
+  role: { type: String, enum: ['admin', 'super_admin', 'city_admin'], default: 'city_admin' },
   isActive: { type: Boolean, default: true },
   lastLogin: { type: Date },
   
