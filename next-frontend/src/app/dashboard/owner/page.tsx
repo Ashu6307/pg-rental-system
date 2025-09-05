@@ -13,12 +13,12 @@ export default function OwnerDashboardPage() {
     // Wait for AuthContext to initialize
     if (!loading) {
       if (!isAuthenticated) {
-        router.push('/auth/owner/login');
+        router.push('/auth/login?role=owner');
         return;
       }
 
       if (role !== 'owner') {
-        router.push('/auth/owner/login');
+        router.push('/auth/login?role=owner');
         return;
       }
 
@@ -45,8 +45,6 @@ export default function OwnerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <OwnerDashboard />
-    </div>
+    <OwnerDashboard />
   );
 }

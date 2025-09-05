@@ -61,3 +61,10 @@ Thumbs.db
 # React build cache
 node_modules/.cache/
 */node_modules/.cache/
+
+# Test and temporary files
+test-atlas-connection.js
+*/test-atlas-connection.js
+**/test-auth/
+**/owner_disabled/
+**/dashboards/

@@ -38,7 +38,7 @@ const OwnerDashboard = () => {
   // Redirect if not authenticated
   React.useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/auth/owner/login');
+      router.push('/auth/login?role=owner');
     }
   }, [isAuthenticated, router]);
 

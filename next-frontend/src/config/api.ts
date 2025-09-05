@@ -57,9 +57,24 @@ export const getApiUrl = (endpoint: string): string => {
 // API Service Class - Matching old frontend pattern
 class ApiService {
   private baseURL: string;
+  private authToken: string = '';
 
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
+  }
+
+  // Method to set auth token
+  setAuthToken(token: string) {
+    this.authToken = token;
+  }
+
+  // Method to get auth token
+  getAuthToken(): string {
+    if (this.authToken) return this.authToken;
+    
+    // Fallback to storage
+    return typeof window !== 'undefined' ? 
+      (sessionStorage.getItem('token') || localStorage.getItem('token') || '') : '';
   }
 
   async request(endpoint: string, options: RequestInit = {}) {
@@ -73,9 +88,8 @@ class ApiService {
       ...options,
     };
 
-    // Add auth token if available (check both sessionStorage and localStorage for backward compatibility)
-    const token = typeof window !== 'undefined' ? 
-      (sessionStorage.getItem('token') || localStorage.getItem('token')) : null;
+    // Add auth token if available
+    const token = this.getAuthToken();
     if (token) {
       config.headers = {
         ...config.headers,

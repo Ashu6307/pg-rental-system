@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FaUser, FaLock, FaEye, FaEyeSlash, FaUserCircle, FaUserTie, FaHome } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
@@ -8,11 +8,16 @@ import toast, { Toaster } from 'react-hot-toast';
 import EmailValidationInput from '../../../components/validation/EmailValidationInput';
 import PasswordValidationInput from '../../../components/validation/PasswordValidationInput';
 import { authService } from '../../../services/authService';
+import { AuthContext } from '../../../context/AuthContext';
 
 const LoginForm: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  
+  // Auth context
+  const authContext = useContext(AuthContext);
+  const { login } = authContext || {};
   
   // Role detection similar to RegisterForm
   const role = (() => {
@@ -137,14 +142,29 @@ const LoginForm: React.FC = () => {
           sessionStorage.setItem('token', data.token);
         }
         
+        // Update auth context with await to ensure it completes
+        if (login) {
+          await login(data.token, data.user, role);
+        }
+        
         toast.success('🎉 Login successful!');
         
-        // Redirect based on role
-        if (role === 'owner') {
-          router.push('/dashboard'); // Owner dashboard route
-        } else {
-          router.push('/dashboard'); // User dashboard route (can be different later)
-        }
+        // Small delay to ensure auth context is fully updated
+        setTimeout(() => {
+          // Check for redirect parameter
+          const redirectUrl = searchParams.get('redirect');
+          
+          if (redirectUrl) {
+            router.push(redirectUrl);
+          } else {
+            // Default redirect based on role
+            if (role === 'owner') {
+              router.push('/dashboard/owner');
+            } else {
+              router.push('/user/dashboard');
+            }
+          }
+        }, 100);
       } else {
         toast.error(data.message || 'Login failed');
       }

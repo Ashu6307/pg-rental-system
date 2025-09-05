@@ -19,7 +19,6 @@ import {
   FaInfoCircle,
   FaSignOutAlt,
   FaHotel,
-  FaCrown,
   FaUserTie,
   FaChevronDown,
   FaUserShield,
@@ -73,14 +72,6 @@ const Navbar: React.FC = () => {
 
   const getCurrentUserInfo = () => {
     if (isLoggedIn && user) {
-      if (role === "admin" || role === "superadmin") {
-        return {
-          role: "admin",
-          name: user.name || "Admin",
-          dashboard: "/admin/dashboard",
-          icon: FaCrown,
-        };
-      }
       if (role === "owner") {
         return {
           role: "owner",
@@ -126,9 +117,7 @@ const Navbar: React.FC = () => {
               onClick={() =>
                 handleNavClick(
                   isLoggedIn && currentUser
-                    ? currentUser.role === "admin"
-                      ? "/admin/dashboard"
-                      : currentUser.role === "owner"
+                    ? currentUser.role === "owner"
                       ? "/owner/dashboard"
                       : "/"
                     : "/"
@@ -185,7 +174,7 @@ const Navbar: React.FC = () => {
                 </Link>
               </>
             )}
-            {(!isLoggedIn || (currentUser && currentUser.role !== "admin")) && (
+            {!isLoggedIn && (
               <>
                 <Link
                   href="/about"
@@ -223,16 +212,12 @@ const Navbar: React.FC = () => {
                     })}
                   {currentUser.role === "owner"
                     ? "Owner Dashboard"
-                    : currentUser.role === "admin"
-                    ? "Admin Dashboard"
                     : "Dashboard"}
                 </Link>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600">
                     {currentUser.role === "owner"
                       ? "Owner"
-                      : currentUser.role === "admin"
-                      ? "Admin"
                       : "User"}
                     : {currentUser.name}
                   </span>
@@ -327,7 +312,7 @@ const Navbar: React.FC = () => {
                     onMouseLeave={() => setRegisterDropdown(false)}
                   >
                     <Link
-                      href="/auth/user/register"
+                      href="/auth/register?role=user"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded transition-colors duration-150"
                       onClick={() => {
                         scrollToTop();
@@ -337,7 +322,7 @@ const Navbar: React.FC = () => {
                       User Register
                     </Link>
                     <Link
-                      href="/auth/owner/register"
+                      href="/auth/register?role=owner"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded transition-colors duration-150"
                       onClick={() => {
                         scrollToTop();
@@ -405,8 +390,7 @@ const Navbar: React.FC = () => {
                   </Link>
                 </>
               )}
-              {(!isLoggedIn ||
-                (currentUser && currentUser.role !== "admin")) && (
+              {!isLoggedIn && (
                 <>
                   <Link
                     href="/about"
@@ -439,8 +423,6 @@ const Navbar: React.FC = () => {
                       <span className="text-sm text-gray-600">
                         {currentUser?.role === "owner"
                           ? "Owner"
-                          : currentUser?.role === "admin"
-                          ? "Admin"
                           : "User"}
                         : {currentUser?.name}
                       </span>
@@ -458,8 +440,6 @@ const Navbar: React.FC = () => {
                         })}
                       {currentUser?.role === "owner"
                         ? "Owner Dashboard"
-                        : currentUser?.role === "admin"
-                        ? "Admin Dashboard"
                         : "Dashboard"}
                     </Link>
                     <button
@@ -489,7 +469,7 @@ const Navbar: React.FC = () => {
                       {loginDropdown && (
                         <div id="mobile-login-options" className="pl-2">
                           <Link
-                            href="/auth/user/login"
+                            href="/auth/login?role=user"
                             className="text-gray-700 hover:text-blue-600 block px-6 py-2 rounded-md text-sm"
                             onClick={() => {
                               scrollToTop();
@@ -499,7 +479,7 @@ const Navbar: React.FC = () => {
                             User
                           </Link>
                           <Link
-                            href="/auth/owner/login"
+                            href="/auth/login?role=owner"
                             className="text-gray-700 hover:text-blue-600 block px-6 py-2 rounded-md text-sm"
                             onClick={() => {
                               scrollToTop();
@@ -529,7 +509,7 @@ const Navbar: React.FC = () => {
                       {registerDropdown && (
                         <div id="mobile-register-options" className="pl-2">
                           <Link
-                            href="/auth/user/register"
+                            href="/auth/register?role=user"
                             className="text-gray-700 hover:text-blue-600 block px-6 py-2 rounded-md text-sm"
                             onClick={() => {
                               scrollToTop();
@@ -539,7 +519,7 @@ const Navbar: React.FC = () => {
                             User
                           </Link>
                           <Link
-                            href="/auth/owner/register"
+                            href="/auth/register?role=owner"
                             className="text-gray-700 hover:text-blue-600 block px-6 py-2 rounded-md text-sm"
                             onClick={() => {
                               scrollToTop();

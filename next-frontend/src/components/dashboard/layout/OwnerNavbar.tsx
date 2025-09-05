@@ -85,10 +85,10 @@ const OwnerNavbar: React.FC<OwnerNavbarProps> = ({
       if (logout) {
         await logout();
       }
-      router.push('/auth/owner/login');
+      router.push('/auth/login?role=owner');
     } catch (error) {
       console.error('Logout error:', error);
-      router.push('/auth/owner/login');
+      router.push('/auth/login?role=owner');
     }
   };
 

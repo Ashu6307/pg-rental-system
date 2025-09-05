@@ -107,7 +107,7 @@ export default function RegisterForm() {
       textColor: 'text-blue-600',
       borderColor: 'border-blue-300',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      loginLink: '/auth/user/login'
+      loginLink: '/auth/login?role=user'
     },
     owner: {
       name: 'Owner',
@@ -116,7 +116,7 @@ export default function RegisterForm() {
       textColor: 'text-green-600',
       borderColor: 'border-green-300',
       buttonColor: 'bg-green-600 hover:bg-green-700',
-      loginLink: '/auth/owner/login'
+      loginLink: '/auth/login?role=owner'
     }
   }[role];
 

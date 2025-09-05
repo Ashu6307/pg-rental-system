@@ -4,11 +4,16 @@ import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
+import TabSecurityGuard from "@/components/security/TabSecurityGuard";
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith('/auth');
-  const isDashboardPage = pathname?.startsWith('/dashboard');
+  const isDashboardPage = pathname?.startsWith('/dashboard') || 
+                           pathname?.startsWith('/user/dashboard') || 
+                           pathname?.startsWith('/owner/dashboard') || 
+                           pathname?.startsWith('/admin/dashboard') ||
+                           pathname?.startsWith('/sys-mgmt');
   const isLoginPage = pathname?.includes('/login');
 
   useEffect(() => {
@@ -27,16 +32,20 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   if (isDashboardPage) {
     return (
       <AuthProvider>
-        {children}
+        <TabSecurityGuard>
+          {children}
+        </TabSecurityGuard>
       </AuthProvider>
     );
   }
 
   return (
     <AuthProvider>
-      <Navbar />
-      {children}
-      {!isAuthPage && <Footer />}
+      <TabSecurityGuard>
+        <Navbar />
+        {children}
+        {!isAuthPage && <Footer />}
+      </TabSecurityGuard>
     </AuthProvider>
   );
 }

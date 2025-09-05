@@ -1,46 +1,11 @@
-'use client';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import ForgotPasswordForm from '../components/ForgotPasswordForm';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Forgot Password | PG & Room Rental',
+  description: 'Reset your account password for PG and room rental services',
+};
 
 export default function ForgotPasswordPage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const role = searchParams.get('role');
-
-  useEffect(() => {
-      // Set page title role wise
-      if (role === 'admin') {
-        document.title = 'Admin Forgot Password | PG & Room Rental';
-      } else if (role === 'owner') {
-        document.title = 'Owner Forgot Password | PG & Room Rental';
-      } else {
-        document.title = 'User Forgot Password | PG & Room Rental';
-      }
-    
-    // Redirect to role-specific page if no role parameter
-    if (!role) {
-      router.replace('/auth/forgot-password?role=user');
-      return;
-    }
-
-    // Only allow 'user' and 'owner' roles, redirect admin to admin forgot password
-    if (role === 'admin') {
-      router.replace('/auth/admin/forgot-password');
-      return;
-    }
-
-    // Only allow valid roles
-    if (role !== 'user' && role !== 'owner') {
-      router.replace('/auth/forgot-password?role=user');
-      return;
-    }
-  }, [role, router]);
-
-  // Don't render anything during redirect
-  if (!role || role === 'admin' || (role !== 'user' && role !== 'owner')) {
-    return null;
-  }
-
   return <ForgotPasswordForm />;
 }
