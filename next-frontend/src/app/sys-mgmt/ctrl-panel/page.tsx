@@ -71,7 +71,7 @@ const SystemControlPanel = () => {
         return;
       }
 
-      if (role !== 'admin') {
+      if (role !== 'admin' && role !== 'super_admin') {
         router.push('/sys-mgmt/auth');
         return;
       }

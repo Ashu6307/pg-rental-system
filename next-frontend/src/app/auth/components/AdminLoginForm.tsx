@@ -224,7 +224,7 @@ const AdminLoginForm: React.FC = () => {
         });
         
         setTimeout(() => {
-          router.push('/admin/dashboard');
+          router.push('/sys-mgmt/ctrl-panel');
         }, 1000);
       } else {
         // Enhanced attempt tracking
