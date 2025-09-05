@@ -461,14 +461,14 @@ const PG: React.FC = () => {
                     <div>
                       <div className="flex items-center gap-2">
                         {pg.priceRange && pg.priceRange.min !== pg.priceRange.max ? (
-                          <span className="text-lg font-bold text-green-600" title={`Price range: ₹${pg.priceRange.min?.toLocaleString()} - ₹${pg.priceRange.max?.toLocaleString()} per month${pg.deposit ? ` (Security deposit varies by room type)` : ''}`}>
+                          <span className="text-lg font-bold text-green-600" title={`Price range: ₹${pg.priceRange.min?.toLocaleString()} - ₹${pg.priceRange.max?.toLocaleString()} /month${pg.deposit ? ` (Security deposit varies by room type)` : ''}`}>
                             ₹{pg.priceRange.min?.toLocaleString()} - ₹{pg.priceRange.max?.toLocaleString()}{' '}
-                            <span className="text-sm font-normal text-gray-600">per month</span>
+                            <span className="text-sm font-normal text-gray-600"> /month</span>
                           </span>
                         ) : (
                           <span className="text-lg font-bold text-green-600" title={`Monthly rent: ₹${pg.price?.toLocaleString()}${pg.deposit ? ` (Security deposit: ₹${pg.deposit.toLocaleString()})` : ''}`}>
                             ₹{pg.price?.toLocaleString()}{' '}
-                            <span className="text-sm font-normal text-gray-600">per month</span>
+                            <span className="text-sm font-normal text-gray-600"> /month</span>
                           </span>
                         )}
                         {pg.originalPrice && pg.originalPrice > pg.price && (
