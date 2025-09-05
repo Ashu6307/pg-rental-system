@@ -95,7 +95,7 @@ const SystemControlPanel = () => {
   }
 
   return (
-    <RoleBasedLayout>
+    <RoleBasedLayout role="admin">
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-red-700 to-red-900 text-white">

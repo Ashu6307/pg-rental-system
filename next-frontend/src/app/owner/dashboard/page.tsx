@@ -4,7 +4,7 @@ import RoleBasedLayout from '@/layouts/RoleBasedLayout';
 
 const OwnerDashboard = () => {
   return (
-    <RoleBasedLayout>
+    <RoleBasedLayout role="owner">
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-slate-700 to-slate-900 text-white">
