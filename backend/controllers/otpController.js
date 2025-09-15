@@ -1,4 +1,3 @@
-
 import Otp from '../models/Otp.js';
 import User from '../models/User.js';
 import OwnerProfile from '../models/OwnerProfile.js';
