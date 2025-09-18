@@ -1,9 +1,6 @@
 // paymentGatewayController.js
 // Industry-level payment gateway integration controller
 const Payment = require('../models/Payment');
-const User = require('../models/User');
-const Owner = require('../models/Owner');
-const PG = require('../models/PG');
 const paymentGateway = require('../utils/paymentGateway');
 
 // Initiate payment

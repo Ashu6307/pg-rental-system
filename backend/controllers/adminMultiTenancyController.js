@@ -1,7 +1,6 @@
 // adminMultiTenancyController.js
 // Industry-level multi-tenancy controller for Admin Dashboard
 const Tenant = require('../models/Tenant');
-const User = require('../models/User');
 
 // List tenants (with filters)
 exports.listTenants = async (req, res) => {

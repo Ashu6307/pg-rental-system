@@ -1,7 +1,6 @@
 // adminNotificationPreferencesController.js
 // Industry-level notification preferences controller for Admin Dashboard
 const NotificationPreference = require('../models/NotificationPreference');
-const User = require('../models/User');
 
 // List notification preferences (with filters)
 exports.listPreferences = async (req, res) => {

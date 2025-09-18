@@ -1,7 +1,6 @@
 // adminApprovalWorkflowController.js
 // Industry-level approval workflows controller for Admin Dashboard
 const ApprovalWorkflow = require('../models/ApprovalWorkflow');
-const User = require('../models/User');
 
 // List approval workflows (with filters)
 exports.listApprovalWorkflows = async (req, res) => {

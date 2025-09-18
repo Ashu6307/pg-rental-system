@@ -1,7 +1,6 @@
 // adminReviewController.js
 // Industry-level reviews/feedback controller for Admin Dashboard
 const Review = require('../models/Review');
-const User = require('../models/User');
 
 // List reviews/feedback (with filters)
 exports.listReviews = async (req, res) => {

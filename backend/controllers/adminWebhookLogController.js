@@ -1,7 +1,6 @@
 // adminWebhookLogController.js
 // Industry-level webhook logs controller for Admin Dashboard
 const WebhookLog = require('../models/WebhookLog');
-const User = require('../models/User');
 
 // List webhook logs (with filters)
 exports.listWebhookLogs = async (req, res) => {

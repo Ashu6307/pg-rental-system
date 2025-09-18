@@ -1,7 +1,6 @@
 // adminRateLimitingController.js
 // Industry-level rate limiting controller for Admin Dashboard
 const RateLimitLog = require('../models/RateLimitLog');
-const User = require('../models/User');
 
 // List rate limit logs (with filters)
 exports.listRateLimitLogs = async (req, res) => {

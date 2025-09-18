@@ -1,6 +1,5 @@
 const express = require('express');
 const Invoice = require('../models/Invoice');
-const User = require('../models/User');
 const { authenticateJWT } = require('../middleware/auth');
 const { generateInvoicePDFBuffer } = require('../utils/invoicePDF');
 const router = express.Router();

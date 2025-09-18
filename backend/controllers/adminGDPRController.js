@@ -1,6 +1,5 @@
 // adminGDPRController.js
 // Industry-level GDPR/data consent controller for Admin Dashboard
-const User = require('../models/User');
 const GDPRConsent = require('../models/GDPRConsent');
 
 // List user consents (with filters)
