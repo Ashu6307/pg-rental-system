@@ -24,13 +24,17 @@ export const metadata = {
     site: '@pgroomrental',
   },
   robots: 'index, follow',
-  viewport: 'width=device-width, initial-scale=1',
   authors: [{ name: 'PG & Room Rental Team' }],
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 import HomeClient from './HomeClient';

@@ -191,42 +191,26 @@ const HomeClient = () => {
           <div className="relative mt-4">
             <img
               src={currentImage}
-              alt="Image"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
+              alt="Hero Image"
+              onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                e.currentTarget.classList.add('hidden');
                 if (e.currentTarget.nextSibling) {
-                  (e.currentTarget.nextSibling as HTMLElement).style.display =
-                    "flex";
+                  (e.currentTarget.nextSibling as HTMLElement).classList.remove('hidden');
+                  (e.currentTarget.nextSibling as HTMLElement).classList.add('flex');
                 }
               }}
-              onLoad={(e) => {
-                e.currentTarget.style.display = "block";
+              onLoad={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                e.currentTarget.classList.remove('hidden');
                 if (e.currentTarget.nextSibling) {
-                  (e.currentTarget.nextSibling as HTMLElement).style.display =
-                    "none";
+                  (e.currentTarget.nextSibling as HTMLElement).classList.add('hidden');
                 }
               }}
-              className="mx-auto rounded-lg shadow-2xl w-full max-w-7xl object-cover transition-opacity duration-1000"
-              style={{
-                height: "350px",
-                minHeight: "350px",
-                maxHeight: "350px",
-                width: "100%",
-                maxWidth: "1440px",
-              }}
+              className="mx-auto rounded-lg shadow-2xl w-full max-w-7xl object-cover transition-opacity duration-1000 h-[350px]"
             />
 
             {/* Fallback when image fails to load */}
             <div
-              className="mx-auto rounded-lg shadow-2xl w-full max-w-7xl bg-gray-200 flex items-center justify-center text-gray-600 text-2xl font-semibold"
-              style={{
-                height: "350px",
-                minHeight: "350px",
-                maxHeight: "350px",
-                width: "100%",
-                maxWidth: "1440px",
-                display: "none",
-              }}
+              className="mx-auto rounded-lg shadow-2xl w-full max-w-7xl bg-gray-200 items-center justify-center text-gray-600 text-2xl font-semibold h-[350px] hidden"
             >
               Image
             </div>
@@ -234,7 +218,7 @@ const HomeClient = () => {
             {/* Image Indicators */}
             {heroImages.length > 1 && (
               <div className="flex justify-center mt-2 space-x-2">
-                {heroImages.map((_, index) => (
+                {heroImages.map((_: string, index: number) => (
                   <button
                     key={index}
                     className={`w-3 h-3 rounded-full transition-all duration-300 ${
@@ -243,6 +227,8 @@ const HomeClient = () => {
                         : "bg-white/50 hover:bg-white/75"
                     }`}
                     onClick={() => setCurrentImageIndex(index)}
+                    aria-label={`View image ${index + 1}`}
+                    title={`View image ${index + 1}`}
                   />
                 ))}
               </div>
@@ -343,7 +329,7 @@ const HomeClient = () => {
 
             <HorizontalCarousel
               autoScroll={true}
-              scrollSpeed={40}
+              scrollSpeed={100}
               showArrows={true}
             >
               {homeData.featuredPGs
@@ -351,11 +337,13 @@ const HomeClient = () => {
                 .map((item: any, idx: number) => (
                   <div
                     key={`${item._id || idx}-${idx}`}
-                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
-                    onClick={() => router.push("/pg")}
+                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
                   >
                     {/* Image + Badges */}
-                    <div className="relative h-48 w-full">
+                    <div 
+                      className="relative h-48 w-full cursor-pointer"
+                      onClick={() => router.push("/pg")}
+                    >
                       {/* Main Image */}
                       <img
                         src={item.images?.[0]?.url || item.images?.[0]}
@@ -372,13 +360,9 @@ const HomeClient = () => {
                       />
                       {/* Fallback if image missing */}
                       <div
-                        className="w-full h-full flex-col items-center justify-center text-gray-400"
-                        style={{
-                          display:
-                            item.images && item.images.length > 0
-                              ? "none"
-                              : "flex",
-                        }}
+                        className={`w-full h-full flex-col items-center justify-center text-gray-400 ${
+                          item.images && item.images.length > 0 ? "hidden" : "flex"
+                        }`}
                       >
                         <FaBuilding size={32} className="mb-2" />
                         <span className="text-sm">No Image</span>
@@ -516,8 +500,12 @@ const HomeClient = () => {
                           </span>
                         </div>
                         <button
-                          onClick={() => router.push("/pg")}
-                          className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-blue-700 transition"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Navigate to specific PG detail page
+                            router.push(`/pg/${item._id || item.id || 'details'}`);
+                          }}
+                          className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-blue-700 transition-all duration-300 hover:scale-105 active:scale-95"
                         >
                           View Details
                         </button>
@@ -553,83 +541,103 @@ const HomeClient = () => {
                 .map((item: any, idx: number) => (
                   <div
                     key={`${item._id || idx}-${idx}`}
-                    className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 group cursor-pointer overflow-hidden h-80"
-                    onClick={() => router.push("/rooms")}
+                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 group overflow-hidden"
                   >
-                    <div className="relative p-3 h-full flex flex-col">
+                    <div className="relative">
                       {/* Card Image */}
-                      <div className="w-full h-48 rounded-lg mb-2 overflow-hidden bg-gray-100">
+                      <div 
+                        className="relative h-48 w-full cursor-pointer"
+                        onClick={() => router.push("/rooms")}
+                      >
                         {item.images && item.images.length > 0 ? (
                           <img
                             src={item.images[0].url || item.images[0]}
                             alt={item.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover"
                             onError={(e) => {
-                              e.currentTarget.style.display = "none";
+                              e.currentTarget.classList.add('hidden');
                               if (e.currentTarget.nextSibling) {
-                                (
-                                  e.currentTarget.nextSibling as HTMLElement
-                                ).style.display = "flex";
+                                (e.currentTarget.nextSibling as HTMLElement).classList.remove('hidden');
+                                (e.currentTarget.nextSibling as HTMLElement).classList.add('flex');
                               }
                             }}
                           />
                         ) : null}
                         <div
-                          className="w-full h-full flex flex-col items-center justify-center text-gray-400"
-                          style={{
-                            display:
-                              item.images && item.images.length > 0
-                                ? "none"
-                                : "flex",
-                          }}
+                          className={`w-full h-full items-center justify-center text-gray-400 ${
+                            item.images && item.images.length > 0 ? "hidden" : "flex"
+                          }`}
                         >
                           <FaHotel size={32} className="mb-2" />
                           <span className="text-sm">No Image</span>
                         </div>
+
+                        {/* Room Type Badge */}
+                        <div className="absolute top-3 left-3">
+                          <span className="bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow">
+                            {item.propertyType || item.type || "Room"}
+                          </span>
+                        </div>
+
+                        {/* Discount Badge */}
+                        {item.pricing?.originalPrice &&
+                          item.pricing.originalPrice > (item.pricing?.rent || item.price) && (
+                            <div className="absolute top-3 right-3">
+                              <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">
+                                UP TO{" "}
+                                {Math.round(
+                                  ((item.pricing.originalPrice - (item.pricing?.rent || item.price)) /
+                                    item.pricing.originalPrice) * 100
+                                )}
+                                % OFF
+                              </div>
+                            </div>
+                          )}
+
+
                       </div>
 
-                      {/* Line 1: Name and Rating */}
-                      <div className="flex items-start justify-between mb-1">
-                        <h3 className="text-sm font-bold text-blue-700 group-hover:text-purple-700 transition mr-2 leading-4 line-clamp-2 max-w-[50%]">
+                      {/* Content */}
+                      <div className="p-4">
+                        {/* Title */}
+                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
                           {item.title || item.name}
                         </h3>
-                        <div className="flex items-center">
-                          {(typeof item.rating === "object" &&
-                            item.rating?.overall) ||
-                          (typeof item.rating === "number" &&
-                            item.rating > 0) ? (
-                            <div className="flex items-center">
-                              <div className="flex mr-1">
+
+                        {/* Location */}
+                        <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+                          <div className="flex items-center">
+                            <FaMapMarkerAlt className="text-gray-500 mr-1" />
+                            {item.location || `${item.city}, ${item.state}`}
+                          </div>
+
+                          {/* Rating */}
+                          {(item.rating || item.rating?.overall) && (
+                            <div className="bg-white px-3 py-1 rounded-full flex items-center gap-2 text-sm font-semibold shadow text-gray-800">
+                              <div className="flex relative text-yellow-400">
                                 {[1, 2, 3, 4, 5].map((star) => {
                                   const rating =
-                                    typeof item.rating === "object" &&
-                                    item.rating?.overall
+                                    typeof item.rating === "object"
                                       ? item.rating.overall
                                       : item.rating;
 
                                   if (star <= Math.floor(rating)) {
                                     // Full star
                                     return (
-                                      <FaStar
-                                        key={star}
-                                        className="text-xs text-yellow-400"
-                                      />
+                                      <FaStar key={star} className="text-xs" />
                                     );
-                                  } else if (
-                                    star - 1 < rating &&
-                                    star > rating
-                                  ) {
-                                    // Partial star
+                                  } else if (star - 1 < rating && star > rating) {
+                                    // Half star
                                     const percent =
                                       (rating - Math.floor(rating)) * 100;
                                     return (
                                       <div
                                         key={star}
-                                        className="relative text-xs"
+                                        className="relative text-xs w-3.5"
                                       >
                                         <FaStar className="text-gray-300" />
                                         <FaStar
-                                          className="absolute top-0 left-0 text-yellow-400"
+                                          className="text-yellow-400 absolute top-0 left-0"
                                           style={{
                                             clipPath: `inset(0 ${
                                               100 - percent
@@ -649,65 +657,35 @@ const HomeClient = () => {
                                   }
                                 })}
                               </div>
-                              <span className="text-xs font-semibold text-gray-700">
-                                {typeof item.rating === "object" &&
-                                item.rating?.overall
-                                  ? item.rating.overall.toFixed(1)
-                                  : item.rating.toFixed(1)}
+                              <span>
+                                {(typeof item.rating === "object"
+                                  ? item.rating.overall
+                                  : item.rating
+                                ).toFixed(1)}
                               </span>
                             </div>
-                          ) : (
-                            <span className="text-xs text-gray-400">
-                              No Rating
-                            </span>
                           )}
                         </div>
-                      </div>
-                      {/* Line 2: Address and Price/month */}
-                      <div className="flex items-center justify-between mt-auto">
-                        <p className="text-gray-600 text-sm truncate flex-1 mr-2">
-                          {item.location || `${item.city}, ${item.state}`}
-                        </p>
-                        <div className="flex flex-col items-end">
-                          {item.pricing?.originalPrice &&
-                            item.pricing.originalPrice >
-                              (item.pricing?.rent || item.price) && (
-                              <span className="text-xs text-gray-400 line-through">
-                                ₹{item.pricing.originalPrice}/month
-                              </span>
-                            )}
-                          <span className="text-green-600 font-bold text-sm">
-                            ₹
-                            {item.pricing?.rent ||
-                              item.pricing?.monthlyRent ||
-                              item.price}
-                            /month
-                          </span>
-                        </div>
-                      </div>
 
-                      {/* Badges */}
-                      <div className="absolute top-3 left-3">
-                        <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow group-hover:bg-purple-600 transition">
-                          {item.propertyType || item.type || "Room"}
+                        {/* Price + Button */}
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="text-green-600 font-bold text-lg">
+                            ₹{(item.pricing?.rent || item.pricing?.monthlyRent || item.price).toLocaleString()}
+                            <span className="text-sm font-normal text-gray-500 ml-1">
+                              /month
+                            </span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/rooms/${item._id || item.id || 'details'}`);
+                            }}
+                            className="bg-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-purple-700 transition-all duration-300 hover:scale-105 active:scale-95"
+                          >
+                            View Details
+                          </button>
                         </div>
                       </div>
-                      {item.pricing?.originalPrice &&
-                        item.pricing.originalPrice >
-                          (item.pricing?.rent || item.price) && (
-                          <div className="absolute top-3 right-3">
-                            <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">
-                              UP TO{" "}
-                              {Math.round(
-                                ((item.pricing.originalPrice -
-                                  (item.pricing?.rent || item.price)) /
-                                  item.pricing.originalPrice) *
-                                  100
-                              )}
-                              % OFF
-                            </div>
-                          </div>
-                        )}
                     </div>
                   </div>
                 ))}
@@ -731,7 +709,7 @@ const HomeClient = () => {
 
             <HorizontalCarousel
               autoScroll={true}
-              scrollSpeed={35}
+              scrollSpeed={45}
               showArrows={true}
             >
               {homeData.testimonials.map((review: any, idx: number) => (

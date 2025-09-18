@@ -23,7 +23,7 @@ const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
   const [currentOffset, setCurrentOffset] = useState(0);
 
   // Calculate animation duration for consistent linear speed
-  const animationDuration = Math.max(25, Math.floor(scrollSpeed * 0.7)); // Faster and more consistent
+  const animationDuration = Math.max(20, scrollSpeed); // Use scrollSpeed directly
 
   // Reset manual offset when auto-scroll resumes
   useEffect(() => {
@@ -126,10 +126,12 @@ const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
       <div className="carousel-container" ref={containerRef}>
         <div 
           ref={trackRef}
-          className={`carousel-track pg-carousel-track ${isPaused ? 'paused' : ''}`}
+          className={`carousel-track ${isPaused ? 'paused' : ''}`}
           style={
             {
-              '--carousel-duration': `${animationDuration}s`
+              '--carousel-duration': `${animationDuration}s`,
+              animation: `infiniteScroll ${animationDuration}s linear infinite`,
+              animationPlayState: isPaused ? 'paused' : 'running'
             } as React.CSSProperties
           }
           onMouseEnter={handleMouseEnter}

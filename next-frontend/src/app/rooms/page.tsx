@@ -8,13 +8,10 @@ import {
 } from 'react-icons/fa';
 import apiService from '@/services/api';
 import AutoImageCarousel from '@/components/AutoImageCarousel';
-import Modal from '@/components/Modal';
 
 const Rooms: React.FC = () => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRoom, setSelectedRoom] = useState<any>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -126,14 +123,14 @@ const Rooms: React.FC = () => {
 
   const handleRoomClick = async (room: any) => {
     try {
-      setDetailsLoading(true);
-      setSelectedRoom(room);
       // Track view analytics
       await apiService.post(`/rooms/${room._id}/view`);
+      // Navigate to room details page
+      router.push(`/rooms/${room._id}`);
     } catch (error) {
       console.error('Error tracking room view:', error);
-    } finally {
-      setDetailsLoading(false);
+      // Still navigate even if tracking fails
+      router.push(`/rooms/${room._id}`);
     }
   };
 
@@ -522,20 +519,6 @@ const Rooms: React.FC = () => {
             <h3 className="text-xl font-semibold text-gray-600 mb-2">No Properties Found</h3>
             <p className="text-gray-500">Try adjusting your search criteria or filters</p>
           </div>
-        )}
-
-        {/* Room Details Modal */}
-        {selectedRoom && (
-          <Modal 
-            onClose={() => setSelectedRoom(null)}
-          >
-            <div className="p-6 max-w-4xl">
-              <h2 className="text-2xl font-bold mb-4">{selectedRoom.name}</h2>
-              {/* Add detailed room information here */}
-              <p className="text-gray-600">{selectedRoom.description}</p>
-              {/* Add more room details as needed */}
-            </div>
-          </Modal>
         )}
       </div>
     </div>

@@ -186,8 +186,8 @@ const LoginForm: React.FC = () => {
   return (
     <>
       <Toaster position="top-center" />
-      <div className={`h-screen flex flex-col justify-center py-2 px-4 sm:px-6 lg:px-8 ${role === 'owner' ? 'bg-green-50' : 'bg-blue-50'}`}>
-        <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
+      <div className={`min-h-screen flex flex-col justify-start pt-8 py-2 px-4 sm:px-6 lg:px-8 ${role === 'owner' ? 'bg-green-50' : 'bg-blue-50'}`}>
+        <div className="flex-1 flex flex-col justify-start max-w-md mx-auto w-full">
         
         <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
           <div className={`p-6 rounded-[2rem] border-2 border-gray-100 shadow-[0_8px_40px_rgba(0,0,0,0.25)] drop-shadow-2xl ${

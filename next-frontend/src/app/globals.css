@@ -109,15 +109,6 @@ body {
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
 
-/* Different speeds for different carousels with consistent linear timing */
-.pg-carousel-track {
-  animation: infiniteScroll var(--carousel-duration, 35s) linear infinite;
-}
-
-.room-carousel-track {
-  animation: infiniteScroll var(--carousel-duration, 40s) linear infinite;
-}
-
 /* OTP Input paste shake animation */
 .animate-shake {
   animation: shake 0.4s;

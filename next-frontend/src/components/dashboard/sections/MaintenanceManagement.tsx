@@ -17,7 +17,6 @@ import {
   Edit,
   Trash2,
   MapPin,
-  Settings,
   Home,
   Droplets,
   Zap,

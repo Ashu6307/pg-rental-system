@@ -6,15 +6,12 @@ import {
 } from 'react-icons/fa';
 import apiService from '@/services/api';
 import AutoImageCarousel from '@/components/AutoImageCarousel';
-import Modal from '@/components/Modal';
 // ScrollToTop component ko agar migrate kiya hai to import karo, warna comment rehne do
 // import ScrollToTop, { useScrollToTop } from '@/components/ScrollToTop';
 
 const PG: React.FC = () => {
   const [pgs, setPgs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPG, setSelectedPG] = useState<any>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -126,7 +123,8 @@ const PG: React.FC = () => {
   };
 
   const handlePGClick = (pg: any) => {
-    setSelectedPG(pg);
+    // Navigate to PG details page
+    router.push(`/pg/${pg._id}`);
   };
 
   const renderStars = (rating: number) => {
@@ -194,29 +192,6 @@ const PG: React.FC = () => {
 
   return (
     <>
-      {/* Modal for PG details */}
-      {selectedPG && (
-        <Modal onClose={() => setSelectedPG(null)}>
-          {detailsLoading ? (
-            <div className="min-h-[300px] flex items-center justify-center">Loading...</div>
-          ) : (
-            <div className="max-w-2xl mx-auto p-6">
-              <h2 className="text-2xl font-bold mb-2">{selectedPG.name}</h2>
-              <div className="mb-4">
-                <AutoImageCarousel images={selectedPG.images || []} alt={selectedPG.name} className="h-56 rounded-xl" showControls showDots type="pg" />
-              </div>
-              <div className="mb-2 text-gray-700"><strong>Address:</strong> {selectedPG.address}, {selectedPG.city}, {selectedPG.state}</div>
-              <div className="mb-2 text-gray-700"><strong>Price:</strong> ₹{selectedPG.price?.toLocaleString() || (selectedPG.priceRange?.min?.toLocaleString() + ' - ' + selectedPG.priceRange?.max?.toLocaleString())} /month</div>
-              <div className="mb-2 text-gray-700"><strong>Available Rooms:</strong> {selectedPG.availableRooms}</div>
-              <div className="mb-2 text-gray-700"><strong>Amenities:</strong> {selectedPG.amenities?.join(', ')}</div>
-              <div className="mb-2 text-gray-700"><strong>Highlights:</strong> {selectedPG.highlights?.join(', ')}</div>
-              <div className="mb-2 text-gray-700"><strong>Nearby:</strong> {selectedPG.nearby?.map((n: any) => `${n.name} (${n.distance})`).join(', ')}</div>
-              <div className="mb-2 text-gray-700"><strong>Rating:</strong> {selectedPG.rating?.overall?.toFixed(1) || 'N/A'} / 5</div>
-              <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg" onClick={() => setSelectedPG(null)}>Close</button>
-            </div>
-          )}
-        </Modal>
-      )}
       {/* ScrollToTop yahan add kar sakte ho agar migrate kiya hai */}
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto py-8 px-4">

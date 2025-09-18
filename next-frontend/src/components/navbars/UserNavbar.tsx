@@ -109,7 +109,11 @@ const UserNavbar = () => {
             {isAuthenticated && user ? (
               <>
                 {/* Search Icon */}
-                <button className="p-2 text-gray-500 hover:text-blue-600 transition-colors">
+                <button 
+                  className="p-2 text-gray-500 hover:text-blue-600 transition-colors"
+                  aria-label="Search properties"
+                  title="Search properties"
+                >
                   <FaSearch className="w-5 h-5" />
                 </button>
 

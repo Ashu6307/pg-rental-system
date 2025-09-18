@@ -34,16 +34,16 @@ const UserFooter = () => {
               Safe, verified, and comfortable living spaces for students and professionals.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors" aria-label="Facebook" title="Follow us on Facebook">
                 <FaFacebook className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors" aria-label="Twitter" title="Follow us on Twitter">
                 <FaTwitter className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-pink-400 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-pink-400 transition-colors" aria-label="Instagram" title="Follow us on Instagram">
                 <FaInstagram className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors">
+              <a href="#" className="text-gray-400 hover:text-blue-600 transition-colors" aria-label="LinkedIn" title="Follow us on LinkedIn">
                 <FaLinkedin className="w-5 h-5" />
               </a>
             </div>

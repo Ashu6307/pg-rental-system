@@ -125,13 +125,7 @@ const Navbar: React.FC = () => {
               }
               className="flex items-center h-16 cursor-pointer"
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  height: "48px",
-                }}
-              >
+              <div className="flex items-center h-12">
                 <StayWheelsLogo />
               </div>
             </div>
@@ -247,17 +241,11 @@ const Navbar: React.FC = () => {
                     />
                   </button>
                   <div
-                    className={`absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl z-50 transition-all duration-200 transform ${
+                    className={`absolute right-0 mt-2 w-48 bg-white rounded-xl border border-gray-200 z-50 transition-all duration-200 transform min-w-48 ${
                       loginDropdown
                         ? "opacity-100 visible translate-y-0 scale-100"
                         : "opacity-0 invisible -translate-y-2 scale-95"
                     }`}
-                    style={{
-                      minWidth: "12rem",
-                      boxShadow: loginDropdown
-                        ? "0 8px 32px 0 rgba(31,38,135,0.15)"
-                        : undefined,
-                    }}
                     onMouseLeave={() => setLoginDropdown(false)}
                   >
                     <Link
@@ -298,17 +286,11 @@ const Navbar: React.FC = () => {
                     />
                   </button>
                   <div
-                    className={`absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl z-50 transition-all duration-200 transform ${
+                    className={`absolute right-0 mt-2 w-48 bg-white rounded-xl border border-gray-200 z-50 transition-all duration-200 transform min-w-48 ${
                       registerDropdown
                         ? "opacity-100 visible translate-y-0 scale-100"
                         : "opacity-0 invisible -translate-y-2 scale-95"
                     }`}
-                    style={{
-                      minWidth: "12rem",
-                      boxShadow: registerDropdown
-                        ? "0 8px 32px 0 rgba(31,38,135,0.15)"
-                        : undefined,
-                    }}
                     onMouseLeave={() => setRegisterDropdown(false)}
                   >
                     <Link
@@ -455,7 +437,6 @@ const Navbar: React.FC = () => {
                       <button
                         className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-900 focus:outline-none"
                         onClick={() => setLoginDropdown((prev) => !prev)}
-                        aria-expanded={loginDropdown}
                         aria-controls="mobile-login-options"
                         type="button"
                       >
@@ -495,7 +476,6 @@ const Navbar: React.FC = () => {
                       <button
                         className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-900 focus:outline-none"
                         onClick={() => setRegisterDropdown((prev) => !prev)}
-                        aria-expanded={registerDropdown}
                         aria-controls="mobile-register-options"
                         type="button"
                       >
