@@ -784,13 +784,6 @@ const ProfessionalAddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, lo
     onSubmit(pgData);
   };
 
-  // Get step color
-  const getStepColor = (step: any, isActive: boolean = false, isCompleted: boolean = false) => {
-    if (isCompleted) return 'emerald';
-    if (isActive) return step.color;
-    return 'gray';
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1516,6 +1509,8 @@ const ProfessionalAddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, lo
                       accept="image/*"
                       onChange={handleImageUpload}
                       className="hidden"
+                      title="Upload images for the PG property"
+                      aria-label="Upload property images"
                     />
                     <FaCamera className="text-4xl text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">Upload Property Photos</h3>
@@ -1731,6 +1726,8 @@ const ProfessionalAddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, lo
                               type="button"
                               onClick={() => toggleAmenity(amenity)}
                               className="text-indigo-600 hover:text-indigo-800"
+                              title={`Remove ${amenity} amenity`}
+                              aria-label={`Remove ${amenity} amenity`}
                             >
                               <FaTimes className="text-xs" />
                             </button>
@@ -1768,6 +1765,8 @@ const ProfessionalAddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, lo
                           className="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-red-200 focus:border-red-500 transition-all duration-200 text-gray-800 font-medium"
                           value={accessControl.gateCloseTime}
                           onChange={(e) => setAccessControl({...accessControl, gateCloseTime: e.target.value})}
+                          title="Set gate closing time for the property"
+                          placeholder="Select gate close time"
                         />
                       </div>
                       <div>
@@ -1776,6 +1775,7 @@ const ProfessionalAddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, lo
                           className="w-full p-3 border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-red-200 focus:border-red-500 transition-all duration-200 text-gray-800 font-medium"
                           value={accessControl.guestPolicy}
                           onChange={(e) => setAccessControl({...accessControl, guestPolicy: e.target.value})}
+                          title="Select guest policy for the property"
                         >
                           <option value="No guests allowed">No guests allowed</option>
                           <option value="Guests allowed with prior permission">Guests allowed with prior permission</option>
@@ -1864,6 +1864,7 @@ const ProfessionalAddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, lo
                             className="p-3 border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-red-200 focus:border-red-500 text-gray-800 font-medium"
                             value={place.type}
                             onChange={(e) => updateListItem(nearbyPlaces, setNearbyPlaces, index, 'type', e.target.value)}
+                            title={`Select type for nearby place ${index + 1}`}
                           >
                             {placeTypes.map(type => (
                               <option key={type.value} value={type.value}>{type.label}</option>
@@ -2095,10 +2096,10 @@ const ProfessionalAddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, lo
 
               <div className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl shadow-sm">
                 <span className="text-gray-700 font-bold text-lg">Step {currentStep} of {steps.length}</span>
-                <div className="w-16 bg-gray-300 rounded-full h-2">
+                <div className="w-16 bg-gray-300 rounded-full h-2 overflow-hidden">
                   <div 
-                    className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(currentStep / steps.length) * 100}%` }}
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500 origin-left"
+                    data-progress={`${(currentStep / steps.length) * 100}%`}
                   ></div>
                 </div>
               </div>
