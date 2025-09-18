@@ -14,7 +14,7 @@ import GenderValidationInput from '../../../components/validation/GenderValidati
 import BusinessTypeValidationInput from '../../../components/validation/BusinessTypeValidationInput';
 import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
-import { getMaxOtpAttempts, getOtpExpiryTime, getResendTimer, getRoleMessages, getMaxOtpSendsPerHour, getMaxResendAttempts, UserRole } from '../../../utils/otpConfig';
+import { getMaxOtpAttempts, getOtpExpiryTime, getResendTimer, getRoleMessages, getMaxResendAttempts, UserRole } from '../../../utils/otpConfig';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -37,7 +37,6 @@ export default function RegisterForm() {
   
   // Role-based configuration
   const maxAttempts = getMaxOtpAttempts(role as UserRole);
-  const maxResendAttempts = getMaxResendAttempts(role as UserRole);
   const otpExpiryTime = getOtpExpiryTime(role as UserRole);
   const resendTimerDuration = getResendTimer(role as UserRole);
   const roleMessages = getRoleMessages(role as UserRole);
@@ -276,12 +275,6 @@ export default function RegisterForm() {
     return data;
   };
 
-  const verifyOtpApi = async (email: string, otpCode: string) => {
-    const data = await authService.verifyOtp(email, otpCode);
-    if (!data.success) throw new Error(data.message);
-    return data;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -324,12 +317,6 @@ export default function RegisterForm() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Handle max OTP attempts reached
-  const handleMaxAttemptsReached = () => {
-    setOtpDisabled(true);
-    toast.error(roleMessages.maxAttemptsReached);
   };
 
   // Enhanced OTP verification - NO useCallback to prevent dependency issues
@@ -515,7 +502,7 @@ export default function RegisterForm() {
                       setOtpSent(true);
                       setEmailForOtp(formData.email);
                       setOtpCreatedAt(Date.now());
-                      toast.success(roleMessages.otpSent);
+                      toast.success('otpSent' in roleMessages ? roleMessages.otpSent : 'OTP sent successfully');
                       startOtpTimer();
                     } catch (error: any) {
                       toast.error(error.message || 'OTP send failed');
@@ -677,9 +664,11 @@ export default function RegisterForm() {
                           // Check if this was the last allowed resend
                           if (newResendCount >= maxResends) {
                             setResendDisabled(true);
-                            toast.success(`${roleMessages.otpSent} (Last resend - refresh page for more)`);
+                            const otpMessage = 'otpSent' in roleMessages ? roleMessages.otpSent : 'OTP sent successfully';
+                            toast.success(`${otpMessage} (Last resend - refresh page for more)`);
                           } else {
-                            toast.success(`${roleMessages.otpSent} (${maxResends - newResendCount} resends left)`);
+                            const otpMessage = 'otpSent' in roleMessages ? roleMessages.otpSent : 'OTP sent successfully';
+                            toast.success(`${otpMessage} (${maxResends - newResendCount} resends left)`);
                           }
                           
                           startOtpTimer();
