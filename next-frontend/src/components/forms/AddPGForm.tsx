@@ -35,7 +35,7 @@ interface AddPGFormProps {
 }
 
 const AddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, loading = false }) => {
-  const [currentStep, setCurrentStep] = useState(1 as number);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -642,6 +642,9 @@ const AddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, loading = fals
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
               {/* Step 2: Contact Information */}
               {currentStep === 2 && (
                 <div className="space-y-8">
@@ -872,12 +875,11 @@ const AddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, loading = fals
               )}
 
               {currentStep === 8 && (
-                <div className="text-center py-16">
-                  <FaEye size={64} className="text-gray-300 mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Review & Submit</h2>
-                  <p className="text-gray-600">Final review and submission will be implemented here</p>
-                </div>
-              )}
+                <div className="space-y-8">
+                  <div className="text-center mb-8">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Review & Submit</h2>
+                    <p className="text-gray-600">Complete your PG registration with all required information</p>
+                  </div>
 
         {/* Contact Information */}
         <div className="bg-green-50 p-6 rounded-xl">
@@ -1625,19 +1627,20 @@ const AddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, loading = fals
             </div>
           </div>
         </div>
-
+                </div>
+              )}
             </div>
 
-            {/* Navigation Buttons */}
+              {/* Navigation Buttons */}
             <div className="flex items-center justify-between pt-8 border-t border-gray-200 px-8 pb-8">
               <button
                 type="button"
                 onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                  disabled={currentStep === 1}
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold transition-all duration-200"
-                >
-                  ← Previous
-                </button>
+                disabled={currentStep === 1}
+                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold transition-all duration-200"
+              >
+                ← Previous
+              </button>
 
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-gray-500">
@@ -1673,7 +1676,6 @@ const AddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, loading = fals
                   )}
                 </div>
               </div>
-            </div>
           </form>
         </div>
       </div>
