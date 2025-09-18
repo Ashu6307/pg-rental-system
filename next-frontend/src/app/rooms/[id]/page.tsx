@@ -424,6 +424,8 @@ export default function RoomDetailsPage() {
             <button
               onClick={() => window.history.back()}
               className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+              title="Go back to search results"
+              aria-label="Go back to search results"
             >
               <FaArrowLeft className="mr-2" />
               <span>Back to Search</span>
@@ -434,6 +436,8 @@ export default function RoomDetailsPage() {
                 className={`p-2 rounded-full transition-colors ${
                   isFavorite ? 'text-red-500 bg-red-50' : 'text-gray-400 hover:text-red-500'
                 }`}
+                title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
               >
                 <FaHeart className="w-5 h-5" />
               </button>
@@ -520,6 +524,8 @@ export default function RoomDetailsPage() {
               <button
                 onClick={() => setShowImageModal(true)}
                 className="relative h-24 w-full bg-gray-800 bg-opacity-80 text-white flex items-center justify-center rounded hover:bg-opacity-90 transition-opacity"
+                title="View all photos"
+                aria-label="View all photos"
               >
                 <FaCamera className="mr-2" />
                 <span className="text-sm">+{(roomData.media?.images?.length || 0) - 4} photos</span>
@@ -542,6 +548,8 @@ export default function RoomDetailsPage() {
           <button
             onClick={() => setShowImageModal(true)}
             className="bg-white text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center"
+            title="View all photos"
+            aria-label="View all photos"
           >
             <FaExpand className="mr-2" />
             View All Photos
@@ -838,6 +846,8 @@ export default function RoomDetailsPage() {
                 <button
                   onClick={() => setShowChatWidget(true)}
                   className="flex items-center justify-center w-full bg-gray-600 text-white py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                  title="Start live chat"
+                  aria-label="Start live chat"
                 >
                   <FaComments className="mr-2" />
                   Live Chat
@@ -848,6 +858,8 @@ export default function RoomDetailsPage() {
                 <button
                   onClick={() => setShowBookingModal(true)}
                   className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 transition-colors"
+                  title="Book this property"
+                  aria-label="Book this property"
                 >
                   Book Now
                 </button>
@@ -855,6 +867,8 @@ export default function RoomDetailsPage() {
                 <button
                   onClick={() => setShowPaymentModal(true)}
                   className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                  title="Make secure payment"
+                  aria-label="Make secure payment"
                 >
                   <FaCreditCard className="mr-2 inline" />
                   Pay Securely

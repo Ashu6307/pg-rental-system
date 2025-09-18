@@ -385,6 +385,8 @@ const PGDetailsPage: React.FC = () => {
               <button
                 onClick={() => setShowImageModal(true)}
                 className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:bg-white transition-all duration-200 flex items-center gap-2"
+                title="View all photos"
+                aria-label="View all photos"
               >
                 <FaImages className="text-gray-800" />
                 <span className="text-gray-800 font-medium">
@@ -432,6 +434,8 @@ const PGDetailsPage: React.FC = () => {
                   ? 'border-blue-500 ring-2 ring-blue-200'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
+              title={`View image ${index + 1}`}
+              aria-label={`View image ${index + 1}`}
             >
               <Image
                 src={getImageUrl(image) || '/placeholder-pg.jpg'}
@@ -692,7 +696,11 @@ const PGDetailsPage: React.FC = () => {
                     </div>
                     
                     <div className="text-right">
-                      <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
+                      <button 
+                        className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
+                        title="Write a review for this property"
+                        aria-label="Write a review for this property"
+                      >
                         Write a Review
                       </button>
                     </div>
@@ -778,11 +786,19 @@ const PGDetailsPage: React.FC = () => {
 
                 {/* Quick Actions */}
                 <div className="grid grid-cols-2 gap-4">
-                  <button className="flex items-center justify-center gap-2 bg-blue-500 text-white py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors">
+                  <button 
+                    className="flex items-center justify-center gap-2 bg-blue-500 text-white py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors"
+                    title="Get directions to this location"
+                    aria-label="Get directions to this location"
+                  >
                     <FaDirections />
                     Get Directions
                   </button>
-                  <button className="flex items-center justify-center gap-2 bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors">
+                  <button 
+                    className="flex items-center justify-center gap-2 bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors"
+                    title="Share this location"
+                    aria-label="Share this location"
+                  >
                     <FaLocationArrow />
                     Share Location
                   </button>
@@ -821,12 +837,18 @@ const PGDetailsPage: React.FC = () => {
                 <button
                   onClick={() => setShowContactModal(true)}
                   className="w-full bg-blue-500 text-white py-3 px-4 rounded-xl hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                  title="Contact property owner"
+                  aria-label="Contact property owner"
                 >
                   <FaPhoneAlt />
                   Contact Owner
                 </button>
                 
-                <button className="w-full bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
+                <button 
+                  className="w-full bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                  title="Contact via WhatsApp"
+                  aria-label="Contact via WhatsApp"
+                >
                   <FaWhatsapp />
                   WhatsApp
                 </button>
@@ -834,12 +856,18 @@ const PGDetailsPage: React.FC = () => {
                 <button
                   onClick={handleVirtualTour}
                   className="w-full bg-purple-500 text-white py-3 px-4 rounded-xl hover:bg-purple-600 transition-colors flex items-center justify-center gap-2"
+                  title="Take virtual tour"
+                  aria-label="Take virtual tour"
                 >
                   <FaVideo />
                   Virtual Tour
                 </button>
                 
-                <button className="w-full bg-gray-100 text-gray-800 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                <button 
+                  className="w-full bg-gray-100 text-gray-800 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                  title="Send message to owner"
+                  aria-label="Send message to owner"
+                >
                   <FaEnvelope />
                   Send Message
                 </button>
@@ -880,6 +908,8 @@ const PGDetailsPage: React.FC = () => {
                   <button 
                     onClick={handleBookNow}
                     className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-4 rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center gap-2"
+                    title="Book this property now"
+                    aria-label="Book this property now"
                   >
                     <FaCalendar />
                     Book Now
@@ -888,6 +918,8 @@ const PGDetailsPage: React.FC = () => {
                   <button
                     onClick={handleVirtualTour}
                     className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm"
+                    title="Take 360 degree virtual tour"
+                    aria-label="Take 360 degree virtual tour"
                   >
                     <FaVideo />
                     360° Virtual Tour
@@ -945,6 +977,8 @@ const PGDetailsPage: React.FC = () => {
               <button
                 onClick={() => setShowContactModal(false)}
                 className="text-gray-500 hover:text-gray-700"
+                title="Close contact modal"
+                aria-label="Close contact modal"
               >
                 ✕
               </button>
@@ -980,6 +1014,8 @@ const PGDetailsPage: React.FC = () => {
               <button
                 onClick={() => setShowShareModal(false)}
                 className="text-gray-500 hover:text-gray-700"
+                title="Close share modal"
+                aria-label="Close share modal"
               >
                 ✕
               </button>
@@ -989,6 +1025,8 @@ const PGDetailsPage: React.FC = () => {
               <button
                 onClick={() => handleShare('whatsapp')}
                 className="flex items-center justify-center gap-2 bg-green-500 text-white py-3 px-4 rounded-xl hover:bg-green-600 transition-colors"
+                title="Share via WhatsApp"
+                aria-label="Share via WhatsApp"
               >
                 <FaWhatsapp />
                 WhatsApp
@@ -997,6 +1035,8 @@ const PGDetailsPage: React.FC = () => {
               <button
                 onClick={() => handleShare('facebook')}
                 className="flex items-center justify-center gap-2 bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors"
+                title="Share on Facebook"
+                aria-label="Share on Facebook"
               >
                 <FaFacebook />
                 Facebook
@@ -1005,6 +1045,8 @@ const PGDetailsPage: React.FC = () => {
               <button
                 onClick={() => handleShare('twitter')}
                 className="flex items-center justify-center gap-2 bg-blue-400 text-white py-3 px-4 rounded-xl hover:bg-blue-500 transition-colors"
+                title="Share on Twitter"
+                aria-label="Share on Twitter"
               >
                 <FaTwitter />
                 Twitter
@@ -1013,6 +1055,8 @@ const PGDetailsPage: React.FC = () => {
               <button
                 onClick={() => handleShare('copy')}
                 className="flex items-center justify-center gap-2 bg-gray-500 text-white py-3 px-4 rounded-xl hover:bg-gray-600 transition-colors"
+                title={copied ? "Link copied!" : "Copy link to clipboard"}
+                aria-label={copied ? "Link copied!" : "Copy link to clipboard"}
               >
                 {copied ? <FaCheck /> : <FaCopy />}
                 {copied ? 'Copied!' : 'Copy Link'}
@@ -1029,6 +1073,8 @@ const PGDetailsPage: React.FC = () => {
             <button
               onClick={() => setShowImageModal(false)}
               className="absolute top-4 right-4 text-white text-2xl hover:text-gray-300"
+              title="Close image gallery"
+              aria-label="Close image gallery"
             >
               ✕
             </button>
@@ -1048,6 +1094,8 @@ const PGDetailsPage: React.FC = () => {
                     prev === 0 ? (pg.images?.length || 1) - 1 : prev - 1
                   )}
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-2xl hover:text-gray-300"
+                  title="Previous image"
+                  aria-label="Previous image"
                 >
                   ‹
                 </button>
@@ -1056,6 +1104,8 @@ const PGDetailsPage: React.FC = () => {
                     prev === (pg.images?.length || 1) - 1 ? 0 : prev + 1
                   )}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-2xl hover:text-gray-300"
+                  title="Next image"
+                  aria-label="Next image"
                 >
                   ›
                 </button>
@@ -1072,68 +1122,60 @@ const PGDetailsPage: React.FC = () => {
       {/* Advanced Feature Components */}
       
       {/* Chat Widget */}
-      {pg && (
-        <ChatWidget
-          propertyId={pg._id}
-          ownerName={pg.owner.name}
-          ownerPhone={pg.owner.phone}
-          propertyTitle={pg.name}
-          propertyType="PG"
-        />
-      )}
+      <ChatWidget
+        propertyId={pg._id}
+        ownerName={pg.owner?.name || 'Property Owner'}
+        ownerPhone={pg.owner?.phone || ''}
+        propertyTitle={pg.name}
+        propertyType="PG"
+      />
 
       {/* Virtual Tour Modal */}
-      {pg && (
-        <VirtualTour
-          propertyId={pg._id}
-          propertyTitle={pg.name}
-          tourData={virtualTourData}
-          isOpen={showVirtualTour}
-          onClose={() => setShowVirtualTour(false)}
-        />
-      )}
+      <VirtualTour
+        propertyId={pg._id}
+        propertyTitle={pg.name}
+        tourData={virtualTourData}
+        isOpen={showVirtualTour}
+        onClose={() => setShowVirtualTour(false)}
+      />
 
       {/* Booking System Modal */}
-      {pg && (
-        <BookingSystem
-          propertyId={pg._id}
-          propertyTitle={pg.name}
-          propertyType="PG"
-          ownerName={pg.owner.name}
-          pricing={{
-            rent: pg.price,
-            deposit: pg.securityDeposit,
-            maintenance: pg.meals?.price
-          }}
-          availability={{
-            available: true,
-            availableFrom: new Date().toISOString().split('T')[0],
-            minimumStay: 1
-          }}
-          isOpen={showBookingSystem}
-          onClose={() => setShowBookingSystem(false)}
-          onBookingSuccess={handleBookingSuccess}
-        />
-      )}
+      <BookingSystem
+        propertyId={pg._id}
+        propertyTitle={pg.name}
+        propertyType="PG"
+        ownerName={pg.owner?.name || 'Property Owner'}
+        pricing={{
+          rent: pg.price,
+          deposit: pg.securityDeposit,
+          maintenance: pg.meals?.price
+        }}
+        availability={{
+          available: true,
+          availableFrom: new Date().toISOString().split('T')[0],
+          minimumStay: 1
+        }}
+        isOpen={showBookingSystem}
+        onClose={() => setShowBookingSystem(false)}
+        onBookingSuccess={handleBookingSuccess}
+      />
 
       {/* Payment Gateway Modal */}
-      {pg && (
-        <PaymentGateway
-          amount={pg.price + pg.securityDeposit}
-          orderId={bookingOrderId}
-          propertyTitle={pg.name}
-          propertyType="PG"
-          customerDetails={{
-            name: '',
-            email: '',
-            phone: ''
-          }}
-          isOpen={showPaymentGateway}
-          onClose={() => setShowPaymentGateway(false)}
-          onPaymentSuccess={handlePaymentSuccess}
-          onPaymentFailure={handlePaymentFailure}
-        />
-      )}
+      <PaymentGateway
+        amount={pg.price + pg.securityDeposit}
+        orderId={bookingOrderId}
+        propertyTitle={pg.name}
+        propertyType="PG"
+        customerDetails={{
+          name: '',
+          email: '',
+          phone: ''
+        }}
+        isOpen={showPaymentGateway}
+        onClose={() => setShowPaymentGateway(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+        onPaymentFailure={handlePaymentFailure}
+      />
     </div>
   );
 };

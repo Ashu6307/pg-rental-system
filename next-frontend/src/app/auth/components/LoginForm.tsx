@@ -123,8 +123,6 @@ const LoginForm: React.FC = () => {
         userType: role === 'owner' ? 'owner' : 'user'
       });
 
-      const data_response = data;
-
       if (data.success) {
         // Handle Remember Me
         if (rememberMe) {
