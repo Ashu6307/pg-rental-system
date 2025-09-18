@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Payment } from '../models/Payment.js';
+import Payment from '../models/Payment.js';
 import { authenticateJWT } from '../middleware/auth.js';
 import { sendNotification } from '../utils/notificationService.js';
 import { logAction } from '../utils/auditLogService.js';

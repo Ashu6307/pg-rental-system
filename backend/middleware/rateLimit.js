@@ -14,7 +14,6 @@ const createRateLimiter = () => {
   
   return rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: isProduction ? 5000 : 10000, // Production: 5000 req/15min, Dev: 10000 req/15min
     
     // Skip rate limiting for certain conditions
     skip: (req) => {

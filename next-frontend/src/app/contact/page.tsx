@@ -161,9 +161,9 @@ const Contact: React.FC = () => {
     }
   };
 
-  const offices = Array.isArray(content.offices) ? content.offices : [];
-  const faq = Array.isArray(content.faq) ? content.faq : [];
-  const contactInfo = content.contactInfo || {};
+  const offices = Array.isArray(content?.offices) ? content.offices : [];
+  const faq = Array.isArray(content?.faq) ? content.faq : [];
+  const contactInfo = content?.contactInfo || {};
 
   // Responsive scrolling logic for Offices
   const getOfficesScrollThreshold = () => {

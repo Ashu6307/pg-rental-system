@@ -1,12 +1,12 @@
 import express from 'express';
 import BookingAction from '../models/BookingAction.js';
 import Booking from '../models/Booking.js';
-import { verifyUser, verifyAdmin } from '../middleware/auth.js';
+import { authenticateJWT, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Create booking action (cancel/reschedule)
-router.post('/', verifyUser, async (req, res) => {
+router.post('/', authenticateJWT, authorize('user'), async (req, res) => {
   try {
     const { booking_id, action_type, reason } = req.body;
     // Validate booking exists
@@ -27,7 +27,7 @@ router.post('/', verifyUser, async (req, res) => {
 });
 
 // Approve/reject booking action
-router.patch('/:id/approve', verifyAdmin, async (req, res) => {
+router.patch('/:id/approve', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const { status } = req.body;
     const action = await BookingAction.findById(req.params.id);

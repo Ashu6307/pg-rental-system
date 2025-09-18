@@ -48,14 +48,14 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
   };
 
   useEffect(() => {
-    if (images.length <= 1 || isHovered) return;
+    if (!images || images.length <= 1 || isHovered) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) =>
         prevIndex === images.length - 1 ? 0 : prevIndex + 1
       );
     }, autoSlideInterval);
     return () => clearInterval(interval);
-  }, [images.length, autoSlideInterval, isHovered]);
+  }, [images?.length, autoSlideInterval, isHovered]);
 
   const handleImageError = (index: number) => {
     setImageErrors((prev) => ({ ...prev, [index]: true }));
@@ -75,11 +75,13 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
 
   const goToPrevious = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!images || images.length === 0) return;
     setCurrentIndex(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
   };
 
   const goToNext = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!images || images.length === 0) return;
     setCurrentIndex(currentIndex === images.length - 1 ? 0 : currentIndex + 1);
   };
 

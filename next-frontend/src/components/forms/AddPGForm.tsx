@@ -1632,7 +1632,7 @@ const AddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, loading = fals
             <div className="flex items-center justify-between pt-8 border-t border-gray-200 px-8 pb-8">
               <button
                 type="button"
-                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
                   disabled={currentStep === 1}
                   className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold transition-all duration-200"
                 >

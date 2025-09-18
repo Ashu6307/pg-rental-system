@@ -251,7 +251,8 @@ const HomeClient = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
               {homeData.stats.map((stat: any, idx: number) => {
-                const getIconForStat = (label: string) => {
+                const getIconForStat = (label: string | null | undefined) => {
+                  if (!label) return FaStar; // Default icon
                   if (
                     label.toLowerCase().includes("cities") ||
                     label.toLowerCase().includes("city")
