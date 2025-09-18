@@ -10,8 +10,6 @@ import ActivityLog from '../models/ActivityLog.js';
 import Notification from '../models/Notification.js';
 import Maintenance from '../models/Maintenance.js';
 import Utility from '../models/Utility.js';
-import Booking from '../models/Booking.js';
-import Review from '../models/Review.js';
 
 // Get comprehensive dashboard overview with business type support
 export const getOwnerDashboardOverview = async (req, res) => {
@@ -184,7 +182,7 @@ export const getOwnerDashboardOverview = async (req, res) => {
     dashboardData.quickActions = getQuickActions(businessType);
 
     // Alerts and notifications
-    dashboardData.alerts = await generateAlerts(ownerId, businessType);
+    dashboardData.alerts = await generateAlerts(ownerId);
 
     // Overview summary
     dashboardData.overview = {
@@ -458,16 +456,6 @@ export const sendElectricityBills = async (req, res) => {
       const resident = residents.find(r => r._id.toString() === tenantBill.tenantId.toString());
       
       if (resident) {
-        const billData = {
-          tenantName: resident.name,
-          period: `${bill.periodStart.toDateString()} to ${bill.periodEnd.toDateString()}`,
-          consumption: tenantBill.totalConsumption.toFixed(2),
-          amount: tenantBill.totalAmount.toFixed(2),
-          ratePerUnit: bill.ratePerUnit,
-          periods: tenantBill.periods,
-          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        };
-
         let emailSent = false;
         let whatsappSent = false;
 
@@ -992,7 +980,7 @@ const calculateOccupancyRate = (properties) => {
   return totalUnits > 0 ? ((occupiedUnits / totalUnits) * 100).toFixed(1) : 0;
 };
 
-const generateAlerts = async (ownerId, businessType) => {
+const generateAlerts = async (ownerId) => {
   const alerts = [];
   
   try {

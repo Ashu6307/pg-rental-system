@@ -1,12 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import { FaExclamationCircle, FaUser } from "react-icons/fa";
 import {
   handleNameChange,
-  isValidName,
-  getNameValidationError,
-  formatName
+  isValidName
 } from "../../utils/validation/nameValidation";
 import { getRoleColors, getDefaultRoleColors } from "../../utils/roleColors";
 
@@ -77,8 +75,8 @@ const NameValidationInput: React.FC<NameValidationInputProps> = ({
         disabled={disabled}
         value={value}
         placeholder={placeholder}
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={error ? "name-error" : undefined}
+        {...(error ? { 'aria-invalid': true } : { 'aria-invalid': false })}
+        {...(error ? { 'aria-describedby': "name-error" } : {})}
         onChange={e => validateInput(e.target.value)}
         onInput={e => {
           // Remove numbers and special chars in real-time

@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { FaExclamationCircle, FaBuilding, FaHome, FaHotel, FaCity, FaBed, FaKey } from "react-icons/fa";
-import { getRoleColors } from "@/utils/roleColors";
 
 interface BusinessTypeValidationInputProps {
   value: string;
@@ -25,7 +24,6 @@ const BusinessTypeValidationInput: React.FC<BusinessTypeValidationInputProps> = 
   className = "",
   placeholder = "Select Business Type"
 }) => {
-  const roleColors = getRoleColors(role);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -89,10 +87,10 @@ const BusinessTypeValidationInput: React.FC<BusinessTypeValidationInputProps> = 
             ? `border-${role === 'owner' ? 'green' : 'blue'}-500 focus:ring-${role === 'owner' ? 'green' : 'blue'}-500 focus:border-${role === 'owner' ? 'green' : 'blue'}-500`
             : "border-gray-300 focus:ring-gray-500 focus:border-gray-400"
         } ${className}`}
-        aria-expanded={isOpen}
+        {...(isOpen ? { 'aria-expanded': true } : { 'aria-expanded': false })}
         aria-haspopup="listbox"
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={error ? "business-type-error" : undefined}
+        {...(error ? { 'aria-invalid': true } : { 'aria-invalid': false })}
+        {...(error ? { 'aria-describedby': "business-type-error" } : {})}
       >
         <span className={value ? 'text-gray-900' : 'text-gray-400'}>
           {value ? businessTypeOptions.find(opt => opt.value === value)?.label : placeholder}

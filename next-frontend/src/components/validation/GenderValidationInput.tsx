@@ -83,10 +83,10 @@ const GenderValidationInput: React.FC<GenderValidationInputProps> = ({
             ? `border-${role === 'owner' ? 'green' : 'blue'}-500 focus:ring-${role === 'owner' ? 'green' : 'blue'}-500 focus:border-${role === 'owner' ? 'green' : 'blue'}-500`
             : "border-gray-300 focus:ring-gray-500 focus:border-gray-400"
         } ${className}`}
-        aria-expanded={isOpen}
+        {...(isOpen ? { 'aria-expanded': true } : { 'aria-expanded': false })}
         aria-haspopup="listbox"
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={error ? "gender-error" : undefined}
+        {...(error ? { 'aria-invalid': true } : { 'aria-invalid': false })}
+        {...(error ? { 'aria-describedby': "gender-error" } : {})}
       >
         <span className={value ? 'text-gray-900' : 'text-gray-400'}>
           {value ? genderOptions.find(opt => opt.value === value)?.label : placeholder}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import { FaExclamationCircle, FaPhoneAlt } from "react-icons/fa";
 import { formatPhoneNumber, isValidIndianMobile, getMobileValidationError } from "../../utils/validation/mobileValidation";
 import { getRoleColors, getDefaultRoleColors } from "../../utils/roleColors";
@@ -87,8 +87,8 @@ const MobileValidationInput: React.FC<MobileValidationInputProps> = ({
         value={value}
         readOnly={readOnly}
         placeholder={placeholder}
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={error ? "mobile-error" : undefined}
+        {...(error ? { 'aria-invalid': true } : { 'aria-invalid': false })}
+        {...(error ? { 'aria-describedby': "mobile-error" } : {})}
         onChange={e => {
           validateInput(e.target.value);
         }}

@@ -134,18 +134,16 @@ const OtpInput: React.FC<OtpInputProps> = ({
     }
     
     // Update timer every second
-    if (otpCreatedAt && expirySeconds) {
-      const update = () => {
-        const left = getTimeLeft();
-        if (left > 0) setTimerMessage(`OTP will expire in ${formatTime(left)}`);
-        else setTimerMessage('');
-      };
-      update();
-      timerIntervalRef.current = setInterval(update, 1000);
-      return () => {
-        if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      };
-    }
+    const update = () => {
+      const left = getTimeLeft();
+      if (left > 0) setTimerMessage(`OTP will expire in ${formatTime(left)}`);
+      else setTimerMessage('');
+    };
+    update();
+    timerIntervalRef.current = setInterval(update, 1000);
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
   }, [otpCreatedAt, expirySeconds]);
 
   // Whenever error statusMessage/statusType comes, show error for 5s, then show timer
