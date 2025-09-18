@@ -35,9 +35,10 @@ interface AddPGFormProps {
 }
 
 const AddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, loading = false }) => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [showPreview, setShowPreview] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const totalSteps = 8;
 
   // Form Steps
@@ -51,7 +52,6 @@ const AddPGForm: React.FC<AddPGFormProps> = ({ onSubmit, onClose, loading = fals
     { id: 7, title: 'Location', icon: <FaMapMarkerAlt />, description: 'Nearby places' },
     { id: 8, title: 'Preview', icon: <FaEye />, description: 'Review & submit' }
   ];
-  const [currentStep, setCurrentStep] = useState(1);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   
   // Basic Information

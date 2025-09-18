@@ -1,4 +1,3 @@
-```javascript
 const mongoose = require('mongoose');
 
 const policySchema = new mongoose.Schema({
@@ -25,4 +24,3 @@ const policySchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Policy', policySchema);
-```
