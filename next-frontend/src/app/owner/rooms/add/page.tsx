@@ -46,6 +46,8 @@ const AreaImageSection: React.FC<AreaImageSectionProps> = ({ title, icon, images
           type="button"
           onClick={handleAddImage}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          title={`Add ${title.toLowerCase()} image`}
+          aria-label={`Add ${title.toLowerCase()} image`}
         >
           <FaPlus />
         </button>
@@ -64,6 +66,8 @@ const AreaImageSection: React.FC<AreaImageSectionProps> = ({ title, icon, images
                 type="button"
                 onClick={() => onRemoveImage(index)}
                 className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                title={`Remove ${title.toLowerCase()} image`}
+                aria-label={`Remove ${title.toLowerCase()} image`}
               >
                 <FaTimes />
               </button>
@@ -407,6 +411,8 @@ const AddRoom: React.FC = () => {
             <button
               onClick={() => router.back()}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors"
+              title="Go back to previous page"
+              aria-label="Go back to previous page"
             >
               <FaArrowLeft />
             </button>
@@ -446,6 +452,8 @@ const AddRoom: React.FC = () => {
                   value={formData.propertyType}
                   onChange={(e) => handleInputChange('propertyType', e.target.value as 'Room' | 'Flat')}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  aria-label="Property type"
+                  title="Select property type"
                 >
                   <option value="Room">Room</option>
                   <option value="Flat">Flat</option>
@@ -561,6 +569,8 @@ const AddRoom: React.FC = () => {
                     type="button"
                     onClick={addLandmark}
                     className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    title="Add landmark"
+                    aria-label="Add landmark"
                   >
                     <FaPlus />
                   </button>
@@ -576,6 +586,8 @@ const AddRoom: React.FC = () => {
                         type="button"
                         onClick={() => removeLandmark(index)}
                         className="text-gray-500 hover:text-red-500"
+                        title={`Remove landmark: ${landmark}`}
+                        aria-label={`Remove landmark: ${landmark}`}
                       >
                         <FaTimes />
                       </button>
@@ -603,6 +615,8 @@ const AddRoom: React.FC = () => {
                     value={formData.roomConfig?.roomType}
                     onChange={(e) => handleInputChange('roomConfig.roomType', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Room type"
+                    title="Select room type"
                   >
                     <option value="Single">Single Occupancy</option>
                     <option value="Double">Double Occupancy</option>
@@ -623,6 +637,8 @@ const AddRoom: React.FC = () => {
                     value={formData.roomConfig?.area}
                     onChange={(e) => handleInputChange('roomConfig.area', parseInt(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    title="Enter room area in square feet"
+                    placeholder="Enter area (sq ft)"
                   />
                 </div>
 
@@ -637,6 +653,8 @@ const AddRoom: React.FC = () => {
                     value={formData.roomConfig?.floor}
                     onChange={(e) => handleInputChange('roomConfig.floor', parseInt(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    title="Enter floor number"
+                    placeholder="Floor number"
                   />
                 </div>
 
@@ -648,6 +666,8 @@ const AddRoom: React.FC = () => {
                     value={formData.roomConfig?.facing}
                     onChange={(e) => handleInputChange('roomConfig.facing', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Facing direction"
+                    title="Select facing direction"
                   >
                     <option value="North">North</option>
                     <option value="South">South</option>
@@ -704,6 +724,8 @@ const AddRoom: React.FC = () => {
                     value={formData.flatConfig?.flatType}
                     onChange={(e) => handleInputChange('flatConfig.flatType', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Flat type"
+                    title="Select flat type"
                   >
                     <option value="1RK">1RK</option>
                     <option value="1BHK">1BHK</option>
@@ -725,6 +747,8 @@ const AddRoom: React.FC = () => {
                     value={formData.flatConfig?.bedrooms}
                     onChange={(e) => handleInputChange('flatConfig.bedrooms', parseInt(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    title="Enter number of bedrooms"
+                    placeholder="Number of bedrooms"
                   />
                 </div>
 
@@ -739,6 +763,8 @@ const AddRoom: React.FC = () => {
                     value={formData.flatConfig?.bathrooms}
                     onChange={(e) => handleInputChange('flatConfig.bathrooms', parseInt(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    title="Enter number of bathrooms"
+                    placeholder="Number of bathrooms"
                   />
                 </div>
 
@@ -753,6 +779,8 @@ const AddRoom: React.FC = () => {
                     value={formData.flatConfig?.areas.carpetArea}
                     onChange={(e) => handleInputChange('flatConfig.areas.carpetArea', parseInt(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    title="Enter carpet area in square feet"
+                    placeholder="Carpet area (sq ft)"
                   />
                 </div>
 
@@ -767,6 +795,8 @@ const AddRoom: React.FC = () => {
                     value={formData.flatConfig?.floor}
                     onChange={(e) => handleInputChange('flatConfig.floor', parseInt(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    title="Enter floor number"
+                    placeholder="Floor number"
                   />
                 </div>
 
@@ -781,6 +811,8 @@ const AddRoom: React.FC = () => {
                     value={formData.flatConfig?.totalFloors}
                     onChange={(e) => handleInputChange('flatConfig.totalFloors', parseInt(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    title="Enter total number of floors in building"
+                    placeholder="Total floors"
                   />
                 </div>
 
@@ -793,6 +825,8 @@ const AddRoom: React.FC = () => {
                     value={formData.flatConfig?.furnishingStatus}
                     onChange={(e) => handleInputChange('flatConfig.furnishingStatus', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Furnishing status"
+                    title="Select furnishing status"
                   >
                     <option value="Unfurnished">Unfurnished</option>
                     <option value="Semi-Furnished">Semi-Furnished</option>
@@ -809,6 +843,8 @@ const AddRoom: React.FC = () => {
                     value={formData.flatConfig?.ageOfProperty}
                     onChange={(e) => handleInputChange('flatConfig.ageOfProperty', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Age of property"
+                    title="Select age of property"
                   >
                     <option value="Under Construction">Under Construction</option>
                     <option value="0-1 years">0-1 years</option>
@@ -838,6 +874,8 @@ const AddRoom: React.FC = () => {
                   value={formData.pricing.rent}
                   onChange={(e) => handleInputChange('pricing.rent', parseInt(e.target.value))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  title="Enter monthly rent amount in rupees"
+                  placeholder="Monthly rent (₹)"
                 />
               </div>
 
@@ -852,6 +890,8 @@ const AddRoom: React.FC = () => {
                   value={formData.pricing.securityDeposit}
                   onChange={(e) => handleInputChange('pricing.securityDeposit', parseInt(e.target.value))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  title="Enter security deposit amount in rupees"
+                  placeholder="Security deposit (₹)"
                 />
               </div>
 
@@ -865,6 +905,8 @@ const AddRoom: React.FC = () => {
                   value={formData.pricing.maintenanceCharges}
                   onChange={(e) => handleInputChange('pricing.maintenanceCharges', parseInt(e.target.value))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  title="Enter maintenance charges in rupees"
+                  placeholder="Maintenance charges (₹)"
                 />
               </div>
 
@@ -876,6 +918,8 @@ const AddRoom: React.FC = () => {
                   value={formData.pricing.electricityCharges}
                   onChange={(e) => handleInputChange('pricing.electricityCharges', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  aria-label="Electricity charges"
+                  title="Select electricity charges type"
                 >
                   <option value="Included">Included in Rent</option>
                   <option value="Extra">Extra</option>
@@ -901,6 +945,8 @@ const AddRoom: React.FC = () => {
                   value={formData.totalUnits}
                   onChange={(e) => handleInputChange('totalUnits', parseInt(e.target.value))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  title="Enter total number of units"
+                  placeholder="Enter total units"
                 />
               </div>
 
@@ -916,6 +962,8 @@ const AddRoom: React.FC = () => {
                   value={formData.availableUnits}
                   onChange={(e) => handleInputChange('availableUnits', parseInt(e.target.value))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  title="Enter number of available units"
+                  placeholder="Enter available units"
                 />
               </div>
             </div>
@@ -979,6 +1027,8 @@ const AddRoom: React.FC = () => {
                   type="button"
                   onClick={addImage}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                  title="Add property image"
+                  aria-label="Add property image"
                 >
                   <FaPlus />
                 </button>
@@ -1001,6 +1051,8 @@ const AddRoom: React.FC = () => {
                       type="button"
                       onClick={() => removeImage(index)}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                      title="Remove property image"
+                      aria-label="Remove property image"
                     >
                       <FaTimes />
                     </button>
@@ -1143,6 +1195,8 @@ const AddRoom: React.FC = () => {
                   value={formData.tenantPreferences.genderPreference}
                   onChange={(e) => handleInputChange('tenantPreferences.genderPreference', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  aria-label="Gender preference for tenants"
+                  title="Select gender preference for tenants"
                 >
                   <option value="Any">Any</option>
                   <option value="Male">Male Only</option>
@@ -1158,6 +1212,8 @@ const AddRoom: React.FC = () => {
                   value={formData.tenantPreferences.occupationType}
                   onChange={(e) => handleInputChange('tenantPreferences.occupationType', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  aria-label="Occupation type preference for tenants"
+                  title="Select occupation type preference for tenants"
                 >
                   <option value="Any">Any</option>
                   <option value="Students">Students</option>

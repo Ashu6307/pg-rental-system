@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   FaCalendarAlt, 
   FaClock, 
@@ -10,10 +10,7 @@ import {
   FaCheck,
   FaTimes,
   FaSpinner,
-  FaInfoCircle,
-  FaMapMarkerAlt,
   FaHome,
-  FaUsers,
   FaRupeeSign
 } from 'react-icons/fa';
 

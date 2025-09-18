@@ -5,8 +5,6 @@ import {
   FaEnvelope, 
   FaComments, 
   FaTimes,
-  FaCheck,
-  FaClock,
   FaUserTie
 } from 'react-icons/fa';
 

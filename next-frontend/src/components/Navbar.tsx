@@ -12,7 +12,6 @@ import {
   FaBars,
   FaTimes,
   FaUser,
-  FaMotorcycle,
   FaBuilding,
   FaHome,
   FaPhone,
@@ -21,7 +20,6 @@ import {
   FaHotel,
   FaUserTie,
   FaChevronDown,
-  FaUserShield,
 } from "react-icons/fa";
 import { AuthContext } from "@/context/AuthContext";
 import StayWheelsLogo from "./StayWheelsLogo";
@@ -67,7 +65,7 @@ const Navbar: React.FC = () => {
   }, [isOpen]);
 
   if (!auth) return null;
-  const { user, role, logout, isAuthenticated } = auth;
+  const { user, role, logout } = auth;
   const isLoggedIn = !!user;
 
   const getCurrentUserInfo = () => {

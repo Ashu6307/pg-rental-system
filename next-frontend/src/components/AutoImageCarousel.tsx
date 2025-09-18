@@ -24,15 +24,6 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
 
-  const getFallbackImage = () => {
-    if (type === 'pg') {
-      return 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80';
-    } else if (type === 'room') {
-      return 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop&q=80';
-    }
-    return 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop&q=80';
-  };
-
   const getFallbackIcon = () => {
     return FaBuilding;
   };
@@ -124,12 +115,16 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
           <button
             onClick={goToPrevious}
             className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
+            aria-label="Previous image"
+            title="Previous image"
           >
             <FaChevronLeft size={12} />
           </button>
           <button
             onClick={goToNext}
             className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
+            aria-label="Next image"
+            title="Next image"
           >
             <FaChevronRight size={12} />
           </button>
@@ -150,6 +145,8 @@ const AutoImageCarousel: React.FC<AutoImageCarouselProps> = ({
                   ? 'bg-white scale-110'
                   : 'bg-white/50 hover:bg-white/70'
               }`}
+              aria-label={`Go to slide ${index + 1}`}
+              title={`Go to slide ${index + 1}`}
             />
           ))}
         </div>

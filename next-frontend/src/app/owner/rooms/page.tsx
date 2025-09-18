@@ -208,6 +208,8 @@ const OwnerRooms: React.FC = () => {
               value={filters.propertyType}
               onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              aria-label="Filter by property type"
+              title="Filter by property type"
             >
               <option value="">All Property Types</option>
               <option value="Room">Rooms</option>
@@ -218,6 +220,8 @@ const OwnerRooms: React.FC = () => {
               value={filters.status}
               onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              aria-label="Filter by status"
+              title="Filter by status"
             >
               <option value="">All Status</option>
               <option value="Active">Active</option>
@@ -230,6 +234,8 @@ const OwnerRooms: React.FC = () => {
               value={filters.sort}
               onChange={(e) => setFilters(prev => ({ ...prev, sort: e.target.value }))}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              aria-label="Sort properties"
+              title="Sort properties"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -447,7 +453,7 @@ const OwnerRooms: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedRoom && (
-        <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <Modal onClose={() => setShowDeleteModal(false)}>
           <div className="max-w-md mx-auto">
             <div className="text-center">
               <FaTrash className="text-4xl text-red-500 mx-auto mb-4" />

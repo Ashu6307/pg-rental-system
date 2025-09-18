@@ -1,5 +1,6 @@
 "use client";
-import React, { useRef, useEffect, useState } from 'react';
+// Smooth scrolling carousel component
+import React, { useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface SmoothCarouselProps {

@@ -12,7 +12,6 @@ import {
   FaComments, FaCreditCard, FaBookmark, FaWhatsapp
 } from 'react-icons/fa';
 import { MdLocationOn, MdVerified, MdApartment, MdElevator } from 'react-icons/md';
-import VirtualTour from '@/components/property/VirtualTour';
 import ChatWidget from '@/components/property/ChatWidget';
 import BookingSystem from '@/components/property/BookingSystem';
 import PaymentGateway from '@/components/property/PaymentGateway';
@@ -206,7 +205,6 @@ interface RoomData {
   available?: boolean;
   availableFrom?: string;
   images?: string[];
-  virtualTour?: string;
   preferredTenants?: string;
   petAllowed?: boolean;
   smokingAllowed?: boolean;
@@ -237,7 +235,6 @@ export default function RoomDetailsPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
-  const [showVirtualTour, setShowVirtualTour] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showChatWidget, setShowChatWidget] = useState(false);
@@ -536,15 +533,6 @@ export default function RoomDetailsPage() {
 
         {/* Action Buttons Overlay */}
         <div className="absolute bottom-4 left-4 flex space-x-2">
-          {roomData.virtualTour && (
-            <button
-              onClick={() => setShowVirtualTour(true)}
-              className="bg-white text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center"
-            >
-              <FaVideo className="mr-2" />
-              Virtual Tour
-            </button>
-          )}
           <button
             onClick={() => setShowImageModal(true)}
             className="bg-white text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center"
@@ -962,23 +950,6 @@ export default function RoomDetailsPage() {
             </div>
           </div>
         </div>
-      )}
-
-      {showVirtualTour && roomData.virtualTour && (
-        <VirtualTour
-          propertyId={roomData._id}
-          propertyTitle={roomData.name}
-          tourData={[{
-            id: roomData._id,
-            title: roomData.name,
-            thumbnail: getImageUrl(roomData.media?.images?.[0]) || roomData.mainImage || '/placeholder-room.jpg',
-            panoramaUrl: roomData.virtualTour,
-            roomType: roomData.propertyType || roomData.type || 'Room',
-            description: roomData.description || ''
-          }]}
-          isOpen={showVirtualTour}
-          onClose={() => setShowVirtualTour(false)}
-        />
       )}
 
       {showBookingModal && (

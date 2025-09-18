@@ -14,8 +14,7 @@ import {
   FaTimes,
   FaSearch,
   FaHome,
-  FaBuilding,
-  FaQuestionCircle
+  FaBuilding
 } from 'react-icons/fa';
 
 const UserNavbar = () => {
@@ -62,11 +61,6 @@ const UserNavbar = () => {
     logout?.();
     setIsProfileOpen(false);
     router.push('/');
-  };
-
-  const handleNavigation = (path: string) => {
-    router.push(path);
-    setIsMenuOpen(false);
   };
 
   return (

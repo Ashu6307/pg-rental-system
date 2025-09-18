@@ -22,17 +22,6 @@ import apiService from "@/services/api";
 import HorizontalCarousel from "@/components/HorizontalCarousel";
 import CitySelectModal from "@/components/CitySelectModal";
 
-// Utility function to shuffle array
-function shuffleArray(array: any[]) {
-  if (!Array.isArray(array)) return [];
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
 const HomePageLoader = () => (
   <div className="flex justify-center items-center min-h-screen">
     <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>

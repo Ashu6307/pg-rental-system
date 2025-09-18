@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import ChatWidget from '@/components/property/ChatWidget';
-import VirtualTour from '@/components/property/VirtualTour';
 import BookingSystem from '@/components/property/BookingSystem';
 import PaymentGateway from '@/components/property/PaymentGateway';
 import { 
@@ -167,7 +166,6 @@ const PGDetailsPage: React.FC = () => {
   const [copied, setCopied] = useState(false);
   
   // Advanced feature states
-  const [showVirtualTour, setShowVirtualTour] = useState(false);
   const [showBookingSystem, setShowBookingSystem] = useState(false);
   const [showPaymentGateway, setShowPaymentGateway] = useState(false);
   const [bookingOrderId, setBookingOrderId] = useState('');
@@ -256,10 +254,6 @@ const PGDetailsPage: React.FC = () => {
   };
 
   // Advanced feature handlers
-  const handleVirtualTour = () => {
-    setShowVirtualTour(true);
-  };
-
   const handleBookNow = () => {
     setBookingOrderId('ORD' + Date.now());
     setShowBookingSystem(true);
@@ -282,46 +276,6 @@ const PGDetailsPage: React.FC = () => {
     // You can add error notification here
     console.error('Payment failed:', error);
   };
-
-  // Mock virtual tour data - in real app, this would come from API
-  const virtualTourData = useMemo(() => {
-    if (!pg) return [];
-    
-    return [
-      {
-        id: '1',
-        title: 'Entrance & Reception',
-        thumbnail: getImageUrl(pg.images?.[0]) || '/placeholder-room.jpg',
-        panoramaUrl: getImageUrl(pg.images?.[0]) || '/placeholder-room.jpg',
-        roomType: 'entrance',
-        description: 'Welcome to our modern PG with 24/7 reception and security.'
-      },
-      {
-        id: '2',
-        title: 'Common Living Area',
-        thumbnail: getImageUrl(pg.images?.[1]) || '/placeholder-room.jpg',
-        panoramaUrl: getImageUrl(pg.images?.[1]) || '/placeholder-room.jpg',
-        roomType: 'living',
-        description: 'Spacious common area with comfortable seating and entertainment.'
-      },
-      {
-        id: '3',
-        title: 'Sample Room',
-        thumbnail: getImageUrl(pg.images?.[2]) || '/placeholder-room.jpg',
-        panoramaUrl: getImageUrl(pg.images?.[2]) || '/placeholder-room.jpg',
-        roomType: 'bedroom',
-        description: 'Well-furnished rooms with all essential amenities.'
-      },
-      {
-        id: '4',
-        title: 'Kitchen & Dining',
-        thumbnail: getImageUrl(pg.images?.[3]) || '/placeholder-room.jpg',
-        panoramaUrl: getImageUrl(pg.images?.[3]) || '/placeholder-room.jpg',
-        roomType: 'kitchen',
-        description: 'Clean and well-equipped kitchen and dining area.'
-      }
-    ];
-  }, [pg]);
 
   const ImageGallery = () => (
     <div className="relative">
@@ -853,16 +807,6 @@ const PGDetailsPage: React.FC = () => {
                   WhatsApp
                 </button>
                 
-                <button
-                  onClick={handleVirtualTour}
-                  className="w-full bg-purple-500 text-white py-3 px-4 rounded-xl hover:bg-purple-600 transition-colors flex items-center justify-center gap-2"
-                  title="Take virtual tour"
-                  aria-label="Take virtual tour"
-                >
-                  <FaVideo />
-                  Virtual Tour
-                </button>
-                
                 <button 
                   className="w-full bg-gray-100 text-gray-800 py-3 px-4 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                   title="Send message to owner"
@@ -913,16 +857,6 @@ const PGDetailsPage: React.FC = () => {
                   >
                     <FaCalendar />
                     Book Now
-                  </button>
-                  
-                  <button
-                    onClick={handleVirtualTour}
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm"
-                    title="Take 360 degree virtual tour"
-                    aria-label="Take 360 degree virtual tour"
-                  >
-                    <FaVideo />
-                    360° Virtual Tour
                   </button>
                 </div>
               </div>
@@ -1128,15 +1062,6 @@ const PGDetailsPage: React.FC = () => {
         ownerPhone={pg.owner?.phone || ''}
         propertyTitle={pg.name}
         propertyType="PG"
-      />
-
-      {/* Virtual Tour Modal */}
-      <VirtualTour
-        propertyId={pg._id}
-        propertyTitle={pg.name}
-        tourData={virtualTourData}
-        isOpen={showVirtualTour}
-        onClose={() => setShowVirtualTour(false)}
       />
 
       {/* Booking System Modal */}

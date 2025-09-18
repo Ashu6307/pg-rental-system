@@ -221,7 +221,6 @@ const PasswordValidationInput: React.FC<PasswordValidationInputProps> = ({
           disabled={disabled}
           value={value}
           placeholder={placeholder}
-          aria-invalid={error ? "true" : "false"}
           aria-describedby={error ? `${id}-error` : undefined}
           onChange={e => validateInput(e.target.value)}
           onFocus={() => setIsFocused(true)}
@@ -229,7 +228,7 @@ const PasswordValidationInput: React.FC<PasswordValidationInputProps> = ({
           className={`appearance-none block w-full pl-3 pr-10 py-2 border rounded-md placeholder-gray-400 text-gray-900 focus:outline-none sm:text-sm transition-all duration-200 ${
             error
               ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-              : value && isPasswordComplete(value) && !error
+              : value && isPasswordComplete(value)
               ? `border-${role === 'owner' ? 'green' : 'blue'}-500 focus:ring-${role === 'owner' ? 'green' : 'blue'}-500 focus:border-${role === 'owner' ? 'green' : 'blue'}-500`
               : "border-gray-300 focus:ring-gray-500 focus:border-gray-400"
           } ${className}`}

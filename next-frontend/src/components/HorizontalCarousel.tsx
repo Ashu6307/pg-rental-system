@@ -13,7 +13,7 @@ interface HorizontalCarouselProps {
 const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
   children,
   autoScroll = true,
-  scrollSpeed = 50,
+  scrollSpeed = 120,
   showArrows = true,
   className = ""
 }) => {
@@ -69,7 +69,7 @@ const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
       const cardWidth = 452; // Card width (420px) + gap (32px)
       const totalWidth = cardWidth * children.length; // Width of one set
       
-      let newOffset = currentOffset;
+      let newOffset;
       
       if (direction === 'right') {
         newOffset = currentOffset - cardWidth;
@@ -127,13 +127,8 @@ const HorizontalCarousel: React.FC<HorizontalCarouselProps> = ({
         <div 
           ref={trackRef}
           className={`carousel-track ${isPaused ? 'paused' : ''}`}
-          style={
-            {
-              '--carousel-duration': `${animationDuration}s`,
-              animation: `infiniteScroll ${animationDuration}s linear infinite`,
-              animationPlayState: isPaused ? 'paused' : 'running'
-            } as React.CSSProperties
-          }
+          data-animation-duration={animationDuration}
+          data-animation-state={isPaused ? 'paused' : 'running'}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >

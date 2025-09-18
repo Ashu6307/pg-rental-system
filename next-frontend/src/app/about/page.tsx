@@ -19,6 +19,19 @@ const About: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
 
+  // Helper function to get avatar gradient class
+  const getAvatarGradientClass = (name: string) => {
+    const charCode = name?.charCodeAt(0) || 65;
+    const gradientVariants = [
+      'bg-gradient-to-br from-blue-500 to-purple-600',
+      'bg-gradient-to-br from-blue-600 to-purple-700', 
+      'bg-gradient-to-br from-blue-400 to-purple-500',
+      'bg-gradient-to-br from-blue-700 to-purple-800',
+      'bg-gradient-to-br from-blue-500 to-indigo-600'
+    ];
+    return gradientVariants[charCode % gradientVariants.length];
+  };
+
   // Set page title
   useEffect(() => {
     document.title = 'About Us | PG & Room Rental';
@@ -174,7 +187,17 @@ const About: React.FC = () => {
                 {filteredValues.map((value: any, index: number) => (
                   <div key={index} className="carousel-slide">
                     <div className="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group h-full">
-                      <div className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl" style={{ background: value.color?.background || "#DBEAFE", color: value.color?.text || "#1E3A8A" }}>{value.icon}</div>
+                      <div 
+                        className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl bg-blue-100 text-blue-800"
+                        {...(value.color?.background && {
+                          style: { 
+                            backgroundColor: value.color.background, 
+                            color: value.color.text || "#1E3A8A" 
+                          }
+                        })}
+                      >
+                        {value.icon}
+                      </div>
                       <h3 className="text-xl font-bold mb-2 text-blue-900">{value.title}</h3>
                       <span className="text-xs text-gray-500 capitalize mb-2">{value.category}</span>
                       <p className="text-gray-600 text-base mb-4 w-full text-left line-clamp-2">{value.description}</p>
@@ -203,7 +226,17 @@ const About: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {filteredValues.map((value: any, index: number) => (
                 <div key={index} className="bg-white p-8 rounded-3xl shadow-xl flex flex-col items-center text-center border-t-4 border-blue-500 hover:scale-105 transition-transform duration-300 group">
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl" style={{ background: value.color?.background || "#DBEAFE", color: value.color?.text || "#1E3A8A" }}>{value.icon}</div>
+                  <div 
+                    className="w-14 h-14 flex items-center justify-center rounded-full mb-4 text-3xl bg-blue-100 text-blue-800"
+                    {...(value.color?.background && {
+                      style: { 
+                        backgroundColor: value.color.background, 
+                        color: value.color.text || "#1E3A8A" 
+                      }
+                    })}
+                  >
+                    {value.icon}
+                  </div>
                   <h3 className="text-xl font-bold mb-2 text-blue-900">{value.title}</h3>
                   <span className="text-xs text-gray-500 capitalize mb-2">{value.category}</span>
                   <p className="text-gray-600 text-base mb-4 w-full text-left">{value.description}</p>
@@ -266,22 +299,11 @@ const About: React.FC = () => {
                         <img
                           src={member.avatar}
                           alt={member.name}
-                          className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-500"
-                          style={{ background: "transparent" }}
+                          className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-500 bg-transparent"
                         />
                       ) : (
                         <div
-                          className="w-20 h-20 mb-4 rounded-full flex items-center justify-center font-bold"
-                          style={{
-                            background: `linear-gradient(135deg, #3b82f6 ${(member?.name?.charCodeAt(0) || 65) % 60}%, #8b5cf6 100%)`,
-                            color: "#fff",
-                            fontSize: "2.5rem",
-                            letterSpacing: "1px",
-                            fontWeight: 700,
-                            textShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                            userSelect: "none",
-                            border: "2px solid #3b82f6",
-                          }}
+                          className={`w-20 h-20 mb-4 rounded-full flex items-center justify-center font-bold text-white text-4xl tracking-wide border-2 border-blue-500 select-none shadow-lg ${getAvatarGradientClass(member?.name || '')}`}
                         >
                           {member?.name?.charAt(0)?.toUpperCase() || "U"}
                         </div>
@@ -312,22 +334,11 @@ const About: React.FC = () => {
                     <img
                       src={member.avatar}
                       alt={member.name}
-                      className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-500"
-                      style={{ background: "transparent" }}
+                      className="w-20 h-20 mb-4 rounded-full object-cover border-2 border-blue-500 bg-transparent"
                     />
                   ) : (
                     <div
-                      className="w-20 h-20 mb-4 rounded-full flex items-center justify-center font-bold"
-                      style={{
-                        background: `linear-gradient(135deg, #3b82f6 ${(member?.name?.charCodeAt(0) || 65) % 60}%, #8b5cf6 100%)`,
-                        color: "#fff",
-                        fontSize: "2.5rem",
-                        letterSpacing: "1px",
-                        fontWeight: 700,
-                        textShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                        userSelect: "none",
-                        border: "2px solid #3b82f6",
-                      }}
+                      className={`w-20 h-20 mb-4 rounded-full flex items-center justify-center font-bold text-white text-4xl tracking-wide border-2 border-blue-500 select-none shadow-lg ${getAvatarGradientClass(member?.name || '')}`}
                     >
                       {member?.name?.charAt(0)?.toUpperCase() || "U"}
                     </div>

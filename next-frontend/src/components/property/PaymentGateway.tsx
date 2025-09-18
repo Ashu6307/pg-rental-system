@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   FaCreditCard, 
   FaUniversity, 
@@ -33,7 +33,7 @@ interface PaymentGatewayProps {
 interface PaymentMethod {
   id: string;
   name: string;
-  icon: React.ComponentType;
+  icon: React.ComponentType<{className?: string}>;
   type: 'card' | 'upi' | 'netbanking' | 'wallet';
   popular?: boolean;
 }

@@ -492,7 +492,7 @@ const PG: React.FC = () => {
             ))}
           </div>
           {/* No Results */}
-          {filteredPgs.length === 0 && !loading && (
+          {filteredPgs.length === 0 && (
             <div className="text-center py-12">
               <FaBuilding size={64} className="text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-600 mb-2">No PGs Found</h3>
