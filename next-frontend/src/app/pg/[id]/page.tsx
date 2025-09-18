@@ -437,7 +437,7 @@ const PGDetailsPage: React.FC = () => {
       {/* Thumbnail Strip */}
       {pg && pg.images && pg.images.length > 1 && (
         <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-          {(pg.images || []).map((image, index) => (
+          {pg.images.map((image, index) => (
             <button
               key={index}
               onClick={() => setSelectedImageIndex(index)}
