@@ -1,10 +1,10 @@
 import express from 'express';
 import { getOwnerAnalytics, getOwnerAnalyticsByPeriod } from '../controllers/ownerAnalyticsController.js';
-import { ownerAuth } from '../middleware/auth.js';
+import { authenticateJWT, ownerAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', ownerAuth, getOwnerAnalytics);
-router.get('/period/:period/:year/:month', ownerAuth, getOwnerAnalyticsByPeriod);
+router.get('/', authenticateJWT, ownerAuth, getOwnerAnalytics);
+router.get('/period/:period/:year/:month', authenticateJWT, ownerAuth, getOwnerAnalyticsByPeriod);
 
 export default router;

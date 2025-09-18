@@ -39,7 +39,7 @@ router.post('/public/:id/inquiry', trackInquiry);
 
 // Owner Protected Routes
 // Create PG with KYC validation
-router.post('/', ownerAuth, async (req, res) => {
+router.post('/', authenticateJWT, ownerAuth, async (req, res) => {
   try {
     // KYC approval check
     const ownerProfile = await OwnerProfile.findOne({ owner_id: req.user.id });
@@ -72,13 +72,11 @@ router.post('/', ownerAuth, async (req, res) => {
 });
 
 // Get all PGs for owner with analytics
-router.get('/owner/dashboard', ownerAuth, getOwnerPGs);
+router.get('/owner/dashboard', authenticateJWT, ownerAuth, getOwnerPGs);
 
 // Get single PG by ID (owner)
-router.get('/:id', ownerAuth, async (req, res) => {
+router.get('/:id', authenticateJWT, ownerAuth, async (req, res) => {
   try {
-    // Set user for authorization
-    req.user = req.user || { _id: req.user.id };
     await getPGById(req, res);
   } catch (err) {
     res.status(500).json({ 
@@ -89,9 +87,8 @@ router.get('/:id', ownerAuth, async (req, res) => {
 });
 
 // Update PG
-router.put('/:id', ownerAuth, async (req, res) => {
+router.put('/:id', authenticateJWT, ownerAuth, async (req, res) => {
   try {
-    req.user = req.user || { _id: req.user.id };
     await updatePG(req, res);
     
     // Audit log for update
@@ -113,9 +110,8 @@ router.put('/:id', ownerAuth, async (req, res) => {
 });
 
 // Soft delete PG
-router.delete('/:id', ownerAuth, async (req, res) => {
+router.delete('/:id', authenticateJWT, ownerAuth, async (req, res) => {
   try {
-    req.user = req.user || { _id: req.user.id };
     await deletePG(req, res);
     
     // Audit log for deletion
