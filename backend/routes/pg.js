@@ -52,7 +52,7 @@ router.post('/', authenticateJWT, ownerAuth, async (req, res) => {
 
     // Add owner ID and audit log
     req.body.owner = req.user._id;
-    const result = await createPG(req, res);
+    await createPG(req, res);
     
     // Audit log for successful creation
     if (res.statusCode === 201) {
