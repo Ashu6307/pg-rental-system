@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaEnvelope, FaPhone, FaUserCircle, FaUserTie, FaCheckCircle, FaHome, FaArrowLeft } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { FaUser, FaUserTie, FaCheckCircle, FaHome } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';

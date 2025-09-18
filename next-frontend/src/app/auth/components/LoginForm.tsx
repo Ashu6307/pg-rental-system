@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useContext } from 'react';
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaUserCircle, FaUserTie, FaHome } from 'react-icons/fa';
+import { FaUser, FaUserCircle, FaUserTie, FaHome } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';

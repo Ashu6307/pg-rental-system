@@ -1,16 +1,13 @@
 "use client";
 import React, { useState, useRef } from 'react';
-import { 
+import {
   FaBuilding, FaMapMarkerAlt, FaPhone, FaEnvelope, FaRupeeSign, 
   FaBed, FaWifi, FaCar, FaUtensils, FaShieldAlt, FaCamera,
   FaPlus, FaMinus, FaStar, FaClock, FaUsers, FaHome,
   FaDumbbell, FaSwimmingPool, FaTshirt, FaSnowflake,
-  FaBolt, FaVideo, FaLeaf, FaBook, FaGamepad, FaMusic,
-  FaCoffee, FaMedkit, FaBusinessTime, FaParking, FaCheck,
-  FaInfoCircle, FaEye, FaEyeSlash, FaGraduationCap, FaMale, FaFemale
-} from 'react-icons/fa';
-
-interface RoomType {
+  FaBolt, FaParking, FaCheck,
+  FaEye, FaMale, FaFemale
+} from 'react-icons/fa';interface RoomType {
   type: string;
   name: string;
   description: string;

@@ -1,17 +1,16 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaUserCircle, FaUserTie, FaUserShield, FaCheckCircle, FaExclamationCircle, FaHome, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
-import { toast, Toaster } from 'react-hot-toast';
+import { FaUser, FaLock, FaUserTie, FaUserShield, FaCheckCircle, FaHome } from 'react-icons/fa';
 import Link from 'next/link';
 import PasswordValidationInput from '../../../components/validation/PasswordValidationInput';
 import EmailValidationInput from '../../../components/validation/EmailValidationInput';
 import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
 import { isValidEmail } from '../../../utils/validation/emailValidation';
-import { isValidOtp, isOtpExpired, getOtpValidationError, getOtpTimeRemaining, formatOtpTime } from '../../../utils/validation/otpValidation';
+import { isValidOtp, getOtpValidationError, getOtpTimeRemaining } from '../../../utils/validation/otpValidation';
 import { getMaxResendAttempts, getMaxOtpAttempts, getRoleMessages } from '../../../utils/otpConfig';
 
 const ForgotPasswordForm: React.FC = () => {

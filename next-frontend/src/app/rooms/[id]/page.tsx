@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { 
-  FaBed, FaBath, FaRulerCombined, FaMapMarkerAlt, FaPhone, FaEnvelope, 
+  FaBed, FaBath, FaRulerCombined, FaPhone, 
   FaHeart, FaShare, FaStar, FaWifi, FaCar, FaShieldAlt, FaLeaf,
-  FaSwimmingPool, FaDumbbell, FaUsers, FaPaw, FaSmoking, FaCheck,
-  FaCalendarAlt, FaRupeeSign, FaArrowLeft, FaEye, FaChevronLeft,
-  FaChevronRight, FaTimes, FaPlay, FaExpand, FaCamera, FaVideo,
+  FaSwimmingPool, FaDumbbell, FaUsers, FaCheck,
+  FaCalendarAlt, FaArrowLeft, FaEye, FaChevronLeft,
+  FaChevronRight, FaTimes, FaExpand, FaCamera, FaVideo,
   FaComments, FaCreditCard, FaBookmark, FaWhatsapp
 } from 'react-icons/fa';
 import { MdLocationOn, MdVerified, MdApartment, MdElevator } from 'react-icons/md';
@@ -17,13 +17,6 @@ import ChatWidget from '@/components/property/ChatWidget';
 import BookingSystem from '@/components/property/BookingSystem';
 import PaymentGateway from '@/components/property/PaymentGateway';
 import apiService from '@/services/api';
-
-interface Owner {
-  _id: string;
-  name?: string;
-  email?: string;
-  phone?: string;
-}
 
 interface Nearby {
   name: string;

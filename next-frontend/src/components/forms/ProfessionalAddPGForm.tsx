@@ -3,12 +3,12 @@ import React, { useState, useRef } from 'react';
 import { 
   FaBuilding, FaMapMarkerAlt, FaPhone, FaEnvelope, FaRupeeSign, 
   FaBed, FaWifi, FaCar, FaUtensils, FaShieldAlt, FaCamera,
-  FaPlus, FaMinus, FaStar, FaClock, FaUsers, FaHome,
+  FaPlus, FaMinus, FaStar, FaUsers, FaHome,
   FaDumbbell, FaSwimmingPool, FaTshirt, FaSnowflake,
   FaBolt, FaVideo, FaLeaf, FaBook, FaGamepad, FaMusic,
   FaCoffee, FaMedkit, FaBusinessTime, FaParking, FaCheck,
-  FaArrowLeft, FaArrowRight, FaSave, FaEye, FaEdit,
-  FaTrash, FaCopy, FaUpload, FaImage, FaCheckCircle,
+  FaArrowLeft, FaArrowRight, FaSave,
+  FaTrash, FaUpload, FaCheckCircle,
   FaInfoCircle, FaExclamationTriangle, FaTimes
 } from 'react-icons/fa';
 

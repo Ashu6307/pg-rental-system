@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   FaPlus, FaEdit, FaTrash, FaEye, FaMapMarkerAlt, FaCrown, FaShieldAlt, 
-  FaBed, FaHome, FaIndianRupeeSign, FaUsers, FaWifi, FaCar, FaSnowflake,
-  FaSearch, FaFilter, FaSortAmountDown 
+  FaBed, FaHome, FaUsers, FaWifi, FaCar, FaSnowflake,
+  FaSearch 
 } from 'react-icons/fa';
 import apiService from '@/services/api';
 import Modal from '@/components/Modal';

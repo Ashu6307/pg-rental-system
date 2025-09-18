@@ -2,9 +2,9 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  FaBuilding, FaMapMarkerAlt, FaStar, FaWifi, FaCar, FaUtensils, FaSearch, FaHeart, FaEye, 
-  FaMale, FaFemale, FaUsers, FaCrown, FaShieldAlt, FaTshirt, FaDumbbell, FaLeaf, FaBook, 
-  FaSnowflake, FaBolt, FaVideo, FaBed, FaBath, FaHome, FaRupeeSign, FaBalanceScale 
+  FaBuilding, FaMapMarkerAlt, FaStar, FaWifi, FaCar, FaSearch, FaHeart, FaEye, 
+  FaMale, FaFemale, FaUsers, FaShieldAlt, FaDumbbell, 
+  FaSnowflake, FaBed, FaBath, FaHome, FaRupeeSign 
 } from 'react-icons/fa';
 import apiService from '@/services/api';
 import AutoImageCarousel from '@/components/AutoImageCarousel';

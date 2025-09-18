@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  FaSave, FaArrowLeft, FaBed, FaHome, FaMapMarkerAlt, FaIndianRupeeSign,
-  FaPlus, FaTimes, FaWifi, FaCar, FaSnowflake, FaBolt, FaShieldAlt,
+  FaSave, FaArrowLeft, FaBed, FaHome,
+  FaPlus, FaTimes, FaCar,
   FaUtensils, FaBath
 } from 'react-icons/fa';
 import apiService from '@/services/api';

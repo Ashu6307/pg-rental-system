@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from "react";
-import { FaExclamationCircle, FaLock, FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaCheckCircle } from "react-icons/fa";
 import { HiArrowNarrowRight } from "react-icons/hi";
 import { getRoleColors, getDefaultRoleColors } from "../../utils/roleColors";
 
