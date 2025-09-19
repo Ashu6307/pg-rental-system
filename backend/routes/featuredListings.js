@@ -1,7 +1,5 @@
 import express from 'express';
 import FeaturedListing from '../models/FeaturedListing.js';
-import PG from '../models/PG.js';
-import Room from '../models/Room.js';
 
 const router = express.Router();
 

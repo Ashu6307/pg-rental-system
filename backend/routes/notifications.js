@@ -18,7 +18,6 @@ router.get('/', authenticateJWT, async (req, res) => {
 // Real-time notification endpoint stub
 router.post('/push', async (req, res) => {
   // TODO: Integrate with websocket/push service
-  const { userId, message, type } = req.body;
   try {
     // await sendPushNotification(userId, message, type);
     res.status(200).json({ success: true, message: 'Push notification sent.' });
@@ -29,7 +28,6 @@ router.post('/push', async (req, res) => {
 
 // Real-time notification (websocket) integration stub
 router.post('/realtime', async (req, res) => {
-  const { userId, message, type } = req.body;
   try {
     // TODO: Integrate with websocket server for real-time delivery
     // Example: emit to socket.io or similar
@@ -45,8 +43,12 @@ router.post('/send', async (req, res) => {
   const { userId, message, channel } = req.body;
   try {
     // TODO: Integrate with notificationService for email/SMS/push
-    await sendNotification(userId, message, channel);
-    res.status(200).json({ success: true, message: 'Notification sent.' });
+    // await sendNotification(userId, message, channel);
+    res.status(501).json({ 
+      success: false, 
+      message: 'Notification service not implemented yet',
+      requested: { userId, message, channel }
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

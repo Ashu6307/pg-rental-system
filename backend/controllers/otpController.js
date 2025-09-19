@@ -1,8 +1,6 @@
 import Otp from '../models/Otp.js';
 import User from '../models/User.js';
 import OwnerProfile from '../models/OwnerProfile.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 // Enhanced Email System Import
 import EmailManager from '../modules/email/EmailManager.js';
 import OtpAudit from '../models/OtpAudit.js';
@@ -55,11 +53,6 @@ async function getOtpSettings() {
   };
 }
 
-// Helper: GDPR/Data Consent log
-async function logConsent(email, consentType, details) {
-  // Consent model me save karo
-  // ...implementation...
-}
 
 // Helper: Multi-tenancy (tenantId support)
 function getTenantId(req) {

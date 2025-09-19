@@ -5,7 +5,6 @@ import PGResident from '../models/PGResident.js';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const Payment = require('../models/Payment.js');
-import Revenue from '../models/Invoice.js';
 import Maintenance from '../models/Maintenance.js';
 import Review from '../models/Review.js';
 import Utility from '../models/Utility.js';

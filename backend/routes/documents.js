@@ -10,7 +10,7 @@ const upload = multer({ dest: 'uploads/documents/' });
 
 // Advanced document search/filter endpoint
 router.post('/search', async (req, res) => {
-  const { query, filters, sort, page, limit } = req.body;
+  const { filters, sort, page, limit } = req.body;
   try {
     // TODO: Implement advanced search/filter logic
     // Example: Use MongoDB aggregation for flexible search

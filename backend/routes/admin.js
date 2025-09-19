@@ -546,8 +546,11 @@ router.get('/audit/export', async (req, res) => {
   try {
     // TODO: Implement audit log export logic
     // Example: Generate CSV/PDF and return download link
-    const report = await exportAuditLogs(filters, format);
-    res.status(200).json({ success: true, report });
+    res.status(501).json({ 
+      success: false, 
+      message: 'Export functionality not implemented yet',
+      requested: { format, filters }
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -559,8 +562,11 @@ router.get('/analytics/export', async (req, res) => {
   try {
     // TODO: Implement analytics export logic
     // Example: Generate CSV/PDF and return download link
-    const report = await exportAnalytics(filters, format);
-    res.status(200).json({ success: true, report });
+    res.status(501).json({ 
+      success: false, 
+      message: 'Analytics export functionality not implemented yet',
+      requested: { format, filters }
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -572,8 +578,11 @@ router.get('/gdpr/export', async (req, res) => {
   try {
     // TODO: Implement GDPR/data consent export logic
     // Example: Generate CSV/PDF and return download link
-    const report = await exportGDPRLogs(filters, format);
-    res.status(200).json({ success: true, report });
+    res.status(501).json({ 
+      success: false, 
+      message: 'GDPR export functionality not implemented yet',
+      requested: { format, filters }
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -583,8 +592,10 @@ router.get('/gdpr/export', async (req, res) => {
 router.get('/webhook-logs/export', async (req, res) => {
   try {
     // TODO: Integrate with webhook log storage/service
-    const logs = await getWebhookLogs();
-    res.status(200).json({ success: true, logs });
+    res.status(501).json({ 
+      success: false, 
+      message: 'Webhook logs export functionality not implemented yet'
+    });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -605,7 +616,6 @@ router.post('/settings/version', async (req, res) => {
 
 // Webhook event trigger endpoint
 router.post('/webhook/trigger', async (req, res) => {
-  const { eventType, payload } = req.body;
   try {
     // TODO: Integrate with webhook service
     // Example: await triggerWebhookEvent(eventType, payload);
