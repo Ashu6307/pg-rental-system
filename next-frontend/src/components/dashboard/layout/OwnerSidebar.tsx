@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '@/context/AuthContext';
+import React, { useState } from 'react';
 import { useOwnerData } from '@/hooks/useOwnerData';
 import { 
   Home,
@@ -15,16 +14,12 @@ import {
   MessageSquare,
   Wrench,
   Shield,
-  HelpCircle,
   ChevronDown,
-  ChevronRight,
-  Star,
   TrendingUp,
   Calendar,
   PlusCircle,
   Eye,
   DollarSign,
-  Award,
   Clock,
   Zap
 } from 'lucide-react';
@@ -42,7 +37,6 @@ const OwnerSidebar: React.FC<OwnerSidebarProps> = ({
   isOpen,
   onClose
 }) => {
-  const { user } = useContext(AuthContext) || {};
   const { ownerData, ownerName, primaryPropertyName } = useOwnerData();
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
 

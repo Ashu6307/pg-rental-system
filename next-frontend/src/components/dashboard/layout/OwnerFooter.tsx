@@ -1,14 +1,8 @@
 'use client';
 
-import React, { useContext } from 'react';
-import { AuthContext } from '@/context/AuthContext';
-import { useOwnerData } from '@/hooks/useOwnerData';
+import React from 'react';
 import { 
   Building2, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
   Shield, 
   HeadphonesIcon,
   ExternalLink,
@@ -17,13 +11,9 @@ import {
   Instagram,
   Linkedin,
   Youtube,
-  TrendingUp,
   Users,
   IndianRupee,
-  Star,
-  Award,
   Globe,
-  Calendar,
   CreditCard,
   Settings,
   FileText,
@@ -35,8 +25,6 @@ interface OwnerFooterProps {
 }
 
 const OwnerFooter: React.FC<OwnerFooterProps> = ({ className = '' }) => {
-  const { user } = useContext(AuthContext) || {};
-  const { ownerData, ownerName, primaryPropertyName } = useOwnerData();
   const currentYear = new Date().getFullYear();
 
   // Quick Links for Property Management
@@ -85,34 +73,6 @@ const OwnerFooter: React.FC<OwnerFooterProps> = ({ className = '' }) => {
     { icon: Instagram, href: "#", label: "Instagram" },
     { icon: Linkedin, href: "#", label: "LinkedIn" },
     { icon: Youtube, href: "#", label: "YouTube" }
-  ];
-
-  // Business performance stats (dynamic based on owner data)
-  const businessStats = [
-    { 
-      label: "Total Properties", 
-      value: ownerData.stats.totalProperties.toString(),
-      icon: Building2,
-      color: "text-blue-600"
-    },
-    { 
-      label: "Active Tenants", 
-      value: ownerData.stats.totalTenants.toString(),
-      icon: Users,
-      color: "text-green-600"
-    },
-    { 
-      label: "Occupancy Rate", 
-      value: `${ownerData.stats.occupancyRate}%`,
-      icon: TrendingUp,
-      color: "text-purple-600"
-    },
-    { 
-      label: "Monthly Revenue", 
-      value: `₹${(ownerData.stats.monthlyRevenue / 1000).toFixed(0)}K`,
-      icon: IndianRupee,
-      color: "text-yellow-600"
-    }
   ];
 
   return (

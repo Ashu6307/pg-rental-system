@@ -8,8 +8,8 @@ import { blacklistToken, logSuspiciousActivity } from '../middleware/security.js
 // Enhanced Email System Import
 import EmailManager from '../modules/email/EmailManager.js';
 import rateLimit from 'express-rate-limit';
-import { isValidIndianMobile, getNormalizedMobile } from '../utils/mobileValidation.js';
-import { validateName, formatName, processName } from '../utils/nameValidation.js';
+import { isValidIndianMobile } from '../utils/mobileValidation.js';
+import { validateName, formatName } from '../utils/nameValidation.js';
 
 const router = express.Router();
 
@@ -39,13 +39,8 @@ router.post('/register', async (req, res) => {
     profilePhoto,
     role,
     ownerName,
-    businessName,
     businessType,
-    kycDocs,
-    businessAddress,
-    bankDetails,
     referralCode,
-    termsAccepted,
     otp // Add OTP field for verification
   } = req.body;
   try {

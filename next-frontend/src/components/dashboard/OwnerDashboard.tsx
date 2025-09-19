@@ -31,7 +31,7 @@ const PlaceholderSection = ({ title }: { title: string }) => (
 
 const OwnerDashboard = () => {
   const router = useRouter();
-  const { user, isAuthenticated } = useContext(AuthContext) || {};
+  const { isAuthenticated } = useContext(AuthContext) || {};
   const [activeSection, setActiveSection] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -49,14 +49,6 @@ const OwnerDashboard = () => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleMenuToggle = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleSidebarClose = () => {
-    setSidebarOpen(false);
   };
 
   const renderContent = () => {

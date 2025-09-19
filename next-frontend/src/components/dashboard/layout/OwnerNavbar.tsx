@@ -12,7 +12,6 @@ import {
   LogOut, 
   User, 
   ChevronDown,
-  Home,
   IndianRupee,
   Users,
   MessageSquare,
