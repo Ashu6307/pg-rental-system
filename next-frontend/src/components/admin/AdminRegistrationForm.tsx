@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useContext } from 'react';
-import { FaUser, FaEnvelope, FaPhone, FaLock, FaEye, FaEyeSlash, FaUserShield, FaBuilding, FaTimes, FaPlus } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaLock, FaUserShield, FaBuilding, FaTimes, FaPlus } from 'react-icons/fa';
 import { AuthContext } from '@/context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -9,8 +9,6 @@ import NameValidationInput from '@/components/validation/NameValidationInput';
 import EmailValidationInput from '@/components/validation/EmailValidationInput';
 import MobileValidationInput from '@/components/validation/MobileValidationInput';
 import PasswordValidationInput from '@/components/validation/PasswordValidationInput';
-import OtpInput from '@/components/validation/OtpInput';
-
 interface AdminRegistrationFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;

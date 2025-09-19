@@ -2,8 +2,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminLoginForm from '../../auth/components/AdminLoginForm';
-import { Metadata } from 'next';
-
 // Security through obscurity - obfuscated admin login
 export default function SystemAuthPage() {
   const router = useRouter();

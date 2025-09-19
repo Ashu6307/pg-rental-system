@@ -4,25 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Search, 
-  Filter, 
-  Plus, 
   Phone, 
   Calendar, 
   IndianRupee, 
-  MapPin, 
   User, 
-  Mail, 
   CheckCircle, 
   AlertTriangle, 
   XCircle,
   Edit,
   Eye,
-  Clock,
   Home,
   Activity,
-  FileText,
   RefreshCw,
-  Download,
   UserPlus,
   UserMinus
 } from 'lucide-react';
@@ -93,7 +86,6 @@ const EnhancedTenantManagement = () => {
   const [filterProperty, setFilterProperty] = useState('all');
   const [selectedTenant, setSelectedTenant] = useState<TenantRecord | null>(null);
   const [showTenantDetails, setShowTenantDetails] = useState(false);
-  const [showAddTenant, setShowAddTenant] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -238,8 +230,9 @@ const EnhancedTenantManagement = () => {
             Refresh
           </button>
           <button
-            onClick={() => setShowAddTenant(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            disabled
+            className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed opacity-50"
+            title="Add tenant functionality coming soon"
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Add Tenant
@@ -324,6 +317,7 @@ const EnhancedTenantManagement = () => {
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Filter by tenant status"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -336,6 +330,7 @@ const EnhancedTenantManagement = () => {
             value={filterProperty}
             onChange={(e) => setFilterProperty(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Filter by property type"
           >
             <option value="all">All Properties</option>
             <option value="pg">PG</option>
@@ -448,14 +443,24 @@ const EnhancedTenantManagement = () => {
                             setShowTenantDetails(true);
                           }}
                           className="text-blue-600 hover:text-blue-900"
+                          aria-label="View tenant details"
+                          title="View Details"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button className="text-gray-400 hover:text-gray-600">
+                        <button 
+                          className="text-gray-400 hover:text-gray-600"
+                          aria-label="Edit tenant information"
+                          title="Edit Tenant"
+                        >
                           <Edit className="h-4 w-4" />
                         </button>
                         {tenant.stayDetails.isActive && (
-                          <button className="text-red-600 hover:text-red-900">
+                          <button 
+                            className="text-red-600 hover:text-red-900"
+                            aria-label="Check out tenant"
+                            title="Check Out"
+                          >
                             <UserMinus className="h-4 w-4" />
                           </button>
                         )}
