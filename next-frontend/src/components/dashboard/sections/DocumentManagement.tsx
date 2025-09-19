@@ -6,25 +6,19 @@ import {
   Upload, 
   Download, 
   Eye, 
-  Edit, 
-  Trash2, 
   Plus, 
   Search, 
-  Filter,
   Calendar,
   User,
   Shield,
   CheckCircle,
   AlertTriangle,
   Clock,
-  Star,
   Share,
   Copy,
-  Folder,
   File,
   Image,
   Archive,
-  Paperclip,
   Home,
   UserCheck,
   CreditCard,
@@ -367,6 +361,7 @@ const DocumentManagement = () => {
                 value={selectedCategory} 
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter by document category"
               >
                 <option value="all">All Categories</option>
                 <option value="tenant-documents">Tenant Documents</option>
@@ -379,6 +374,7 @@ const DocumentManagement = () => {
                 value={selectedStatus} 
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter by document status"
               >
                 <option value="all">All Status</option>
                 <option value="pending-review">Pending Review</option>

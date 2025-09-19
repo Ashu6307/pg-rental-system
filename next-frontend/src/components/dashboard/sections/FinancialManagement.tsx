@@ -4,19 +4,14 @@ import React, { useState } from 'react';
 import { 
   IndianRupee, 
   TrendingUp, 
-  TrendingDown, 
-  Calendar, 
+  TrendingDown,
   FileText, 
   Download, 
-  Eye, 
   CheckCircle, 
-  AlertTriangle, 
   Clock,
   CreditCard,
   PieChart,
   BarChart3,
-  Filter,
-  Search
 } from 'lucide-react';
 
 interface RevenueData {

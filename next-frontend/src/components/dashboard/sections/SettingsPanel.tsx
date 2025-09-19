@@ -2,33 +2,16 @@
 
 import React, { useState } from 'react';
 import { 
-  Settings, 
-  User, 
+  Settings,
   Shield, 
-  Bell, 
-  Palette, 
+  Bell,
   Database, 
   Save, 
   Eye, 
   EyeOff,
-  Plus,
-  Trash2,
-  Edit,
-  Clock,
-  DollarSign,
-  Home,
-  Wifi,
-  Phone,
   Mail,
-  MapPin,
-  Camera,
-  Key,
   AlertTriangle,
-  CheckCircle,
-  Globe,
-  Lock,
   Smartphone,
-  Calendar,
   CreditCard,
   Building,
   Users
@@ -205,8 +188,9 @@ const SettingsPanel = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Property Name</label>
+              <label htmlFor="propertyName" className="block text-sm font-medium text-gray-700 mb-2">Property Name</label>
               <input
+                id="propertyName"
                 type="text"
                 value={pgSettings.propertyName}
                 onChange={(e) => {
@@ -218,8 +202,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Owner Name</label>
+              <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700 mb-2">Owner Name</label>
               <input
+                id="ownerName"
                 type="text"
                 value={pgSettings.ownerName}
                 onChange={(e) => {
@@ -231,8 +216,9 @@ const SettingsPanel = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">Address</label>
               <textarea
+                id="address"
                 value={pgSettings.address}
                 onChange={(e) => {
                   setPgSettings({...pgSettings, address: e.target.value});
@@ -244,8 +230,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">City</label>
               <input
+                id="city"
                 type="text"
                 value={pgSettings.city}
                 onChange={(e) => {
@@ -257,8 +244,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+              <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">State</label>
               <input
+                id="state"
                 type="text"
                 value={pgSettings.state}
                 onChange={(e) => {
@@ -270,8 +258,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
+              <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
               <input
+                id="pincode"
                 type="text"
                 value={pgSettings.pincode}
                 onChange={(e) => {
@@ -283,8 +272,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
               <input
+                id="phone"
                 type="tel"
                 value={pgSettings.phone}
                 onChange={(e) => {
@@ -296,8 +286,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
+                id="email"
                 type="email"
                 value={pgSettings.email}
                 onChange={(e) => {
@@ -309,8 +300,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Website (Optional)</label>
+              <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">Website (Optional)</label>
               <input
+                id="website"
                 type="url"
                 value={pgSettings.website || ''}
                 onChange={(e) => {
@@ -330,6 +322,7 @@ const SettingsPanel = () => {
                   setHasChanges(true);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Select PG type"
               >
                 <option value="boys">Boys Only</option>
                 <option value="girls">Girls Only</option>
@@ -338,8 +331,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Total Rooms</label>
+              <label htmlFor="totalRooms" className="block text-sm font-medium text-gray-700 mb-2">Total Rooms</label>
               <input
+                id="totalRooms"
                 type="number"
                 value={pgSettings.totalRooms}
                 onChange={(e) => {
@@ -351,8 +345,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Security Deposit (₹)</label>
+              <label htmlFor="securityDeposit" className="block text-sm font-medium text-gray-700 mb-2">Security Deposit (₹)</label>
               <input
+                id="securityDeposit"
                 type="number"
                 value={pgSettings.securityDeposit}
                 onChange={(e) => {
@@ -364,8 +359,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Check-in Time</label>
+              <label htmlFor="checkInTime" className="block text-sm font-medium text-gray-700 mb-2">Check-in Time</label>
               <input
+                id="checkInTime"
                 type="time"
                 value={pgSettings.checkInTime}
                 onChange={(e) => {
@@ -377,8 +373,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Check-out Time</label>
+              <label htmlFor="checkOutTime" className="block text-sm font-medium text-gray-700 mb-2">Check-out Time</label>
               <input
+                id="checkOutTime"
                 type="time"
                 value={pgSettings.checkOutTime}
                 onChange={(e) => {
@@ -390,8 +387,9 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Electricity Rate (₹/unit)</label>
+              <label htmlFor="electricityRate" className="block text-sm font-medium text-gray-700 mb-2">Electricity Rate (₹/unit)</label>
               <input
+                id="electricityRate"
                 type="number"
                 step="0.1"
                 value={pgSettings.electricityRate}
@@ -404,9 +402,10 @@ const SettingsPanel = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">WiFi Password</label>
+              <label htmlFor="wifiPassword" className="block text-sm font-medium text-gray-700 mb-2">WiFi Password</label>
               <div className="relative">
                 <input
+                  id="wifiPassword"
                   type={showPassword ? "text" : "password"}
                   value={pgSettings.wifiPassword}
                   onChange={(e) => {
@@ -459,6 +458,7 @@ const SettingsPanel = () => {
                           setHasChanges(true);
                         }}
                         className="sr-only peer"
+                        aria-label={`Toggle ${label.toLowerCase()}`}
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
@@ -493,6 +493,7 @@ const SettingsPanel = () => {
                           setHasChanges(true);
                         }}
                         className="sr-only peer"
+                        aria-label={`Toggle ${label.toLowerCase()}`}
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
@@ -513,6 +514,7 @@ const SettingsPanel = () => {
                   setHasChanges(true);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Select reminder frequency"
               >
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
@@ -553,6 +555,7 @@ const SettingsPanel = () => {
                         setHasChanges(true);
                       }}
                       className="sr-only peer"
+                      aria-label={`Toggle ${label.toLowerCase()}`}
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
@@ -574,6 +577,7 @@ const SettingsPanel = () => {
                     setHasChanges(true);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label="Session timeout in minutes"
                 />
               </div>
 
@@ -589,6 +593,7 @@ const SettingsPanel = () => {
                     setHasChanges(true);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label="Select password policy"
                 >
                   <option value="basic">Basic (8+ characters)</option>
                   <option value="medium">Medium (8+ chars, numbers)</option>
@@ -621,6 +626,7 @@ const SettingsPanel = () => {
                   setHasChanges(true);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Rent due date day of month"
               />
             </div>
 
@@ -637,6 +643,7 @@ const SettingsPanel = () => {
                   setHasChanges(true);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Late fee amount in rupees"
               />
             </div>
 
@@ -653,6 +660,7 @@ const SettingsPanel = () => {
                   setHasChanges(true);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Grace period in days"
               />
             </div>
 
@@ -670,6 +678,7 @@ const SettingsPanel = () => {
                   setHasChanges(true);
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Tax rate percentage"
               />
             </div>
 
@@ -692,6 +701,7 @@ const SettingsPanel = () => {
                         setHasChanges(true);
                       }}
                       className="sr-only peer"
+                      aria-label="Toggle auto-generate bills"
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
@@ -714,6 +724,7 @@ const SettingsPanel = () => {
                         setHasChanges(true);
                       }}
                       className="sr-only peer"
+                      aria-label="Toggle tax included in rent"
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
