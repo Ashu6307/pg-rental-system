@@ -10,7 +10,7 @@ import EmailValidationInput from '../../../components/validation/EmailValidation
 import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
 import { isValidEmail } from '../../../utils/validation/emailValidation';
-import { isValidOtp, getOtpValidationError, getOtpTimeRemaining } from '../../../utils/validation/otpValidation';
+import { isValidOtp, getOtpValidationError } from '../../../utils/validation/otpValidation';
 import { getMaxResendAttempts, getMaxOtpAttempts, getRoleMessages } from '../../../utils/otpConfig';
 
 const ForgotPasswordForm: React.FC = () => {
@@ -98,8 +98,6 @@ const ForgotPasswordForm: React.FC = () => {
   // Resend count tracking
   const [resendCount, setResendCount] = useState(0);
   const [resendDisabled, setResendDisabled] = useState(false);
-  // OTP expiry timer for UI
-  const otpTimeLeft = otpCreatedAt ? getOtpTimeRemaining(otpCreatedAt, 300) : 0;
   const [emailError, setEmailError] = useState(''); // Email validation error
   
   // Password validation errors - exactly like register form
@@ -159,7 +157,7 @@ const ForgotPasswordForm: React.FC = () => {
     setOtpSuccess('');
     setFormData(prev => ({ ...prev, otp: '' }));
     try {
-      const data = await authService.forgotPassword(formData.email, role);
+      await authService.forgotPassword(formData.email, role);
       
       setOtpSuccess('OTP sent successfully to your email!');
       // Toast removed - success message shown in UI
@@ -195,27 +193,8 @@ const ForgotPasswordForm: React.FC = () => {
     }
   };
 
-  const getOtpErrorIcon = (errorMessage: string) => {
-    if (!errorMessage) return '❌';
-    
-    const message = errorMessage.toLowerCase();
-    
-    if (message.includes('invalid')) {
-      return '🚫';
-    } else if (message.includes('expired')) {
-      return '⏰';
-    } else if (message.includes('used') || message.includes('already')) {
-      return '🔄';
-    } else if (message.includes('network')) {
-      return '📡';
-    } else {
-      return '❌';
-    }
-  };
-
   const handleOtpError = (errorMessage: string, showToast = true) => {
     const formattedMessage = getOtpErrorMessage(errorMessage);
-    const errorIcon = getOtpErrorIcon(errorMessage);
     setOtpError(formattedMessage);
     setShowOtpError(true);
     if (showToast) {
@@ -428,7 +407,7 @@ const ForgotPasswordForm: React.FC = () => {
     setOtpSuccess('');
     setFormData(prev => ({ ...prev, otp: '' }));
     try {
-      const data = await authService.forgotPassword(formData.email, role);
+      await authService.forgotPassword(formData.email, role);
       
       // Increment resend count
       const newResendCount = resendCount + 1;
@@ -506,8 +485,6 @@ const ForgotPasswordForm: React.FC = () => {
   };
 
   // Helper for role-based color and icon - exactly like old frontend
-  const roleColor = role === 'admin' ? 'red' : role === 'owner' ? 'green' : 'blue';
-  const iconColor = role === 'admin' ? 'text-red-600' : role === 'owner' ? 'text-green-600' : 'text-blue-600';
   const bgColor = role === 'admin' 
     ? 'bg-red-50' 
     : role === 'owner' 

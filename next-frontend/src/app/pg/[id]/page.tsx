@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import ChatWidget from '@/components/property/ChatWidget';
@@ -37,7 +37,6 @@ import {
   FaCouch,
   FaImages,
   FaCamera,
-  FaVideo,
   FaMapPin,
   FaDirections,
   FaComments,

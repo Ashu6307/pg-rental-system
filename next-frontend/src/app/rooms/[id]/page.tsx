@@ -8,7 +8,7 @@ import {
   FaHeart, FaShare, FaStar, FaWifi, FaCar, FaShieldAlt, FaLeaf,
   FaSwimmingPool, FaDumbbell, FaUsers, FaCheck,
   FaCalendarAlt, FaArrowLeft, FaEye, FaChevronLeft,
-  FaChevronRight, FaTimes, FaExpand, FaCamera, FaVideo,
+  FaChevronRight, FaTimes, FaExpand, FaCamera,
   FaComments, FaCreditCard, FaBookmark, FaWhatsapp
 } from 'react-icons/fa';
 import { MdLocationOn, MdVerified, MdApartment, MdElevator } from 'react-icons/md';
