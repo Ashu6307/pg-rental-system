@@ -124,7 +124,7 @@ const Rooms: React.FC = () => {
   const handleRoomClick = async (room: any) => {
     try {
       // Track view analytics
-      await apiService.post(`/rooms/${room._id}/view`);
+      await apiService.post(`/rooms/${room._id}/view`, {});
       // Navigate to room details page
       router.push(`/rooms/${room._id}`);
     } catch (error) {

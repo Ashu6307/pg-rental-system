@@ -3,12 +3,18 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
   ? process.env.NEXT_PUBLIC_API_URL || 'https://your-production-api.com'
   : 'http://localhost:5000';
 
+interface RequestOptions extends RequestInit {
+  headers?: Record<string, string>;
+}
+
 class ApiService {
+  private baseURL: string;
+
   constructor() {
     this.baseURL = API_BASE_URL;
   }
 
-  async request(endpoint, options = {}) {
+  async request(endpoint: string, options: RequestOptions = {}): Promise<any> {
     const url = `${this.baseURL}${endpoint}`;
     
     const config = {
@@ -43,16 +49,16 @@ class ApiService {
   }
 
   // GET request
-  async get(endpoint, options = {}) {
+  async get(endpoint: string, options: RequestOptions = {}): Promise<any> {
     return this.request(endpoint, { method: 'GET', ...options });
   }
 
   // POST request
-  async post(endpoint, data, options = {}) {
+  async post(endpoint: string, data: any, options: RequestOptions = {}): Promise<any> {
     // Handle FormData (for file uploads)
     const isFormData = data instanceof FormData;
     
-    const config = {
+    const config: RequestOptions = {
       method: 'POST',
       ...options,
     };
@@ -60,7 +66,9 @@ class ApiService {
     if (isFormData) {
       config.body = data;
       // Remove content-type for FormData, browser sets it automatically
-      delete config.headers['Content-Type'];
+      if (config.headers) {
+        delete config.headers['Content-Type'];
+      }
     } else {
       config.body = JSON.stringify(data);
     }
@@ -68,8 +76,8 @@ class ApiService {
   }
 
   // PUT request
-  async put(endpoint, data, options = {}) {
-    const config = {
+  async put(endpoint: string, data: any, options: RequestOptions = {}): Promise<any> {
+    const config: RequestOptions = {
       method: 'PUT',
       body: JSON.stringify(data),
       ...options,
@@ -78,8 +86,8 @@ class ApiService {
   }
 
   // DELETE request
-  async delete(endpoint, options = {}) {
-    const config = {
+  async delete(endpoint: string, options: RequestOptions = {}): Promise<any> {
+    const config: RequestOptions = {
       method: 'DELETE',
       ...options,
     };
@@ -87,8 +95,8 @@ class ApiService {
   }
 
   // Area Images Management
-  async addAreaImage(roomId, area, imageUrl, label = null) {
-    const body = { area, imageUrl };
+  async addAreaImage(roomId: string | number, area: string, imageUrl: string, label: string | null = null): Promise<any> {
+    const body: any = { area, imageUrl };
     if (area === 'others' && label) {
       body.label = label;
     }
@@ -96,8 +104,8 @@ class ApiService {
     return this.post(`/api/rooms/${roomId}/area-images`, { body: JSON.stringify(body) });
   }
 
-  async removeAreaImage(roomId, area, imageIndex, label = null) {
-    const body = { area, imageIndex };
+  async removeAreaImage(roomId: string | number, area: string, imageIndex: number, label: string | null = null): Promise<any> {
+    const body: any = { area, imageIndex };
     if (area === 'others' && label) {
       body.label = label;
     }
