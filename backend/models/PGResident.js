@@ -136,6 +136,71 @@ const pgResidentSchema = new mongoose.Schema({
       accountHolderName: String
     }
   },
+
+  // Billing Automation Fields
+  billingCycle: {
+    type: String,
+    enum: ['monthly', 'quarterly', 'yearly'],
+    default: 'monthly'
+  },
+  lastBillingDate: {
+    type: Date,
+    default: null
+  },
+  nextBillingDate: {
+    type: Date,
+    default: function() {
+      if (this.checkinDate) {
+        const nextBilling = new Date(this.checkinDate);
+        nextBilling.setMonth(nextBilling.getMonth() + 1);
+        return nextBilling;
+      }
+      return null;
+    }
+  },
+  billingDay: {
+    type: Number,
+    min: 1,
+    max: 31,
+    default: function() {
+      return this.checkinDate ? this.checkinDate.getDate() : 1;
+    }
+  },
+  billingHistory: [{
+    invoiceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
+    amount: { type: Number, required: true },
+    billingDate: { type: Date, required: true },
+    dueDate: Date,
+    paidDate: Date,
+    status: {
+      type: String,
+      enum: ['pending', 'paid', 'overdue', 'cancelled'],
+      default: 'pending'
+    },
+    type: {
+      type: String,
+      enum: ['rent', 'electricity', 'common_charges', 'security_deposit', 'other'],
+      required: true
+    },
+    notes: String,
+    createdAt: { type: Date, default: Date.now }
+  }],
+  billingPreferences: {
+    autoGenerate: { type: Boolean, default: true },
+    reminderDays: { type: Number, default: 3 }, // Days before billing to send reminder
+    gracePeriod: { type: Number, default: 5 }, // Days after due date before marking overdue
+    emailReminders: { type: Boolean, default: true },
+    smsReminders: { type: Boolean, default: true },
+    whatsappReminders: { type: Boolean, default: false }
+  },
+  proration: {
+    enableProration: { type: Boolean, default: true },
+    prorationType: {
+      type: String,
+      enum: ['daily', 'weekly'],
+      default: 'daily'
+    }
+  },
   
   // Preferences & Settings
   preferences: {
@@ -226,6 +291,9 @@ pgResidentSchema.index({ email: 1 });
 pgResidentSchema.index({ phone: 1 });
 pgResidentSchema.index({ checkinDate: 1 });
 pgResidentSchema.index({ status: 1, checkinDate: -1 });
+pgResidentSchema.index({ nextBillingDate: 1, status: 1 });
+pgResidentSchema.index({ lastBillingDate: 1 });
+pgResidentSchema.index({ billingDay: 1, status: 1 });
 
 // Virtual for full name (if needed for different formats)
 pgResidentSchema.virtual('fullName').get(function() {
@@ -254,6 +322,25 @@ pgResidentSchema.virtual('age').get(function() {
   return age;
 });
 
+// Virtual for billing status
+pgResidentSchema.virtual('billingStatus').get(function() {
+  if (!this.nextBillingDate) return 'not_set';
+  const today = new Date();
+  const daysUntilBilling = Math.ceil((this.nextBillingDate - today) / (1000 * 60 * 60 * 24));
+  
+  if (daysUntilBilling < 0) return 'overdue';
+  if (daysUntilBilling <= 3) return 'due_soon';
+  return 'current';
+});
+
+// Virtual for outstanding amount
+pgResidentSchema.virtual('outstandingAmount').get(function() {
+  if (!this.billingHistory || this.billingHistory.length === 0) return 0;
+  return this.billingHistory
+    .filter(bill => bill.status === 'pending' || bill.status === 'overdue')
+    .reduce((total, bill) => total + bill.amount, 0);
+});
+
 // Instance methods
 pgResidentSchema.methods.calculateTotalStay = function() {
   if (!this.checkinDate) return 0;
@@ -268,6 +355,68 @@ pgResidentSchema.methods.isDocumentExpiring = function(days = 30) {
     return daysUntilExpiry <= days && daysUntilExpiry >= 0;
   });
   return expiringDocs;
+};
+
+// Billing-related methods
+pgResidentSchema.methods.updateNextBillingDate = function() {
+  if (!this.checkinDate) return null;
+  
+  const currentNext = this.nextBillingDate || new Date(this.checkinDate);
+  const newNext = new Date(currentNext);
+  
+  if (this.billingCycle === 'monthly') {
+    newNext.setMonth(newNext.getMonth() + 1);
+  } else if (this.billingCycle === 'quarterly') {
+    newNext.setMonth(newNext.getMonth() + 3);
+  } else if (this.billingCycle === 'yearly') {
+    newNext.setFullYear(newNext.getFullYear() + 1);
+  }
+  
+  this.nextBillingDate = newNext;
+  return newNext;
+};
+
+pgResidentSchema.methods.calculateProratedAmount = function(startDate, endDate) {
+  if (!startDate || !endDate || !this.rentAmount) return 0;
+  
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const daysInPeriod = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+  
+  if (this.proration.prorationType === 'daily') {
+    const dailyRate = this.rentAmount / 30; // Assuming 30 days per month
+    return Math.round(dailyRate * daysInPeriod);
+  } else {
+    const weeklyRate = this.rentAmount / 4; // Assuming 4 weeks per month
+    const weeks = Math.ceil(daysInPeriod / 7);
+    return Math.round(weeklyRate * weeks);
+  }
+};
+
+pgResidentSchema.methods.isDueBilling = function() {
+  if (!this.nextBillingDate) return false;
+  const today = new Date();
+  return this.nextBillingDate <= today;
+};
+
+pgResidentSchema.methods.getDaysUntilBilling = function() {
+  if (!this.nextBillingDate) return null;
+  const today = new Date();
+  return Math.ceil((this.nextBillingDate - today) / (1000 * 60 * 60 * 24));
+};
+
+pgResidentSchema.methods.getLastBill = function() {
+  if (!this.billingHistory || this.billingHistory.length === 0) return null;
+  return this.billingHistory[this.billingHistory.length - 1];
+};
+
+pgResidentSchema.methods.addBillingRecord = function(billingData) {
+  if (!this.billingHistory) {
+    this.billingHistory = [];
+  }
+  this.billingHistory.push(billingData);
+  this.lastBillingDate = billingData.billingDate;
+  return this.billingHistory[this.billingHistory.length - 1];
 };
 
 // Static methods

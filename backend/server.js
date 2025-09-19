@@ -4,13 +4,17 @@ import contentRoutes from './routes/content.js';
 import offersRoutes from './routes/offersSimple.js';
 import ownersRoutes from './routes/ownersSimple.js';
 import citiesRoutes from './routes/cities.js';
+import userDashboardRoutes from './routes/userDashboard.js';
+import favoritesRoutes from './routes/favorites.js';
 import express from 'express';
+import http from 'http';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import rateLimiter from './middleware/rateLimit.js';
 import logger from './utils/logger.js';
 import errorHandler from './middleware/errorHandler.js';
+import websocketService from './services/websocketService.js';
 import adminRoutes from './routes/admin.js';
 import bookingRoutes from './routes/bookings.js';
 import pgRoutes from './routes/pg.js';
@@ -42,10 +46,17 @@ import usersRoutes from './routes/users.js';
 import notificationsRoutes from './routes/notifications.js';
 import statsRouter from './routes/stats.js';
 import invoicesRoutes from './routes/invoices.js';
+import billingRoutes from './routes/billing.js';
+import websocketRoutes from './routes/websocket.js';
 
 
 dotenv.config({ quiet: true });
 const app = express();
+const server = http.createServer(app);
+
+// Initialize WebSocket service
+websocketService.initialize(server);
+
 app.set('trust proxy', 1); // Fixes rate-limit X-Forwarded-For warning
 
 // Configure CORS properly for credentials
@@ -88,8 +99,17 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/pg_room_ren
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => {
+.then(async () => {
   logger.info('MongoDB connected successfully');
+  
+  // Initialize billing scheduler after DB connection
+  try {
+    const billingScheduler = (await import('./services/billingScheduler.js')).default;
+    await billingScheduler.initialize();
+    logger.info('Billing scheduler initialized successfully');
+  } catch (error) {
+    logger.error('Failed to initialize billing scheduler', { error: error.message });
+  }
 })
 .catch((error) => {
   logger.error('MongoDB connection failed', { error: error.message });
@@ -128,10 +148,14 @@ app.use('/api/inquiries', inquiryRoutes);
 
 // User-specific protected routes (These routes already have their own auth middleware)
 app.use('/api/users', usersRoutes);
+app.use('/api/user/dashboard', userDashboardRoutes); // User Dashboard APIs
+app.use('/api/favorites', favoritesRoutes); // User Favorites Management
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/user-loyalty', userLoyaltyRoutes);
 app.use('/api/invoices', invoicesRoutes); // Invoice management
+app.use('/api/billing', billingRoutes); // Billing automation and management
+app.use('/api/websocket', websocketRoutes); // WebSocket real-time updates
 
 app.use('/api/stats', statsRouter);
 app.use('/api/content', contentRoutes);
@@ -157,10 +181,11 @@ app.use('/api/contacts', contactRoutes);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`, { 
     environment: process.env.NODE_ENV || 'development',
     port: PORT,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    websocket: 'enabled'
   });
 });
