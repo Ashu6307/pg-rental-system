@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
 
+// Define types for better TypeScript support
+type UserRole = 'user' | 'owner' | 'admin';
+
 // Define route patterns for each role
-const roleRoutes = {
+const roleRoutes: Record<UserRole, string[]> = {
   user: ['/user', '/pg', '/rooms', '/bookings', '/favorites'],
   owner: ['/owner'],
   admin: ['/admin']
@@ -66,7 +69,7 @@ export async function middleware(request: NextRequest) {
         }
         
         return response;
-      } catch (error) {
+      } catch {
         return NextResponse.redirect(new URL('/sys-mgmt/auth', request.url));
       }
     }
@@ -84,8 +87,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  let user = null;
-  let userRole = null;
+  let user: any = null;
+  let userRole: UserRole | null = null;
 
   // Verify token if present
   if (token) {
@@ -93,9 +96,9 @@ export async function middleware(request: NextRequest) {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
       const { payload } = await jwtVerify(token, secret);
       user = payload;
-      userRole = payload.role as string;
-    } catch (error) {
-      console.error('Token verification failed:', error);
+      userRole = payload.role as UserRole;
+    } catch {
+      console.error('Token verification failed');
       // Invalid token - clear it and redirect to login
       const response = NextResponse.redirect(new URL('/auth/login', request.url));
       response.cookies.delete('token');
@@ -127,7 +130,7 @@ export async function middleware(request: NextRequest) {
 
   // Check role-based access for role-specific routes
   if (user && userRole) {
-    const allowedRoutes = roleRoutes[userRole as keyof typeof roleRoutes] || [];
+    const allowedRoutes = roleRoutes[userRole] || [];
     const isRoleSpecificRoute = Object.values(roleRoutes).some(routes => 
       routes.some(route => pathname.startsWith(route))
     );
@@ -155,19 +158,7 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-function getDefaultDashboard(role: string): string {
-  switch (role) {
-    case 'admin':
-      return '/sys-mgmt/ctrl-panel';
-    case 'owner':
-      return '/dashboard/owner';
-    case 'user':
-    default:
-      return '/user/dashboard';
-  }
-}
-
-function getDashboardUrl(role: string): string {
+function getDashboardUrl(role: UserRole): string {
   switch (role) {
     case 'admin':
       return '/admin/dashboard';

@@ -8,7 +8,6 @@ import {
   Clock, 
   Plus, 
   Search, 
-  Filter, 
   Calendar,
   User,
   Phone,
@@ -16,7 +15,6 @@ import {
   Eye,
   Edit,
   Trash2,
-  MapPin,
   Home,
   Droplets,
   Zap,
@@ -247,7 +245,6 @@ const MaintenanceManagement = () => {
   const totalRequests = maintenanceRequests.length;
   const pendingRequests = maintenanceRequests.filter(r => r.status === 'pending').length;
   const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in-progress').length;
-  const completedRequests = maintenanceRequests.filter(r => r.status === 'completed').length;
   const averageRating = maintenanceRequests
     .filter(r => r.rating)
     .reduce((sum, r) => sum + (r.rating || 0), 0) / maintenanceRequests.filter(r => r.rating).length || 0;
@@ -375,6 +372,7 @@ const MaintenanceManagement = () => {
                 value={selectedStatus} 
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter by status"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -387,6 +385,7 @@ const MaintenanceManagement = () => {
                 value={selectedPriority} 
                 onChange={(e) => setSelectedPriority(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter by priority"
               >
                 <option value="all">All Priority</option>
                 <option value="urgent">Urgent</option>

@@ -43,8 +43,6 @@ export const createPG = async (req, res) => {
 // Get all PGs with location-based filtering and pagination
 export const getAllPGs = async (req, res) => {
   try {
-  // console.log('getAllPGs API called with location filter:', req.locationInfo);
-    
     // Check if user is authenticated for full access
     const isAuthenticated = req.user ? true : false;
     
@@ -81,9 +79,6 @@ export const getAllPGs = async (req, res) => {
     // Add location filter if available
     if (req.locationFilter && Object.keys(req.locationFilter).length > 0) {
       Object.assign(filter, req.locationFilter);
-  // console.log('Applied location filter for PGs:', req.locationFilter);
-    } else {
-  // console.log('No location filter applied for PGs');
     }
     
     // Price filtering with room types consideration
@@ -126,8 +121,6 @@ export const getAllPGs = async (req, res) => {
     const skip = Math.max(0, (Number(page) - 1) * Number(limit));
     const limitNum = limit; // Use the dynamically set limit
 
-  // console.log('Final PG query:', JSON.stringify(filter, null, 2));
-
     const pgs = await PG.find(filter)
       .sort(sortOptions)
       .skip(skip)
@@ -153,8 +146,6 @@ export const getAllPGs = async (req, res) => {
       console.error('Stats aggregation error:', err);
       return [];
     }) : [];
-
-  // console.log(`Found ${pgs.length} PGs for location: ${req.locationInfo?.city || 'all locations'}`);
 
     res.json({
       success: true,
@@ -394,7 +385,6 @@ export const searchPGs = async (req, res) => {
   try {
     const { 
       q, // search query
-      location,
       radius = 10, // km
       lat,
       lng

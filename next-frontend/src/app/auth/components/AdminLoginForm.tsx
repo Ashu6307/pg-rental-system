@@ -8,7 +8,7 @@ import EmailValidationInput from '../../../components/validation/EmailValidation
 import PasswordValidationInput from '../../../components/validation/PasswordValidationInput';
 import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
-import { isValidOtp, isOtpExpired, getOtpValidationError, getOtpTimeRemaining, formatOtpTime } from '../../../utils/validation/otpValidation';
+import { isValidOtp, getOtpValidationError } from '../../../utils/validation/otpValidation';
 import { getMaxResendAttempts, getMaxOtpAttempts, getRoleMessages } from '../../../utils/otpConfig';
 
 const AdminLoginForm: React.FC = () => {
@@ -77,14 +77,6 @@ const AdminLoginForm: React.FC = () => {
     };
   }, []);
 
-  // No longer needed as PasswordValidationInput handles password changes
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = e.target;
-  //   if (name === 'password') {
-  //     setFormData(prev => ({ ...prev, [name]: value }));
-  //   }
-  // };
-
   // Step 1: Send OTP
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,66 +105,12 @@ const AdminLoginForm: React.FC = () => {
       } else {
         toast.error(result.message || 'Failed to send OTP');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('OTP send error:', error);
       toast.error('Failed to send OTP. Please check your credentials.');
     } finally {
       setLoading(false);
     }
-  };
-
-  // OTP Error Handling Functions
-  const getOtpErrorMessage = (errorMessage: string) => {
-    if (!errorMessage) return '';
-    
-    const message = errorMessage.toLowerCase();
-    
-    if (message.includes('invalid')) {
-      return 'Invalid OTP - Please check and enter the correct OTP';
-    } else if (message.includes('expired')) {
-      return 'OTP Expired - Please request a new OTP to continue';
-    } else if (message.includes('used') || message.includes('already')) {
-      return 'OTP Already Used - Please request a new OTP';
-    } else if (message.includes('network')) {
-      return 'Network Error - Please check your connection and try again';
-    } else {
-      return errorMessage;
-    }
-  };
-
-  const getOtpErrorIcon = (errorMessage: string) => {
-    if (!errorMessage) return '❌';
-    
-    const message = errorMessage.toLowerCase();
-    
-    if (message.includes('invalid')) {
-      return '🚫';
-    } else if (message.includes('expired')) {
-      return '⏰';
-    } else if (message.includes('used') || message.includes('already')) {
-      return '🔄';
-    } else if (message.includes('network')) {
-      return '📡';
-    } else {
-      return '❌';
-    }
-  };
-
-  const handleOtpError = (errorMessage: string, showToast = true) => {
-    const formattedMessage = getOtpErrorMessage(errorMessage);
-    const errorIcon = getOtpErrorIcon(errorMessage);
-    setOtpError(formattedMessage);
-    setShowOtpError(true);
-    if (showToast) {
-      toast.error(formattedMessage, {
-        icon: errorIcon,
-        duration: 4000
-      });
-    }
-    // Hide error after 1.2s for input box red
-    setTimeout(() => {
-      setShowOtpError(false);
-    }, 1200);
   };
 
   // Step 2: Verify OTP - Enhanced with proper attempt tracking
@@ -249,7 +187,7 @@ const AdminLoginForm: React.FC = () => {
         
         setOtpErrorTrigger(prev => prev + 1); // Increment to trigger new error in OtpInput
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Enhanced attempt tracking for network errors
       const newAttempts = otpAttempts + 1;
       setOtpAttempts(newAttempts);
@@ -258,7 +196,7 @@ const AdminLoginForm: React.FC = () => {
       const maxAttempts = getMaxOtpAttempts('admin');
       const remainingAttempts = maxAttempts - newAttempts;
       
-      let errorMsg = error.message || 'Failed to verify OTP';
+      let errorMsg = error instanceof Error ? error.message : 'Failed to verify OTP';
       
       if (newAttempts >= maxAttempts) {
         // Max attempts reached

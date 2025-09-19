@@ -6,7 +6,7 @@ import OwnerDashboard from '@/components/dashboard/OwnerDashboard';
 
 export default function OwnerDashboardPage() {
   const router = useRouter();
-  const { isAuthenticated, user, role, loading } = useContext(AuthContext) || {};
+  const { isAuthenticated, role, loading } = useContext(AuthContext) || {};
   const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
