@@ -41,6 +41,7 @@ import userLoyaltyRoutes from './routes/userLoyalty.js';
 import usersRoutes from './routes/users.js';
 import notificationsRoutes from './routes/notifications.js';
 import statsRouter from './routes/stats.js';
+import invoicesRoutes from './routes/invoices.js';
 
 
 dotenv.config({ quiet: true });
@@ -130,6 +131,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/user-loyalty', userLoyaltyRoutes);
+app.use('/api/invoices', invoicesRoutes); // Invoice management
 
 app.use('/api/stats', statsRouter);
 app.use('/api/content', contentRoutes);
