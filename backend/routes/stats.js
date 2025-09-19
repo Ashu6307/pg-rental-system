@@ -1,5 +1,4 @@
 import express from 'express';
-import Stat from '../models/Stat.js';
 import PG from '../models/PG.js';
 import Room from '../models/Room.js';
 import User from '../models/User.js';

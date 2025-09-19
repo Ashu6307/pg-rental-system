@@ -4,7 +4,6 @@ import User from '../models/User.js';
 import PG from '../models/PG.js';
 import Flat from '../models/Flat.js';
 import Inquiry from '../models/Inquiry.js';
-import mongoose from 'mongoose';
 
 // **CITY-WISE ADMIN MANAGEMENT SYSTEM**
 

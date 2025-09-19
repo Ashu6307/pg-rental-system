@@ -1,5 +1,4 @@
 import OwnerDocument from '../models/OwnerDocument.js';
-import OwnerProfile from '../models/OwnerProfile.js';
 import { syncKYCStatus } from '../utils/kycUtils.js';
 
 // Upload document

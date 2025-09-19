@@ -1,6 +1,4 @@
 import Flat from '../models/Flat.js';
-import User from '../models/User.js';
-
 // Get public flats with filtering
 export const getPublicFlats = async (req, res) => {
   try {

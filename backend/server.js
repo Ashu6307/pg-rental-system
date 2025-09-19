@@ -1,8 +1,4 @@
 import authMeRouter from './routes/authMe.js';
-import ctaContentRouter from './routes/ctaContent.js';
-import heroContentRouter from './routes/heroContent.js';
-import testimonialsRouter from './routes/testimonials.js';
-import featuredListingsRouter from './routes/featuredListings.js';
 import ownerWebhookLogsRoutes from './routes/ownerWebhookLogs.js';
 import contentRoutes from './routes/content.js';
 import offersRoutes from './routes/offersSimple.js';
@@ -25,7 +21,6 @@ import homeRoutes from './routes/home.js';
 import otpRoutes from './routes/otp.js';
 import forgotPasswordRoutes from './routes/forgotPassword.js';
 import softDeleteRoutes from './routes/softDelete.js';
-import { checkJwtExpiry } from './middleware/security.js';
 import ownerBookingsRoutes from './routes/ownerBookings.js';
 import ownerRevenueRoutes from './routes/ownerRevenue.js';
 import ownerDocumentsRoutes from './routes/ownerDocuments.js';
@@ -46,7 +41,6 @@ import userLoyaltyRoutes from './routes/userLoyalty.js';
 import usersRoutes from './routes/users.js';
 import notificationsRoutes from './routes/notifications.js';
 import statsRouter from './routes/stats.js';
-import footerRouter from './routes/footer.js';
 
 
 dotenv.config({ quiet: true });
