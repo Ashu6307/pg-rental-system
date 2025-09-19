@@ -11,7 +11,6 @@ import {
   FaChevronDown,
   FaBars,
   FaTimes,
-  FaUsers,
   FaBuilding,
   FaChartLine,
   FaShieldAlt,
@@ -23,12 +22,22 @@ import {
   FaExclamationTriangle
 } from 'react-icons/fa';
 
+// TypeScript interface for notifications
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  time: string;
+  isRead: boolean;
+  type: 'warning' | 'error' | 'success' | 'info';
+}
+
 const AdminNavbar = () => {
   const { user, logout, isAuthenticated } = useContext(AuthContext) || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   
   const profileRef = useRef<HTMLDivElement>(null);
@@ -70,11 +79,6 @@ const AdminNavbar = () => {
     setIsProfileOpen(false);
     // Redirect to obfuscated admin login
     router.push('/sys-mgmt/auth');
-  };
-
-  const handleNavigation = (path: string) => {
-    router.push(path);
-    setIsMenuOpen(false);
   };
 
   const getNotificationIcon = (type: string) => {

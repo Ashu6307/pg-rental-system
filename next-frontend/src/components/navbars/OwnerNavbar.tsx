@@ -21,12 +21,21 @@ import {
   FaTachometerAlt
 } from 'react-icons/fa';
 
+// TypeScript interface for notifications
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  time: string;
+  isRead: boolean;
+}
+
 const OwnerNavbar = () => {
   const { user, logout, isAuthenticated } = useContext(AuthContext) || {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   
   const profileRef = useRef<HTMLDivElement>(null);
@@ -66,11 +75,6 @@ const OwnerNavbar = () => {
     logout?.();
     setIsProfileOpen(false);
     router.push('/');
-  };
-
-  const handleNavigation = (path: string) => {
-    router.push(path);
-    setIsMenuOpen(false);
   };
 
   return (
