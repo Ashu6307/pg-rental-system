@@ -6,17 +6,9 @@ import {
   TrendingUp, 
   TrendingDown, 
   Calendar, 
-  FileText, 
   Download, 
-  Eye, 
   CheckCircle, 
   AlertTriangle, 
-  Clock,
-  CreditCard,
-  PieChart,
-  BarChart3,
-  Filter,
-  Search,
   RefreshCw,
   Users,
   Building2
@@ -37,8 +29,6 @@ interface FinancialStats {
 }
 
 const EnhancedFinancialManagement = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState('current-month');
-  const [viewType, setViewType] = useState('overview');
   const [financialData, setFinancialData] = useState<EnhancedDashboardOverview | null>(null);
   const [paymentData, setPaymentData] = useState<PaymentOverview | null>(null);
   const [loading, setLoading] = useState(true);

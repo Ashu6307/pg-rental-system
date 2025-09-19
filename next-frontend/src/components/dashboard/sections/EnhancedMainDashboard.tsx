@@ -10,15 +10,12 @@ import {
   AlertTriangle,
   Plus,
   FileText,
-  Calendar,
   BarChart3,
   Home,
   Clock,
   CheckCircle,
   XCircle,
   Activity,
-  MapPin,
-  Eye,
   RefreshCw
 } from 'lucide-react';
 

@@ -4,29 +4,14 @@ import React, { useState } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
-  TrendingDown, 
   Calendar, 
   Download, 
-  Filter,
-  Search,
   Users,
   Home,
   IndianRupee,
-  Zap,
   Star,
-  Clock,
   Target,
-  PieChart,
-  LineChart,
-  Activity,
-  Eye,
-  FileText,
-  Calculator,
-  Globe,
-  Phone,
-  Mail,
-  MapPin,
-  Building
+  FileText
 } from 'lucide-react';
 
 interface AnalyticsData {
@@ -73,7 +58,6 @@ interface RevenueBreakdown {
 const AnalyticsReports = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
-  const [selectedProperty, setSelectedProperty] = useState('all');
 
   // Sample analytics data
   const analyticsData: AnalyticsData[] = [

@@ -8,25 +8,18 @@ import {
   Phone, 
   Send, 
   Users, 
-  Search, 
-  Filter,
+  Search,
   Plus,
   Eye,
   Reply,
   Forward,
   Archive,
-  Star,
   Clock,
   CheckCircle,
   AlertTriangle,
-  Volume2,
-  Smartphone,
   FileText,
-  Image,
-  Paperclip,
   Calendar,
   User,
-  Home,
   Megaphone,
   Edit
 } from 'lucide-react';
@@ -75,7 +68,6 @@ interface Contact {
 const CommunicationCenter = () => {
   const [activeTab, setActiveTab] = useState('messages');
   const [showComposeModal, setShowComposeModal] = useState(false);
-  const [selectedMessageType, setSelectedMessageType] = useState('individual');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
 
@@ -392,6 +384,7 @@ const CommunicationCenter = () => {
                 value={selectedFilter} 
                 onChange={(e) => setSelectedFilter(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Filter messages by category"
               >
                 <option value="all">All Categories</option>
                 <option value="general">General</option>
