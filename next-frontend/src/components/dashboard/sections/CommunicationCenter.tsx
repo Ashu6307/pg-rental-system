@@ -27,7 +27,8 @@ import {
   Calendar,
   User,
   Home,
-  Megaphone
+  Megaphone,
+  Edit
 } from 'lucide-react';
 
 interface Message {
