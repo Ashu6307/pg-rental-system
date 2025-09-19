@@ -23,22 +23,8 @@ function askQuestion(query, hide = false) {
       rl.question(query, resolve);
     } else {
       // Hide password input
-      const stdin = process.openStdin();
-      process.stdin.on('data', char => {
-        char = char + '';
-        switch (char) {
-          case '\n': case '\r': case '\u0004':
-            process.stdin.pause();
-            break;
-          default:
-            process.stdout.clearLine();
-            process.stdout.cursorTo(0);
-            process.stdout.write(query + Array(rl.line.length + 1).join('*'));
-            break;
-        }
-      });
-      rl.question(query, answer => {
-        process.stdout.write('\n');
+      process.stdout.write(query);
+      rl.question('', (answer) => {
         resolve(answer);
       });
     }
@@ -68,6 +54,7 @@ const createMainAdmin = async () => {
     const inputSecret = await askQuestion('Enter admin registration secret key: ');
     if (inputSecret !== secretKey) {
       console.error('❌ Invalid secret key. Exiting.');
+      rl.close();
       process.exit(1);
     }
 
@@ -77,6 +64,7 @@ const createMainAdmin = async () => {
     const confirmPassword = await askQuestion('Confirm admin password: ', true);
     if (password !== confirmPassword) {
       console.error('❌ Passwords do not match. Exiting.');
+      rl.close();
       process.exit(1);
     }
 
@@ -84,12 +72,14 @@ const createMainAdmin = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       console.error('❌ Invalid email format. Please enter a valid email.');
+      rl.close();
       process.exit(1);
     }
 
     // Validate password strength
     if (password.length < 6) {
       console.error('❌ Password must be at least 6 characters long.');
+      rl.close();
       process.exit(1);
     }
 
@@ -99,6 +89,7 @@ const createMainAdmin = async () => {
       console.log('👤 Admin already exists!');
       console.log(`📧 Email: ${existingAdmin.email}`);
       console.log(`🔐 Status: ${existingAdmin.isActive ? 'Active' : 'Inactive'}`);
+      rl.close();
       process.exit(0);
     }
 
@@ -136,4 +127,18 @@ const createMainAdmin = async () => {
 
 console.log('🚀 Secure Admin Registration');
 console.log('👑 This will create a new admin account.');
+
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\n\n⚠️  Process interrupted. Cleaning up...');
+  rl.close();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n\n⚠️  Process terminated. Cleaning up...');
+  rl.close();
+  process.exit(0);
+});
+
 createMainAdmin();

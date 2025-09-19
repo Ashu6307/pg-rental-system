@@ -183,8 +183,17 @@ const EnhancedFinancialManagement = () => {
           <div className="mt-4">
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-green-600 h-2 rounded-full transition-all duration-300" 
-                style={{ width: `${financialStats.collectionRate}%` }}
+                className={`bg-green-600 h-2 rounded-full transition-all duration-300 ${
+                  financialStats.collectionRate >= 90 ? 'w-full' :
+                  financialStats.collectionRate >= 80 ? 'w-5/6' :
+                  financialStats.collectionRate >= 70 ? 'w-3/4' :
+                  financialStats.collectionRate >= 60 ? 'w-2/3' :
+                  financialStats.collectionRate >= 50 ? 'w-1/2' :
+                  financialStats.collectionRate >= 40 ? 'w-2/5' :
+                  financialStats.collectionRate >= 30 ? 'w-1/3' :
+                  financialStats.collectionRate >= 20 ? 'w-1/4' :
+                  financialStats.collectionRate >= 10 ? 'w-1/6' : 'w-1/12'
+                }`}
               ></div>
             </div>
           </div>

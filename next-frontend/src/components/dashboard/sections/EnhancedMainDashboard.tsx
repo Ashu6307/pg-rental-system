@@ -185,8 +185,17 @@ const EnhancedMainDashboard = () => {
             </div>
             <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                style={{ width: `${dashboardData.overview.occupancyRate}%` }}
+                className={`bg-blue-600 h-2 rounded-full transition-all duration-300 ${
+                  dashboardData.overview.occupancyRate >= 90 ? 'w-full' :
+                  dashboardData.overview.occupancyRate >= 80 ? 'w-4/5' :
+                  dashboardData.overview.occupancyRate >= 70 ? 'w-3/4' :
+                  dashboardData.overview.occupancyRate >= 60 ? 'w-3/5' :
+                  dashboardData.overview.occupancyRate >= 50 ? 'w-1/2' :
+                  dashboardData.overview.occupancyRate >= 40 ? 'w-2/5' :
+                  dashboardData.overview.occupancyRate >= 30 ? 'w-1/3' :
+                  dashboardData.overview.occupancyRate >= 20 ? 'w-1/4' :
+                  dashboardData.overview.occupancyRate >= 10 ? 'w-1/6' : 'w-1/12'
+                }`}
               ></div>
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -288,8 +297,17 @@ const EnhancedMainDashboard = () => {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full" 
-                          style={{ width: `${pg.occupancyRate}%` }}
+                          className={`bg-blue-600 h-2 rounded-full ${
+                            pg.occupancyRate >= 90 ? 'w-full' :
+                            pg.occupancyRate >= 80 ? 'w-4/5' :
+                            pg.occupancyRate >= 70 ? 'w-3/4' :
+                            pg.occupancyRate >= 60 ? 'w-3/5' :
+                            pg.occupancyRate >= 50 ? 'w-1/2' :
+                            pg.occupancyRate >= 40 ? 'w-2/5' :
+                            pg.occupancyRate >= 30 ? 'w-1/3' :
+                            pg.occupancyRate >= 20 ? 'w-1/4' :
+                            pg.occupancyRate >= 10 ? 'w-1/6' : 'w-1/12'
+                          }`}
                         ></div>
                       </div>
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -341,8 +359,17 @@ const EnhancedMainDashboard = () => {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-green-600 h-2 rounded-full" 
-                          style={{ width: `${(flat.currentOccupancy / flat.maxOccupancy) * 100}%` }}
+                          className={`bg-green-600 h-2 rounded-full ${
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 90 ? 'w-full' :
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 80 ? 'w-4/5' :
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 70 ? 'w-3/4' :
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 60 ? 'w-3/5' :
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 50 ? 'w-1/2' :
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 40 ? 'w-2/5' :
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 30 ? 'w-1/3' :
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 20 ? 'w-1/4' :
+                            ((flat.currentOccupancy / flat.maxOccupancy) * 100) >= 10 ? 'w-1/6' : 'w-1/12'
+                          }`}
                         ></div>
                       </div>
                       <div className="flex justify-between text-xs text-gray-500 mt-1">

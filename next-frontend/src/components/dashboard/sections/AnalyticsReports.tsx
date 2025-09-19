@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
-  Calendar, 
   Download, 
   Users,
   Home,
@@ -119,7 +118,7 @@ const AnalyticsReports = () => {
             <select 
               value={selectedPeriod} 
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              title="Select time period"
+              aria-label="Select time period"
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="weekly">Weekly</option>
@@ -244,19 +243,25 @@ const AnalyticsReports = () => {
             </div>
             
             <div className="h-64 flex items-end justify-between space-x-2">
-              {analyticsData.map((data, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center">
-                  <div 
-                    className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg relative"
-                    data-height={`${(data.revenue / 100000) * 200}px`}
-                  >
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700">
-                      ₹{(data.revenue / 1000).toFixed(0)}K
+              {analyticsData.map((data, index) => {
+                const heightPercentage = (data.revenue / 100000) * 100;
+                const heightClass = heightPercentage > 90 ? 'h-56' : 
+                                   heightPercentage > 80 ? 'h-48' : 
+                                   heightPercentage > 70 ? 'h-40' : 
+                                   heightPercentage > 60 ? 'h-32' : 
+                                   heightPercentage > 50 ? 'h-24' : 'h-16';
+                
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center">
+                    <div className={`w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg relative ${heightClass}`}>
+                      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700">
+                        ₹{(data.revenue / 1000).toFixed(0)}K
+                      </div>
                     </div>
+                    <div className="mt-2 text-xs text-gray-600 text-center">{data.period.split(' ')[0]}</div>
                   </div>
-                  <div className="mt-2 text-xs text-gray-600 text-center">{data.period.split(' ')[0]}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

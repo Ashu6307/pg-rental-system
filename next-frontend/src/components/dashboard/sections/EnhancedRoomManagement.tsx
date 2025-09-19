@@ -4,27 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   Users, 
-  IndianRupee, 
-  Zap,
   Plus,
   Search,
-  Filter,
-  MoreVertical,
   Eye,
   Edit,
-  Settings,
-  Phone,
-  Calendar,
-  AlertTriangle,
   CheckCircle,
   XCircle,
-  Clock,
-  MapPin,
-  User,
   Home,
-  Wifi,
-  Car,
-  Wrench,
+  User,
   RefreshCw,
   Activity
 } from 'lucide-react';
@@ -44,7 +31,11 @@ interface EnhancedRoom {
   availableBeds?: number;
   occupancyRate?: number;
   isOccupied?: boolean;
-  currentTenant?: any;
+  currentTenant?: {
+    name: string;
+    phone: string;
+    checkInDate: string;
+  };
   maxOccupancy?: number;
   currentOccupancy?: number;
   isAvailable?: boolean;
@@ -302,7 +293,7 @@ const EnhancedRoomManagement = () => {
             value={selectedPropertyType}
             onChange={(e) => setSelectedPropertyType(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            title="Filter by property type"
+            aria-label="Filter by property type"
           >
             <option value="all">All Properties</option>
             <option value="pg">PG</option>
@@ -338,11 +329,18 @@ const EnhancedRoomManagement = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                        data-width={room.occupancyRate}
-                      >
-                        <div className="h-full bg-blue-600 rounded-full" style={{ width: `${room.occupancyRate}%` } as React.CSSProperties}></div>
-                      </div>
+                        className={`bg-blue-600 h-2 rounded-full transition-all duration-300 ${
+                          (room.occupancyRate || 0) >= 90 ? 'w-full' :
+                          (room.occupancyRate || 0) >= 80 ? 'w-5/6' :
+                          (room.occupancyRate || 0) >= 70 ? 'w-3/4' :
+                          (room.occupancyRate || 0) >= 60 ? 'w-3/5' :
+                          (room.occupancyRate || 0) >= 50 ? 'w-1/2' :
+                          (room.occupancyRate || 0) >= 40 ? 'w-2/5' :
+                          (room.occupancyRate || 0) >= 30 ? 'w-1/3' :
+                          (room.occupancyRate || 0) >= 20 ? 'w-1/4' :
+                          (room.occupancyRate || 0) >= 10 ? 'w-1/6' : 'w-1/12'
+                        }`}
+                      ></div>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">{room.occupancyRate?.toFixed(1)}% occupied</p>
                   </div>
@@ -368,11 +366,18 @@ const EnhancedRoomManagement = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className="bg-green-600 h-2 rounded-full transition-all duration-300" 
-                        data-width={((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100}
-                      >
-                        <div className="h-full bg-green-600 rounded-full" style={{ width: `${((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100}%` } as React.CSSProperties}></div>
-                      </div>
+                        className={`bg-green-600 h-2 rounded-full transition-all duration-300 ${
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 90 ? 'w-full' :
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 80 ? 'w-5/6' :
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 70 ? 'w-3/4' :
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 60 ? 'w-3/5' :
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 50 ? 'w-1/2' :
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 40 ? 'w-2/5' :
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 30 ? 'w-1/3' :
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 20 ? 'w-1/4' :
+                          ((room.currentOccupancy || 0) / (room.maxOccupancy || 1)) * 100 >= 10 ? 'w-1/6' : 'w-1/12'
+                        }`}
+                      ></div>
                     </div>
                   </div>
                 )}
@@ -519,7 +524,6 @@ const EnhancedRoomManagement = () => {
                 <button
                   onClick={() => setShowRoomModal(false)}
                   className="text-gray-400 hover:text-gray-600"
-                  title="Close modal"
                   aria-label="Close property details modal"
                 >
                   <XCircle className="h-6 w-6" />
