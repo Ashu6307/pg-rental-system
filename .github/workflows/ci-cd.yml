@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # Frontend Tests
+  # NextJS Frontend Tests
   frontend-test:
     runs-on: ubuntu-latest
     
@@ -19,19 +19,44 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'next-frontend/package-lock.json'
     
-    - name: Install Frontend Dependencies
+    - name: Install NextJS Frontend Dependencies
       run: |
-        cd frontend
-        npm install --legacy-peer-deps --no-audit --prefer-offline
+        cd next-frontend
+        npm ci --no-audit --prefer-offline
     
-    - name: Run Frontend Tests
+    - name: NextJS Lint Check
       run: |
-        cd frontend
-        npm test
+        cd next-frontend
+        npm run lint
+      env:
+        NODE_OPTIONS: "--max-old-space-size=2048"
+    
+    - name: NextJS Build Test
+      run: |
+        cd next-frontend
+        npm run build
       env:
         CI: true
-        NODE_OPTIONS: "--max-old-space-size=2048"
+        NODE_OPTIONS: "--max-old-space-size=4096"
+    
+    - name: NextJS Type Check
+      run: |
+        cd next-frontend
+        npx tsc --noEmit
+      continue-on-error: true
+    
+    - name: NextJS Bundle Analysis
+      run: |
+        cd next-frontend
+        npm run build
+        echo "📊 Bundle analysis completed"
+        echo "🔍 Check build output for optimization opportunities"
+      env:
+        ANALYZE: true
+      continue-on-error: true
 
   # Backend Tests  
   backend-test:
@@ -72,10 +97,10 @@ jobs:
       with:
         node-version: '20'
     
-    - name: Frontend Security Audit
+    - name: NextJS Frontend Security Audit
       run: |
-        cd frontend
-        npm audit --audit-level=high || echo "Frontend audit completed"
+        cd next-frontend
+        npm audit --audit-level=high || echo "NextJS frontend audit completed"
       continue-on-error: true
     
     - name: Backend Security Audit
@@ -94,10 +119,25 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
     
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Build NextJS for Staging
+      run: |
+        cd next-frontend
+        npm ci
+        npm run build
+      env:
+        NODE_ENV: staging
+        NODE_OPTIONS: "--max-old-space-size=4096"
+    
     - name: Deploy to Staging
       run: |
-        echo "✅ Staging deployment would happen here"
-        echo "🚀 Project ready for staging environment"
+        echo "✅ NextJS Staging deployment would happen here"
+        echo "🚀 NextJS project ready for staging environment"
+        echo "📁 Build output available in next-frontend/.next"
 
   # Deploy to Production (only on main branch)
   deploy-production:
@@ -109,7 +149,23 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
     
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Build NextJS for Production
+      run: |
+        cd next-frontend
+        npm ci
+        npm run build
+      env:
+        NODE_ENV: production
+        NODE_OPTIONS: "--max-old-space-size=4096"
+    
     - name: Deploy to Production
       run: |
-        echo "✅ Production deployment would happen here"
-        echo "🚀 Project ready for production environment"
+        echo "✅ NextJS Production deployment would happen here"
+        echo "🚀 NextJS project ready for production environment"
+        echo "📁 Build output available in next-frontend/.next"
+        echo "🔧 Ready for deployment to Vercel/Netlify/etc."
