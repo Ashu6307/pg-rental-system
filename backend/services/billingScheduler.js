@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import PGResident from '../models/PGResident.js';
 import Invoice from '../models/Invoice.js';
 import { generateInvoicePDF, sendInvoiceEmail } from '../controllers/invoiceController.js';
-import { calculateAnniversaryBilling, calculateProratedAmount } from './billingService.js';
+import { calculateAnniversaryBilling, } from './billingService.js';
 
 class BillingScheduler {
   constructor() {
@@ -32,7 +32,6 @@ class BillingScheduler {
 
       this.isInitialized = true;
       console.log('Billing scheduler initialized successfully');
-      console.log(`Active jobs: ${Array.from(this.jobs.keys()).join(', ')}`);
     } catch (error) {
       console.error('Error initializing billing scheduler:', error);
       throw error;
@@ -42,15 +41,12 @@ class BillingScheduler {
   // Schedule a cron job
   scheduleJob(name, schedule, task) {
     if (this.jobs.has(name)) {
-      console.log(`Job ${name} already exists, skipping...`);
       return;
     }
 
     const job = cron.schedule(schedule, async () => {
-      console.log(`Running scheduled job: ${name} at ${new Date().toISOString()}`);
       try {
         await task();
-        console.log(`Job ${name} completed successfully`);
       } catch (error) {
         console.error(`Error in job ${name}:`, error);
       }
@@ -60,7 +56,6 @@ class BillingScheduler {
     });
 
     this.jobs.set(name, job);
-    console.log(`Scheduled job: ${name} with schedule: ${schedule}`);
   }
 
   // Check for upcoming bills (anniversary-based)

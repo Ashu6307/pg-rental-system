@@ -1,5 +1,5 @@
 import express from 'express';
-import { authMiddleware } from '../middleware/auth.js';
+import { authenticateJWT } from '../middleware/auth.js';
 import {
   broadcastBookingUpdate,
   sendNotification,
@@ -12,7 +12,7 @@ import {
 const router = express.Router();
 
 // Apply authentication to all routes
-router.use(authMiddleware);
+router.use(authenticateJWT);
 
 // Real-time update routes
 router.post('/booking-update', broadcastBookingUpdate);

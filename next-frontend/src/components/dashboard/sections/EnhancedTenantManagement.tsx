@@ -103,7 +103,7 @@ const EnhancedTenantManagement = () => {
       
       // Transform activities into tenant records (this would come from a dedicated endpoint)
       const tenantMap = new Map();
-      activities.forEach(activity => {
+      activities.forEach((activity: TenantActivity) => {
         if (!tenantMap.has(activity.tenantName)) {
           tenantMap.set(activity.tenantName, {
             _id: `tenant_${Math.random().toString(36).substr(2, 9)}`,
@@ -225,6 +225,8 @@ const EnhancedTenantManagement = () => {
             onClick={fetchTenantData}
             disabled={refreshing}
             className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+            aria-label="Refresh tenant data"
+            title="Refresh tenant data"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -233,6 +235,7 @@ const EnhancedTenantManagement = () => {
             disabled
             className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed opacity-50"
             title="Add tenant functionality coming soon"
+            aria-label="Add new tenant (coming soon)"
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Add Tenant
@@ -537,6 +540,8 @@ const EnhancedTenantManagement = () => {
                 <button
                   onClick={() => setShowTenantDetails(false)}
                   className="text-gray-400 hover:text-gray-600"
+                  aria-label="Close tenant details modal"
+                  title="Close"
                 >
                   <XCircle className="h-6 w-6" />
                 </button>
@@ -646,10 +651,16 @@ const EnhancedTenantManagement = () => {
                 <button
                   onClick={() => setShowTenantDetails(false)}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  aria-label="Close tenant details modal"
+                  title="Close modal"
                 >
                   Close
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button 
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  aria-label="Edit tenant details"
+                  title="Edit tenant information"
+                >
                   Edit Details
                 </button>
               </div>
