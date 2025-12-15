@@ -21,10 +21,22 @@ export const formatPhoneNumber = (value: string): string => {
   if (!value) return '';
   // Remove all non-digits
   const digits = value.replace(/\D/g, '');
-  // If more than 10 digits, take last 10 (to handle country code, etc)
+  
+  // Handle country code cases:
+  // +916307470798 (12 digits) -> 6307470798 (remove +91)
+  // 916307470798 (12 digits) -> 6307470798 (remove 91)
+  // 6307470798 (10 digits) -> 6307470798 (keep as is)
+  
   if (digits.length > 10) {
-    return digits.slice(-10);
+    // Check if starts with 91 (India country code)
+    if (digits.startsWith('91')) {
+      // Remove country code and take next 10 digits
+      return digits.slice(2, 12);
+    }
+    // Otherwise just take first 10 digits
+    return digits.slice(0, 10);
   }
+  
   return digits;
 };
 
@@ -68,16 +80,17 @@ export const getMobileValidationError = (mobile: string, checkRequired: boolean 
     return 'Please enter a valid mobile number';
   }
   
+  // Check first digit immediately - Priority validation
+  if (digits.length > 0 && !/^[6-9]/.test(digits)) {
+    return 'Mobile number must start with 6, 7, 8, or 9';
+  }
+  
   if (digits.length < 10) {
     return 'Mobile number must be 10 digits';
   }
   
   if (digits.length > 10) {
     return 'Mobile number cannot exceed 10 digits';
-  }
-  
-  if (!/^[6-9]/.test(digits)) {
-    return 'Mobile number must start with 6, 7, 8, or 9';
   }
   
   return '';

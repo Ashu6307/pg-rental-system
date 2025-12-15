@@ -169,12 +169,12 @@ export interface UserAnalytics {
 class UserDashboardService {
   // Get user profile
   async getUserProfile(): Promise<UserProfile> {
-    return api.request('/api/user-dashboard/profile');
+    return api.request('/api/user/dashboard/profile');
   }
 
   // Update user profile
   async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
-    return api.request('/api/user-dashboard/profile', {
+    return api.request('/api/user/dashboard/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     });
@@ -182,7 +182,7 @@ class UserDashboardService {
 
   // Get dashboard statistics
   async getDashboardStats(): Promise<DashboardStats> {
-    return api.request('/api/user-dashboard/stats');
+    return api.request('/api/user/dashboard/stats');
   }
 
   // Get user bookings
@@ -204,12 +204,12 @@ class UserDashboardService {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     
-    return api.request(`/api/user-dashboard/bookings?${queryParams.toString()}`);
+    return api.request(`/api/user/dashboard/bookings?${queryParams.toString()}`);
   }
 
   // Get user analytics
   async getUserAnalytics(): Promise<UserAnalytics> {
-    return api.request('/api/user-dashboard/analytics');
+    return api.request('/api/user/dashboard/analytics');
   }
 
   // Get favorite PGs
@@ -229,7 +229,7 @@ class UserDashboardService {
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     
-    return api.request(`/api/user-dashboard/favorites?${queryParams.toString()}`);
+    return api.request(`/api/user/dashboard/favorites?${queryParams.toString()}`);
   }
 
   // Add/Remove favorite

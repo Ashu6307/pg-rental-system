@@ -87,6 +87,9 @@ const MobileValidationInput: React.FC<MobileValidationInputProps> = ({
         value={value}
         readOnly={readOnly}
         placeholder={placeholder}
+        maxLength={10}
+        inputMode="numeric"
+        pattern="[0-9]*"
         {...(error ? { 'aria-invalid': true } : { 'aria-invalid': false })}
         {...(error ? { 'aria-describedby': "mobile-error" } : {})}
         onChange={e => {
