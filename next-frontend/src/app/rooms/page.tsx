@@ -24,7 +24,7 @@ const Rooms: React.FC = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = 'Rooms & Flats | PG & Room Rental';
+    document.title = 'Rooms & Flats | Nestify';
   }, []);
 
   useEffect(() => {

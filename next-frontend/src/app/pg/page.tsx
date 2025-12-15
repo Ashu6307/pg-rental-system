@@ -23,7 +23,7 @@ const PG: React.FC = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = 'PG Accommodations | PG & Room Rental';
+    document.title = 'PG Accommodations | Nestify';
   }, []);
 
   // Agar ScrollToTop migrate kiya hai to yahan use karo

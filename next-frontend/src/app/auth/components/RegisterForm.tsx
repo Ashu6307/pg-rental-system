@@ -152,7 +152,7 @@ export default function RegisterForm() {
   // Cleanup on unmount
   useEffect(() => {
     // Set dynamic page title based on role
-    document.title = `${role === 'owner' ? 'Owner' : 'User'} Register | PG & Room Rental`;
+    document.title = `${role === 'owner' ? 'Owner' : 'User'} Register | Nestify`;
     
     return () => {
       if (timerRef.current) {

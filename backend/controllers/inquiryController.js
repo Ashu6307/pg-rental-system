@@ -323,7 +323,7 @@ export const respondToInquiry = async (req, res) => {
           <p><strong>Response Date:</strong> ${new Date().toLocaleString()}</p>
           <br>
           <p>If you have any further questions, please reply to this email or contact us.</p>
-          <p>Best regards,<br>Property Rental Platform Team</p>
+          <p>Best regards,<br>Nestify Team</p>
         `
       });
     } catch (emailError) {
@@ -424,7 +424,7 @@ export const scheduleVisit = async (req, res) => {
           <p>Dear ${inquiry.user.name},</p>
           ${visitDetails}
           <p>Please confirm your availability by replying to this email.</p>
-          <p>Best regards,<br>Property Rental Platform Team</p>
+          <p>Best regards,<br>Nestify Team</p>
         `
       });
     } catch (emailError) {
@@ -441,7 +441,7 @@ export const scheduleVisit = async (req, res) => {
           ${visitDetails}
           <p><strong>Visitor:</strong> ${inquiry.user.name} (${inquiry.user.phone})</p>
           <p>Please be available for the scheduled visit.</p>
-          <p>Best regards,<br>Property Rental Platform Team</p>
+          <p>Best regards,<br>Nestify Team</p>
         `
       });
     } catch (emailError) {

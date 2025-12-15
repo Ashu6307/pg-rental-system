@@ -21,7 +21,7 @@ const Contact: React.FC = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = 'Contact Us | PG & Room Rental';
+    document.title = 'Contact Us | Nestify';
   }, []);
 
   useEffect(() => {

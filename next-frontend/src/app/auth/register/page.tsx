@@ -13,9 +13,9 @@ function RegisterPageContent() {
   useEffect(() => {
       // Set page title role wise
       if (role === 'owner') {
-        document.title = 'Owner Register | PG & Room Rental';
+        document.title = 'Owner Register | Nestify';
       } else {
-        document.title = 'User Register | PG & Room Rental';
+        document.title = 'User Register | Nestify';
       }
     
     // Redirect to role-specific page if no role parameter

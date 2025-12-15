@@ -6,7 +6,7 @@ export default function OwnerLogin() {
   const router = useRouter();
   
   useEffect(() => {
-    document.title = 'Owner Login | PG & Room Rental';
+    document.title = 'Owner Login | Nestify';
     // Redirect to main login with owner role
     router.replace('/auth/login?role=owner');
   }, [router]);

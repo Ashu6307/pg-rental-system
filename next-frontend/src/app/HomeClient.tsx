@@ -58,7 +58,7 @@ const HomeClient = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = "Home | PG & Room Rental";
+    document.title = "Home | Nestify";
   }, []);
 
   useEffect(() => {

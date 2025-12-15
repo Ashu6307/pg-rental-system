@@ -34,7 +34,7 @@ const About: React.FC = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = 'About Us | PG & Room Rental';
+    document.title = 'About Us | Nestify';
   }, []);
   const [error, setError] = useState("");
   const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');

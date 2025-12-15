@@ -6,7 +6,7 @@ export default function UserLogin() {
   const router = useRouter();
   
   useEffect(() => {
-    document.title = 'User Login | PG & Room Rental';
+    document.title = 'User Login | Nestify';
     // Redirect to main login with user role
     router.replace('/auth/login?role=user');
   }, [router]);

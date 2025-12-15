@@ -2,7 +2,7 @@ import RegisterForm from '../../components/RegisterForm';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Admin Registration | PG & Room Rental',
+  title: 'Admin Registration | Nestify',
   description: 'Create a new admin account for PG and room rental management',
 };
 

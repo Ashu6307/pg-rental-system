@@ -11,9 +11,9 @@ export default function LoginPage() {
   useEffect(() => {
       // Set page title role wise
       if (role === 'owner') {
-        document.title = 'Owner Login | PG & Room Rental';
+        document.title = 'Owner Login | Nestify';
       } else {
-        document.title = 'User Login | PG & Room Rental';
+        document.title = 'User Login | Nestify';
       }
     
     // Redirect to role-specific page if no role parameter

@@ -6,7 +6,7 @@ export default function UserRegister() {
   const router = useRouter();
   
   useEffect(() => {
-    document.title = 'User Register | PG & Room Rental';
+    document.title = 'User Register | Nestify';
     // Redirect to main register with user role
     router.replace('/auth/register?role=user');
   }, [router]);

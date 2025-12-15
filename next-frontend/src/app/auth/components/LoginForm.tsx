@@ -52,7 +52,7 @@ const LoginForm: React.FC = () => {
     }
     
     // Set dynamic page title based on role
-    document.title = `${role === 'owner' ? 'Owner' : 'User'} Login | PG & Room Rental`;
+    document.title = `${role === 'owner' ? 'Owner' : 'User'} Login | Nestify`;
   }, [role]);
 
   const getRoleConfig = () => {
@@ -139,6 +139,9 @@ const LoginForm: React.FC = () => {
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('token', data.token);
         }
+        
+        // Set cookie for middleware authentication
+        document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
         
         // Update auth context with await to ensure it completes
         if (login) {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FaUserShield, FaCheckCircle, FaHome } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -10,9 +10,11 @@ import OtpInput from '../../../components/validation/OtpInput';
 import { authService } from '../../../services/authService';
 import { isValidOtp, getOtpValidationError } from '../../../utils/validation/otpValidation';
 import { getMaxResendAttempts, getMaxOtpAttempts, getRoleMessages } from '../../../utils/otpConfig';
+import { AuthContext } from '../../../context/AuthContext';
 
 const AdminLoginForm: React.FC = () => {
   const router = useRouter();
+  const authContext = useContext(AuthContext);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -149,6 +151,14 @@ const AdminLoginForm: React.FC = () => {
         localStorage.setItem('userRole', 'admin');
         localStorage.setItem('user', JSON.stringify(loginResult.user));
         
+        // Set cookie for middleware authentication
+        document.cookie = `token=${loginResult.token}; path=/; max-age=86400; SameSite=Lax`;
+        
+        // Update AuthContext
+        if (authContext) {
+          authContext.login(loginResult.token, loginResult.user, 'admin');
+        }
+        
         setOtpSuccess('✅ Admin login successful!');
         // Reset all OTP states on successful verification
         setOtpAttempts(0);
@@ -163,7 +173,9 @@ const AdminLoginForm: React.FC = () => {
         
         setTimeout(() => {
           router.push('/sys-mgmt/ctrl-panel');
-        }, 1000);
+          // Force reload to ensure middleware picks up the cookie
+          window.location.href = '/sys-mgmt/ctrl-panel';
+        }, 1500);
       } else {
         // Enhanced attempt tracking
         const newAttempts = otpAttempts + 1;

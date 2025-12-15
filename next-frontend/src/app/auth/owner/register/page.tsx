@@ -6,7 +6,7 @@ export default function OwnerRegister() {
   const router = useRouter();
   
   useEffect(() => {
-    document.title = 'Owner Register | PG & Room Rental';
+    document.title = 'Owner Register | Nestify';
     // Redirect to main register with owner role
     router.replace('/auth/register?role=owner');
   }, [router]);
